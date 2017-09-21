@@ -21,7 +21,7 @@ public enum LogicFactory {
 	RANDOM(RandomLogic.class),
 
 	// Unsere Strategie
-	BETTER_THAN_RANDOM(OurLogic.class),
+	OUR_LOGIC(OurLogic.class),
 	
 	// Die Logik die gewählt wird, wenn kein passender Eintrag zu der Eingabe
 	// gefunden wurde:

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
+import com.thedroide.sc18.GUILogger;
+
 import sc.plugin2018.Action;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -62,6 +64,8 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		Move chosenMove = null;
 		MoveRating chosenRating = null;
 		
+		GUILogger.log(state.getPossibleMoves().size());
+		
 		for (Move move : state.getPossibleMoves()) {
 			MoveRating rating = MoveRating.evaluate(move);
 			
@@ -114,6 +118,8 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		} else {
 			computeBestMove();
 		}
+		
+		GUILogger.log(toString());
 	}
 	
 	@Override
