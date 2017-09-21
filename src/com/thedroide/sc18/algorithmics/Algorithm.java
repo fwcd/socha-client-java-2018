@@ -1,5 +1,5 @@
 package com.thedroide.sc18.algorithmics;
 
-public interface Algorithm {
-	public AMove getBestMove(ABoard board);
+public interface Algorithm<T extends ABoard<?>> {
+	public AMove<T> getBestMove(T board);
 }
