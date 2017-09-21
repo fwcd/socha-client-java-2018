@@ -78,6 +78,8 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		}
 		
 		bestMove = chosenMove;
+		
+		GUILogger.log("Found best leaf move " + bestMove + " from " + state.getPossibleMoves());
 	}
 	
 	/**
@@ -91,7 +93,12 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		}
 	}
 	
+	private boolean isLeaf() {
+		return possibleMoveStates.isEmpty();
+	}
+	
 	public Move getBestMove() {
+		GUILogger.log("Leaf: " + isLeaf() + " (at depth " + depth);
 		return bestMove != null ? bestMove : bestMoveState.getBestMove();
 	}
 	
@@ -102,26 +109,26 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 				try {
 					GameState newState = state.clone();
 					
+					GUILogger.log("Performing action for move at depth " + depth);
+					
 					for (Action action : move.getActions()) {
 						action.perform(newState);
 					}
 					
 					newState.switchCurrentPlayer();
-					possibleMoveStates.add(new MinimaxBoardState(newState, depth - 1, !maximize, this));
+					
+					MinimaxBoardState child = new MinimaxBoardState(newState, depth - 1, !maximize, this);
+					child.compute(); // Using standard Java recursion... remove this and use invokeAll() in case you want to use fork/join
+					possibleMoveStates.add(child);
 				} catch (CloneNotSupportedException | InvalidMoveException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			invokeAll(possibleMoveStates);
+			// invokeAll(possibleMoveStates);
+			// quietlyJoin();
 			
-			GUILogger.log("Now joining");
-			join();
-			GUILogger.log("Done joining");
-			
-			GUILogger.log("Now minimaxing");
 			minimax();
-			GUILogger.log("Done minimaxing");
 		} else {
 			computeBestMove();
 		}
