@@ -49,10 +49,6 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	 * @param parent - The parent node (may be null in case of root)
 	 */
 	public MinimaxBoardState(GameState state, int depth, boolean maximize, MinimaxBoardState parent) {
-		if (depth > 0) {
-			GUILogger.log(depth);
-		}
-		
 		this.state = state;
 		this.depth = depth;
 		this.maximize = maximize;
@@ -71,7 +67,8 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		for (Move move : state.getPossibleMoves()) {
 			MoveRating rating = MoveRating.evaluate(move);
 			
-			if (maximize ? rating.compareTo(chosenRating) > 0 : rating.compareTo(chosenRating) < 0) {
+			if (chosenMove == null || (maximize ? rating.compareTo(chosenRating) > 0 : rating.compareTo(chosenRating) < 0)) {
+				GUILogger.log("Choosing");
 				chosenMove = move;
 				chosenRating = rating;
 			}
@@ -79,7 +76,7 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		
 		bestMove = chosenMove;
 		
-		GUILogger.log("Found best leaf move " + bestMove + " from " + state.getPossibleMoves());
+		GUILogger.log("Chose " + bestMove + " from " + state.getPossibleMoves().size());
 	}
 	
 	/**
@@ -98,7 +95,7 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	}
 	
 	public Move getBestMove() {
-		GUILogger.log("Leaf: " + isLeaf() + " (at depth " + depth);
+		GUILogger.log("Leaf: " + isLeaf() + " (at depth " + depth + ")");
 		return bestMove != null ? bestMove : bestMoveState.getBestMove();
 	}
 	
@@ -118,15 +115,23 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 					newState.switchCurrentPlayer();
 					
 					MinimaxBoardState child = new MinimaxBoardState(newState, depth - 1, !maximize, this);
-					child.compute(); // Using standard Java recursion... remove this and use invokeAll() in case you want to use fork/join
 					possibleMoveStates.add(child);
 				} catch (CloneNotSupportedException | InvalidMoveException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			// invokeAll(possibleMoveStates);
-			// quietlyJoin();
+			// TODO: Fix bugs
+			
+			invokeAll(possibleMoveStates);
+			
+			GUILogger.log("Now joining...");
+			
+			for (MinimaxBoardState child : possibleMoveStates) {
+				child.quietlyJoin();
+			}
+			
+			GUILogger.log("Done joining...");
 			
 			minimax();
 		} else {

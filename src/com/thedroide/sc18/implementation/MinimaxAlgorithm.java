@@ -17,6 +17,8 @@ public class MinimaxAlgorithm implements Algorithm {
 	public Move getBestMove(GameState state) {
 		MinimaxBoardState tree = new MinimaxBoardState(state, depth);
 		
+		GUILogger.log("let's go");
+		
 		FORK_JOIN_POOL.execute(tree);
 		tree.join();
 		
