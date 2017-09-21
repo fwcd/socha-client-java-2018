@@ -32,12 +32,12 @@ public class OurLogic implements IGameHandler {
 	private GameState gameState;
 	private Player currentPlayer;
 
-	private static final Logger log = LoggerFactory.getLogger(OurLogic.class);
+	private static final Logger LOG = LoggerFactory.getLogger(OurLogic.class);
 	/*
 	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse
 	 * einmalig erzeugt wird und darin immer zur Verfuegung steht.
 	 */
-	private static final Random rand = new SecureRandom();
+	private static final Random RANDOM = new SecureRandom();
 
 	/**
 	 * Erzeugt ein neues Strategieobjekt, das zufaellige Zuege taetigt.
@@ -54,7 +54,7 @@ public class OurLogic implements IGameHandler {
 	 * {@inheritDoc}
 	 */
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
-		log.info("Das Spiel ist beendet.");
+		LOG.info("Das Spiel ist beendet.");
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class OurLogic implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		long startTime = System.nanoTime();
-		log.info("Es wurde ein Zug angefordert.");
+		LOG.info("Es wurde ein Zug angefordert.");
 		List<Move> possibleMove = gameState.getPossibleMoves(); // Mindestens ein element
 		List<Move> saladMoves = new ArrayList<>();
 		List<Move> winningMoves = new ArrayList<>();
@@ -121,22 +121,22 @@ public class OurLogic implements IGameHandler {
 		}
 		Move move;
 		if (!winningMoves.isEmpty()) {
-			log.info("Sende Gewinnzug");
-			move = winningMoves.get(rand.nextInt(winningMoves.size()));
+			LOG.info("Sende Gewinnzug");
+			move = winningMoves.get(RANDOM.nextInt(winningMoves.size()));
 		} else if (!saladMoves.isEmpty()) {
 			// es gibt die Möglichkeit einen Salat zu essen
-			log.info("Sende Zug zum Salatessen");
-			move = saladMoves.get(rand.nextInt(saladMoves.size()));
+			LOG.info("Sende Zug zum Salatessen");
+			move = saladMoves.get(RANDOM.nextInt(saladMoves.size()));
 		} else if (!selectedMoves.isEmpty()) {
-			move = selectedMoves.get(rand.nextInt(selectedMoves.size()));
+			move = selectedMoves.get(RANDOM.nextInt(selectedMoves.size()));
 		} else {
-			move = possibleMove.get(rand.nextInt(possibleMove.size()));
+			move = possibleMove.get(RANDOM.nextInt(possibleMove.size()));
 		}
 		move.orderActions();
-		log.info("Sende zug {}", move);
+		LOG.info("Sende zug {}", move);
 		long nowTime = System.nanoTime();
 		sendAction(move);
-		log.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
+		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class OurLogic implements IGameHandler {
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
-		log.info("Spielerwechsel: " + player.getPlayerColor());
+		LOG.info("Spielerwechsel: " + player.getPlayerColor());
 	}
 
 	/**
@@ -155,8 +155,8 @@ public class OurLogic implements IGameHandler {
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
-		log.info("Das Spiel geht voran: Zug: {}", gameState.getTurn());
-		log.info("Spieler: {}", currentPlayer.getPlayerColor());
+		LOG.info("Das Spiel geht voran: Zug: {}", gameState.getTurn());
+		LOG.info("Spieler: {}", currentPlayer.getPlayerColor());
 	}
 
 	/**
