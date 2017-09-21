@@ -49,6 +49,10 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	 * @param parent - The parent node (may be null in case of root)
 	 */
 	public MinimaxBoardState(GameState state, int depth, boolean maximize, MinimaxBoardState parent) {
+		if (depth > 0) {
+			GUILogger.log(depth);
+		}
+		
 		this.state = state;
 		this.depth = depth;
 		this.maximize = maximize;
@@ -63,8 +67,6 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 		
 		Move chosenMove = null;
 		MoveRating chosenRating = null;
-		
-		GUILogger.log(state.getPossibleMoves().size());
 		
 		for (Move move : state.getPossibleMoves()) {
 			MoveRating rating = MoveRating.evaluate(move);
@@ -81,7 +83,7 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	/**
 	 * Minimizes/maximized the best move for a non-leaf.
 	 */
-	private void optimize() {
+	private void minimax() {
 		if (maximize) {
 			bestMoveState = Collections.max(possibleMoveStates);
 		} else {
@@ -112,14 +114,17 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 			}
 			
 			invokeAll(possibleMoveStates);
-			join();
 			
-			optimize();
+			GUILogger.log("Now joining");
+			join();
+			GUILogger.log("Done joining");
+			
+			GUILogger.log("Now minimaxing");
+			minimax();
+			GUILogger.log("Done minimaxing");
 		} else {
 			computeBestMove();
 		}
-		
-		GUILogger.log(toString());
 	}
 	
 	@Override
