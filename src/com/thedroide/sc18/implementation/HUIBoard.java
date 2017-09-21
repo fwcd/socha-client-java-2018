@@ -1,5 +1,7 @@
 package com.thedroide.sc18.implementation;
 
+import java.util.List;
+
 import com.thedroide.sc18.algorithmics.ABoard;
 import com.thedroide.sc18.algorithmics.AMove;
 
@@ -19,5 +21,11 @@ public class HUIBoard implements ABoard<HUIBoard> {
 	
 	public Board getSCBoard() {
 		return scBoard;
+	}
+
+	@Override
+	public List<AMove<HUIBoard>> getPossibleMoves() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
