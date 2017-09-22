@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -21,6 +19,9 @@ public class GUILogger {
 	private static final GUILogger INSTANCE = ENABLED ? new GUILogger() : null;
 	
 	private final JFrame view;
+	private final JScrollPane scrollPane;
+	private final JPanel outputArea;
+	
 	private List<String> output = new ArrayList<>();
 	
 	private GUILogger() {
@@ -28,34 +29,12 @@ public class GUILogger {
 		view.setMinimumSize(new Dimension(600, 250));
 		view.setLayout(new BorderLayout());
 		
-		JPanel outputArea = new JPanel();
+		outputArea = new JPanel();
 		outputArea.setLayout(new BoxLayout(outputArea, BoxLayout.Y_AXIS));
 		outputArea.setBackground(Color.BLACK);
 		
-		JScrollPane scrollPane = new JScrollPane(outputArea);
+		scrollPane = new JScrollPane(outputArea);
 		view.add(scrollPane);
-		
-		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(new TimerTask() {
-
-			@Override
-			public void run() {
-				outputArea.removeAll();
-				
-				for (String line : output) {
-					JLabel label = new JLabel(line);
-					label.setForeground(Color.WHITE);
-					outputArea.add(label);
-				}
-				
-				JScrollBar vScrollBar = scrollPane.getVerticalScrollBar();
-				vScrollBar.setValue(vScrollBar.getMaximum());
-				
-				view.revalidate();
-				view.repaint();
-			}
-			
-		}, 1000, 100);
 		
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		view.setVisible(true);
@@ -63,11 +42,26 @@ public class GUILogger {
 	
 	public static void log(Object s) {
 		if (ENABLED) {
-			INSTANCE.println(s == null ? "null" : s.toString());
+			INSTANCE.println(getPrefix() + (s == null ? "null" : s.toString()));
 		}
+	}
+
+	private static String getPrefix() {
+		return "[" + Integer.toHexString(Thread.currentThread().hashCode()) + "] ";
 	}
 	
 	private void println(String s) {
-		output.addAll(Arrays.asList(s.split("\n")));
+		view.repaint();
+		
+		for (String line : Arrays.asList(s.split("\n"))) {
+			JLabel label = new JLabel(line);
+			label.setForeground(Color.WHITE);
+			
+			outputArea.add(label);
+			output.add(line);
+		}
+		
+		JScrollBar vScrollBar = scrollPane.getVerticalScrollBar();
+		vScrollBar.setValue(vScrollBar.getMaximum());
 	}
 }

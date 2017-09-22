@@ -6,6 +6,8 @@ import com.thedroide.sc18.utils.IndexedMap;
 import sc.plugin2018.Board;
 import sc.plugin2018.Field;
 
+// TODO: Use this class somehow
+
 public class FieldRatings {
 	private static final int BOARD_SIZE = 65;
 	private final IndexedMap<Field, IntRating> ratings = new IndexedHashMap<>();

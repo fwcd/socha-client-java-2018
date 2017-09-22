@@ -16,5 +16,5 @@ public interface Strategy {
 	 * @param state - The state AFTER the move has been executed (should be cloned before writing to it though)
 	 * @return The rating of that move
 	 */
-	public MoveRating evaluate(Move move, GameState state);
+	public MoveRating evaluate(Move move, GameState state, boolean maximize);
 }

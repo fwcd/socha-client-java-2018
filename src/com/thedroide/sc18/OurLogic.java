@@ -14,6 +14,8 @@ import sc.plugin2018.Player;
 import sc.shared.GameResult;
 import sc.shared.PlayerColor;
 
+// TODO: Clean up GUILogger calls in the end
+
 /**
  * Our customized logic.
  */

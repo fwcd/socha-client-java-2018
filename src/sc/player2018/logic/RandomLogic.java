@@ -36,8 +36,8 @@ public class RandomLogic implements IGameHandler {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RandomLogic.class);
 	/*
-	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse
-	 * einmalig erzeugt wird und darin immer zur Verfuegung steht.
+	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse einmalig
+	 * erzeugt wird und darin immer zur Verfuegung steht.
 	 */
 	private static final Random RANDOM = new SecureRandom();
 
@@ -45,8 +45,8 @@ public class RandomLogic implements IGameHandler {
 	 * Erzeugt ein neues Strategieobjekt, das zufaellige Zuege taetigt.
 	 *
 	 * @param client
-	 *            Der Zugrundeliegende Client der mit dem Spielserver
-	 *            kommunizieren kann.
+	 *            Der Zugrundeliegende Client der mit dem Spielserver kommunizieren
+	 *            kann.
 	 */
 	public RandomLogic(Starter client) {
 		this.client = client;
@@ -70,7 +70,7 @@ public class RandomLogic implements IGameHandler {
 		List<Move> saladMoves = new ArrayList<>();
 		List<Move> winningMoves = new ArrayList<>();
 		List<Move> selectedMoves = new ArrayList<>();
-		
+
 		int index = currentPlayer.getFieldIndex();
 		for (Move move : possibleMove) {
 			for (Action action : move.actions) {

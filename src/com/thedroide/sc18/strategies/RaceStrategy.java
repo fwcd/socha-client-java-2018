@@ -9,11 +9,16 @@ import sc.plugin2018.Move;
 
 /**
  * A very simple strategy that focuses
- * on moving forward.
+ * on moving forward.<br><br>
+ * 
+ * Will most probably not win, because it
+ * doesn't event try to commit winning
+ * moves.
  */
 public class RaceStrategy implements Strategy {
 	@Override
-	public MoveRating evaluate(Move move, GameState state) {
-		return new IntRating(state.getCurrentPlayer().getFieldIndex());
+	public MoveRating evaluate(Move move, GameState state, boolean maximize) {
+		int field = state.getCurrentPlayer().getFieldIndex() * (maximize ? 1 : -1);
+		return new IntRating(field);
 	}
 }

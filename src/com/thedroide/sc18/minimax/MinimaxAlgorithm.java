@@ -5,7 +5,7 @@ import java.util.concurrent.ForkJoinPool;
 import com.thedroide.sc18.algorithmics.Algorithm;
 import com.thedroide.sc18.algorithmics.Strategy;
 import com.thedroide.sc18.debug.TreePlotter;
-import com.thedroide.sc18.strategies.RaceStrategy;
+import com.thedroide.sc18.strategies.SmartStrategy;
 
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -15,7 +15,7 @@ public class MinimaxAlgorithm implements Algorithm {
 	
 	private final TreePlotter plotter = new TreePlotter();
 	
-	private final Strategy strategy = new RaceStrategy();
+	private final Strategy strategy = new SmartStrategy();
 	private int depth = 3;
 	
 	@Override
