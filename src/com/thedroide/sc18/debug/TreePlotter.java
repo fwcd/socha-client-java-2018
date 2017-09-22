@@ -9,17 +9,17 @@ import java.awt.Graphics2D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.thedroide.sc18.algorithmics.GraphNode;
+import com.thedroide.sc18.algorithmics.GraphTreeNode;
 
-public class GraphPlotter {
+public class TreePlotter {
 	private JFrame view;
-	private GraphNode treeRoot;
+	private GraphTreeNode treeRoot;
 	
-	public GraphPlotter(GraphNode treeRoot) {
+	public TreePlotter(GraphTreeNode treeRoot) {
 		this.treeRoot = treeRoot;
 		
-		view = new JFrame("GraphPlotter");
-		view.setSize(800, 600);
+		view = new JFrame("GraphTreePlotter");
+		view.setSize(900, 400);
 		view.setLayout(new BorderLayout());
 		
 		view.add(new JPanel() {
@@ -43,21 +43,21 @@ public class GraphPlotter {
 		render(g2d, treeRoot, centerX(), 20, 0);
 	}
 	
-	private void render(Graphics2D g2d, GraphNode node, int x, int y, int incrementalDepth) {
+	private void render(Graphics2D g2d, GraphTreeNode node, int x, int y, int incrementalDepth) {
 		String nodeDesc = node.getNodeDescription();
 		FontMetrics metrics = g2d.getFontMetrics();
 		
 		int topLeftX = x - (metrics.stringWidth(nodeDesc) / 2);
 		int topLeftY = y - (metrics.getHeight() / 2);
 		
-		g2d.setColor(Color.BLACK);
+		g2d.setColor(node.getColor());
 		g2d.drawString(nodeDesc, topLeftX, topLeftY);
 		
 		int children = node.getChildren().size() - 1;
 		int step = (int) ((1D / (incrementalDepth + 1)) * 50D);
 		
 		int i = 0;
-		for (GraphNode child : node.getChildren()) {
+		for (GraphTreeNode child : node.getChildren()) {
 			int childX = x - ((children * step) / 2) + (i * step);
 			int childY = y + metrics.getHeight() * 3;
 			
