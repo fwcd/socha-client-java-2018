@@ -1,5 +1,6 @@
 package com.thedroide.sc18.minimax;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.concurrent.RecursiveAction;
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
 import com.thedroide.sc18.algorithmics.MoveRating;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.debug.GUILogger;
 
 // GUILogger;
 
@@ -45,7 +47,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponentially to this.
 	 */
 	public MinimaxBoardState(GameState state, Strategy strategy, int decrementalDepth) {
-		this(state, state.getLastMove(), strategy, decrementalDepth, true, null);
+		this(state, state.getLastMove(), strategy, decrementalDepth, false, null);
 	}
 	
 	/**
@@ -100,12 +102,15 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	 */
 	private void minimax() {
 		if (maximize) {
-			// GUILogger.log("Maximizing " + possibleMoveStates.size());
 			bestMoveState = Collections.max(possibleMoveStates);
+			GUILogger.log("Maximized " + strategy.evaluate(bestMoveState.getMove(), bestMoveState.state));
 		} else {
 			// GUILogger.log("Minimizing " + possibleMoveStates.size());
 			bestMoveState = Collections.min(possibleMoveStates);
+			GUILogger.log("Minimized " + strategy.evaluate(bestMoveState.getMove(), bestMoveState.state));
 		}
+		
+		GUILogger.log((maximize ? "Maximized" : "Minimized") + bestMoveState.getNodeDescription());
 	}
 	
 	@Override
@@ -113,7 +118,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 		return decrementalDepth == 0;
 	}
 	
-	public Move getBestMove() {
+	public Move getMove() {
 		if (bestMove != null) {
 			return bestMove;
 		} else {
@@ -162,7 +167,8 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 
 	@Override
 	public int compareTo(MinimaxBoardState o) {
-		return strategy.evaluate(getBestMove(), state).compareTo(strategy.evaluate(o.getBestMove(), state));
+		return strategy.evaluate(getMove(), state)
+				.compareTo(strategy.evaluate(o.getMove(), state));
 	}
 	
 	@Override
@@ -179,5 +185,14 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	public String getNodeDescription() {
 		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + "|"
 				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex());
+	}
+	
+	@Override
+	public Color getColor() {
+		if (parent != null && parent.bestMoveState == this) {
+			return Color.RED;
+		} else {
+			return Color.BLACK;
+		}
 	}
 }

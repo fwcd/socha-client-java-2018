@@ -15,9 +15,7 @@ public class TreePlotter {
 	private JFrame view;
 	private GraphTreeNode treeRoot;
 	
-	public TreePlotter(GraphTreeNode treeRoot) {
-		this.treeRoot = treeRoot;
-		
+	public TreePlotter() {
 		view = new JFrame("GraphTreePlotter");
 		view.setSize(900, 400);
 		view.setLayout(new BorderLayout());
@@ -35,12 +33,19 @@ public class TreePlotter {
 		view.setVisible(true);
 	}
 	
+	public void setTree(GraphTreeNode treeRoot) {
+		this.treeRoot = treeRoot;
+		view.repaint();
+	}
+	
 	private int centerX() {
 		return view.getWidth() / 2;
 	}
 	
 	private void render(Graphics2D g2d) {
-		render(g2d, treeRoot, centerX(), 20, 0);
+		if (treeRoot != null) {
+			render(g2d, treeRoot, centerX(), 20, 0);
+		}
 	}
 	
 	private void render(Graphics2D g2d, GraphTreeNode node, int x, int y, int incrementalDepth) {

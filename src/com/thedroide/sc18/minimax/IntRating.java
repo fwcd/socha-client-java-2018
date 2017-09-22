@@ -25,4 +25,9 @@ public class IntRating implements MoveRating {
 			throw new IllegalArgumentException("Compared MoveRating needs to be an instance of IntRating!");
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return Integer.toString(value);
+	}
 }

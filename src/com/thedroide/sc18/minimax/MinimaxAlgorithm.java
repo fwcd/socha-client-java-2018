@@ -4,6 +4,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import com.thedroide.sc18.algorithmics.Algorithm;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.debug.TreePlotter;
 import com.thedroide.sc18.strategies.RaceStrategy;
 
 import sc.plugin2018.GameState;
@@ -12,8 +13,10 @@ import sc.plugin2018.Move;
 public class MinimaxAlgorithm implements Algorithm {
 	private static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool();
 	
+	private final TreePlotter plotter = new TreePlotter();
+	
 	private final Strategy strategy = new RaceStrategy();
-	private int depth = 2;
+	private int depth = 3;
 	
 	@Override
 	public Move getBestMove(GameState state) {
@@ -24,9 +27,9 @@ public class MinimaxAlgorithm implements Algorithm {
 		FORK_JOIN_POOL.execute(tree);
 		tree.join();
 		
-		// new TreePlotter(tree);
+		plotter.setTree(tree);
 		
-		Move move = tree.getBestMove();
+		Move move = tree.getMove();
 		
 		// GUILogger.log("Done calculating move...");
 		// GUILogger.log(move);

@@ -1,8 +1,5 @@
 package com.thedroide.sc18;
 
-import java.security.SecureRandom;
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +15,7 @@ import sc.shared.GameResult;
 import sc.shared.PlayerColor;
 
 /**
- * Unsere Logik.
+ * Our customized logic.
  */
 public class OurLogic implements IGameHandler {
 	private Starter client;
@@ -26,37 +23,28 @@ public class OurLogic implements IGameHandler {
 	private Player currentPlayer;
 
 	/**
-	 * Das Herzstück unserer Logik.
+	 * The heart of our IGameHandler.
 	 */
 	private final Algorithm algorithm = new MinimaxAlgorithm();
 
 	private static final Logger LOG = LoggerFactory.getLogger(OurLogic.class);
-	/*
-	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse einmalig
-	 * erzeugt wird und darin immer zur Verfuegung steht.
-	 */
-	private static final Random RANDOM = new SecureRandom();
+	// private static final Random RANDOM = new SecureRandom();
 
 	/**
-	 * Erzeugt ein neues Strategieobjekt, das Zuege taetigt.
-	 *
-	 * @param client
-	 *            Der Zugrundeliegende Client der mit dem Spielserver kommunizieren
-	 *            kann.
+	 * Creates a new AI-player that commits moves.
+	 * 
+	 * @param Starter - The player's client
 	 */
 	public OurLogic(Starter client) {
 		this.client = client;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
 		LOG.info("Game ended.");
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Called whenever a turn is requested.
 	 */
 	@Override
 	public void onRequestAction() {
@@ -72,18 +60,12 @@ public class OurLogic implements IGameHandler {
 		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
 		LOG.info("Switching turns: " + player.getPlayerColor());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
@@ -92,9 +74,6 @@ public class OurLogic implements IGameHandler {
 		LOG.info("Player: {}", currentPlayer.getPlayerColor());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendAction(Move move) {
 		client.sendMove(move);
