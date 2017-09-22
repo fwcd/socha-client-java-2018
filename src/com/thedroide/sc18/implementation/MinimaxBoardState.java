@@ -5,7 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
-import com.thedroide.sc18.GUILogger;
+import com.thedroide.sc18.algorithmics.GraphNode;
+import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.GameState;
@@ -16,7 +17,7 @@ import sc.shared.InvalidMoveException;
  * A tree of possible board states using recursive
  * fork/join computation.
  */
-public class MinimaxBoardState extends RecursiveAction implements Comparable<MinimaxBoardState> {
+public class MinimaxBoardState extends RecursiveAction implements GraphNode, Comparable<MinimaxBoardState> {
 	private static final long serialVersionUID = 1L;
 	
 	private MinimaxBoardState parent = null; // Will be null, if this is the root
@@ -26,7 +27,7 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	private boolean maximize; // Only relevant for non-leafs
 	private Move bestMove; // Only relevant for leafs
 	private GameState state;
-	private int depth;
+	private int decrementalDepth;
 	
 	/**
 	 * Convenience constructor for generating a
@@ -34,23 +35,23 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	 * turn).
 	 * 
 	 * @param state - The (initial) state of the board
-	 * @param depth - The number of moves predicted. Complexity grows exponentially to this.
+	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponentially to this.
 	 */
-	public MinimaxBoardState(GameState state, int depth) {
-		this(state, depth, true, null);
+	public MinimaxBoardState(GameState state, int decrementalDepth) {
+		this(state, decrementalDepth, true, null);
 	}
 	
 	/**
 	 * Generates a new tree of possible board states.
 	 * 
 	 * @param state - The (initial) state of the board
-	 * @param depth - The number of moves predicted. Complexity grows exponetially to this.
+	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponetially to this.
 	 * @param maximize - Whether this move should be maximized (or not)
 	 * @param parent - The parent node (may be null in case of root)
 	 */
-	public MinimaxBoardState(GameState state, int depth, boolean maximize, MinimaxBoardState parent) {
+	public MinimaxBoardState(GameState state, int decrementalDepth, boolean maximize, MinimaxBoardState parent) {
 		this.state = state;
-		this.depth = depth;
+		this.decrementalDepth = decrementalDepth;
 		this.maximize = maximize;
 		this.parent = parent;
 	}
@@ -84,29 +85,31 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	 */
 	private void minimax() {
 		if (maximize) {
+			GUILogger.log("Maximizing " + possibleMoveStates.size());
 			bestMoveState = Collections.max(possibleMoveStates);
 		} else {
+			GUILogger.log("Minimizing " + possibleMoveStates.size());
 			bestMoveState = Collections.min(possibleMoveStates);
 		}
 	}
 	
-	private boolean isLeaf() {
-		return possibleMoveStates.isEmpty();
+	@Override
+	public boolean isLeaf() {
+		return decrementalDepth == 0;
 	}
 	
 	public Move getBestMove() {
-		GUILogger.log("Leaf: " + isLeaf() + " (at depth " + depth + ")");
 		return bestMove != null ? bestMove : bestMoveState.getBestMove();
 	}
 	
 	@Override
 	protected void compute() {
-		if (depth > 0) {
+		if (decrementalDepth > 0) {
 			for (Move move : state.getPossibleMoves()) {
 				try {
 					GameState newState = state.clone();
 					
-					GUILogger.log("Performing action for move at depth " + depth);
+					GUILogger.log("Performing action for move at depth " + decrementalDepth);
 					
 					for (Action action : move.getActions()) {
 						action.perform(newState);
@@ -114,7 +117,7 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 					
 					newState.switchCurrentPlayer();
 					
-					MinimaxBoardState child = new MinimaxBoardState(newState, depth - 1, !maximize, this);
+					MinimaxBoardState child = new MinimaxBoardState(newState, decrementalDepth - 1, !maximize, this);
 					possibleMoveStates.add(child);
 				} catch (CloneNotSupportedException | InvalidMoveException e) {
 					e.printStackTrace();
@@ -131,8 +134,6 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 				child.quietlyJoin();
 			}
 			
-			GUILogger.log("Done joining...");
-			
 			minimax();
 		} else {
 			computeBestMove();
@@ -141,13 +142,22 @@ public class MinimaxBoardState extends RecursiveAction implements Comparable<Min
 	
 	@Override
 	public String toString() {
-		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + "|"
-				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex()) + "\n"
-				+ "[" + possibleMoveStates.toString() + "]";
+		return getNodeDescription() + "[" + possibleMoveStates.toString() + "]";
 	}
 
 	@Override
 	public int compareTo(MinimaxBoardState o) {
 		return MoveRating.evaluate(getBestMove()).compareTo(MoveRating.evaluate(o.getBestMove()));
+	}
+
+	@Override
+	public List<? extends GraphNode> getChildren() {
+		return possibleMoveStates;
+	}
+
+	@Override
+	public String getNodeDescription() {
+		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + "|"
+				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex());
 	}
 }
