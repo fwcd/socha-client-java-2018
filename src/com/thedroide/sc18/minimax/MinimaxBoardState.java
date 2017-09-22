@@ -1,4 +1,4 @@
-package com.thedroide.sc18.implementation;
+package com.thedroide.sc18.minimax;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
+import com.thedroide.sc18.algorithmics.MoveRating;
+import com.thedroide.sc18.algorithmics.Strategy;
 
 // GUILogger;
 
@@ -20,6 +22,8 @@ import sc.shared.InvalidMoveException;
  */
 public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode, Comparable<MinimaxBoardState> {
 	private static final long serialVersionUID = 1L;
+	
+	private final Strategy strategy;
 	
 	private MinimaxBoardState parent = null; // Will be null, if this is the root
 	private final List<MinimaxBoardState> possibleMoveStates = new ArrayList<>();
@@ -37,10 +41,11 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	 * turn).
 	 * 
 	 * @param state - The (initial) state of the board
+	 * @param strategy - The evaluation strategy
 	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponentially to this.
 	 */
-	public MinimaxBoardState(GameState state, int decrementalDepth) {
-		this(state, state.getLastMove(), decrementalDepth, true, null);
+	public MinimaxBoardState(GameState state, Strategy strategy, int decrementalDepth) {
+		this(state, state.getLastMove(), strategy, decrementalDepth, true, null);
 	}
 	
 	/**
@@ -52,12 +57,19 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	 * @param maximize - Whether this move should be maximized (or not)
 	 * @param parent - The parent node (may be null in case of root)
 	 */
-	public MinimaxBoardState(GameState state, Move lastMove, int decrementalDepth, boolean maximize, MinimaxBoardState parent) {
+	private MinimaxBoardState(
+			GameState state,
+			Move lastMove,
+			Strategy strategy,
+			int decrementalDepth,
+			boolean maximize,
+			MinimaxBoardState parent) {
 		this.state = state;
 		this.decrementalDepth = decrementalDepth;
 		this.maximize = maximize;
 		this.parent = parent;
 		this.lastMove = lastMove;
+		this.strategy = strategy;
 	}
 	
 	/**
@@ -70,7 +82,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 		MoveRating chosenRating = null;
 		
 		for (Move move : state.getPossibleMoves()) {
-			MoveRating rating = MoveRating.evaluate(move);
+			MoveRating rating = strategy.evaluate(move, state);
 			
 			if (chosenMove == null || (maximize ? rating.compareTo(chosenRating) > 0 : rating.compareTo(chosenRating) < 0)) {
 				chosenMove = move;
@@ -124,7 +136,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 					
 					newState.switchCurrentPlayer();
 					
-					MinimaxBoardState child = new MinimaxBoardState(newState, move, decrementalDepth - 1, !maximize, this);
+					MinimaxBoardState child = new MinimaxBoardState(newState, move, strategy, decrementalDepth - 1, !maximize, this);
 					possibleMoveStates.add(child);
 				} catch (CloneNotSupportedException | InvalidMoveException e) {
 					e.printStackTrace();
@@ -150,7 +162,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 
 	@Override
 	public int compareTo(MinimaxBoardState o) {
-		return MoveRating.evaluate(getBestMove()).compareTo(MoveRating.evaluate(o.getBestMove()));
+		return strategy.evaluate(getBestMove(), state).compareTo(strategy.evaluate(o.getBestMove(), state));
 	}
 	
 	@Override

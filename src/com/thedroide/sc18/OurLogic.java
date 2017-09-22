@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.thedroide.sc18.algorithmics.Algorithm;
-import com.thedroide.sc18.implementation.MinimaxAlgorithm;
+import com.thedroide.sc18.minimax.MinimaxAlgorithm;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
