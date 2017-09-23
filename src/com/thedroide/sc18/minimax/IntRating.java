@@ -1,8 +1,8 @@
 package com.thedroide.sc18.minimax;
 
-import com.thedroide.sc18.algorithmics.MoveRating;
+import com.thedroide.sc18.algorithmics.Rating;
 
-public class IntRating implements MoveRating {
+public class IntRating implements Rating {
 	private static final IntRating EMPTY_RATING = new IntRating(Integer.MIN_VALUE);
 	private final int value;
 	
@@ -18,7 +18,7 @@ public class IntRating implements MoveRating {
 	}
 
 	@Override
-	public int compareTo(MoveRating o) {
+	public int compareTo(Rating o) {
 		if (o instanceof IntRating) {
 			return Integer.compare(value, ((IntRating) o).value);
 		} else {

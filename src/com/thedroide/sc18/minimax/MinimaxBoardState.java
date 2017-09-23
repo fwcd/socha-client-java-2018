@@ -2,16 +2,12 @@ package com.thedroide.sc18.minimax;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
 
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
-import com.thedroide.sc18.algorithmics.MoveRating;
+import com.thedroide.sc18.algorithmics.Rating;
 import com.thedroide.sc18.algorithmics.Strategy;
-import com.thedroide.sc18.debug.GUILogger;
-
-// GUILogger;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.GameState;
@@ -24,172 +20,164 @@ import sc.shared.InvalidMoveException;
  */
 public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode, Comparable<MinimaxBoardState> {
 	private static final long serialVersionUID = 1L;
+
+	private MinimaxBoardState parent = null;
+	private List<MinimaxBoardState> children = new ArrayList<>();
+	private MinimaxBoardState bestChild = null;
+	private Rating rating = null;
 	
-	private final Strategy strategy;
+	private final boolean maximize;
+	private final GameState state;
+	private final Strategy<MinimaxBoardState> strategy;
+	private final int depth;
+	private final Move lastMove;
 	
-	private MinimaxBoardState parent = null; // Will be null, if this is the root
-	private final List<MinimaxBoardState> possibleMoveStates = new ArrayList<>();
-	private MinimaxBoardState bestMoveState;
-	
-	private boolean maximize; // Only relevant for non-leafs
-	private Move lastMove;
-	private Move bestMove; // Only relevant for leafs
-	private GameState state;
-	private int decrementalDepth;
-	
-	/**
-	 * Convenience constructor for generating a
-	 * minimax tree starting with maximizing (player's
-	 * turn).
-	 * 
-	 * @param state - The (initial) state of the board
-	 * @param strategy - The evaluation strategy
-	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponentially to this.
-	 */
-	public MinimaxBoardState(GameState state, Strategy strategy, int decrementalDepth) {
-		this(state, state.getLastMove(), strategy, decrementalDepth, true, null);
+	public MinimaxBoardState(GameState state, Strategy<MinimaxBoardState> strategy, int depth) {
+		this(state, strategy, true, depth, null, null);
 	}
 	
-	/**
-	 * Generates a new tree of possible board states.
-	 * 
-	 * @param state - The (initial) state of the board
-	 * @param lastMove - The most recently commited move
-	 * @param decrementalDepth - The number of moves predicted. Complexity grows exponetially to this.
-	 * @param maximize - Whether this move should be maximized (or not)
-	 * @param parent - The parent node (may be null in case of root)
-	 */
-	private MinimaxBoardState(
+	public MinimaxBoardState(
 			GameState state,
-			Move lastMove,
-			Strategy strategy,
-			int decrementalDepth,
+			Strategy<MinimaxBoardState> strategy,
 			boolean maximize,
+			int depth,
+			Move lastMove,
 			MinimaxBoardState parent) {
 		this.state = state;
-		this.decrementalDepth = decrementalDepth;
-		this.maximize = maximize;
-		this.parent = parent;
-		this.lastMove = lastMove;
 		this.strategy = strategy;
+		this.maximize = maximize;
+		this.depth = depth;
+		this.lastMove = lastMove;
+		this.parent = parent;
 	}
 	
-	/**
-	 * Computes the best move for a leaf.
-	 */
-	private void computeBestMove() {
-		// TODO: Implement Alpha-Beta and FieldRatings storing
-		
-		Move chosenMove = null;
-		MoveRating chosenRating = null;
-		
-		for (Move move : state.getPossibleMoves()) {
-			MoveRating rating = strategy.evaluate(move, state, maximize);
-			
-			if (chosenMove == null || (maximize ? rating.compareTo(chosenRating) > 0 : rating.compareTo(chosenRating) < 0)) {
-				chosenMove = move;
-				chosenRating = rating;
-			}
-		}
-		
-		bestMove = chosenMove;
+	public GameState getState() {
+		return state;
 	}
 	
-	/**
-	 * Minimizes/maximized the best move for a non-leaf.
-	 */
-	private void minimax() {
-		if (maximize) {
-			bestMoveState = Collections.max(possibleMoveStates);
-//			GUILogger.log("Maximized " + strategy.evaluate(bestMoveState.getMove(), bestMoveState.state, maximize));
-		} else {
-			bestMoveState = Collections.min(possibleMoveStates);
-//			GUILogger.log("Minimized " + strategy.evaluate(bestMoveState.getMove(), bestMoveState.state, maximize));
-		}
-		
-		GUILogger.log((maximize ? "Maximized" : "Minimized") + bestMoveState.getNodeDescription());
+	public List<Move> getAvailableMoves() {
+		return state.getPossibleMoves();
 	}
 	
-	@Override
-	public boolean isLeaf() {
-		return decrementalDepth == 0;
-	}
-	
-	public Move getMove() {
-		if (bestMove != null) {
-			return bestMove;
-		} else {
-			return bestMoveState.lastMove;
-		}
+	public Move getLastMove() {
+		return lastMove;
 	}
 	
 	@Override
 	protected void compute() {
-		if (decrementalDepth > 0) {
-			for (Move move : state.getPossibleMoves()) {
+		if (!isLeaf()) {
+			for (Move move : getAvailableMoves()) {
 				try {
-					GameState newState = state.clone();
+					GameState nextState = state.clone();
 					
 					for (Action action : move.getActions()) {
-						action.perform(newState);
+						action.perform(nextState);
 					}
 					
-					newState.switchCurrentPlayer();
-					
-					MinimaxBoardState child = new MinimaxBoardState(newState, move, strategy, decrementalDepth - 1, !maximize, this);
-					possibleMoveStates.add(child);
+					nextState.switchCurrentPlayer();
+					MinimaxBoardState child = new MinimaxBoardState(nextState, strategy, !maximize, depth - 1, move, this);
+					children.add(child);
+					child.quietlyInvoke();
 				} catch (CloneNotSupportedException | InvalidMoveException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			invokeAll(possibleMoveStates);
-			
-			for (MinimaxBoardState child : possibleMoveStates) {
-				child.quietlyJoin();
-			}
-			
 			minimax();
-			
-			GUILogger.log("Chose state nr. " + possibleMoveStates.indexOf(bestMoveState) + " of "+ possibleMoveStates.size());
 		} else {
-			computeBestMove();
+			rating = strategy.evaluate(this);
+		}
+	}
+	
+	private void minimax() {
+		if (maximize) {
+			maximize();
+		} else {
+			minimize();
 		}
 	}
 	
 	@Override
-	public String toString() {
-		return getNodeDescription() + "[" + possibleMoveStates.toString() + "]";
-	}
-
-	@Override
 	public int compareTo(MinimaxBoardState o) {
-		return strategy.evaluate(getMove(), state, maximize)
-				.compareTo(strategy.evaluate(o.getMove(), o.state, o.maximize));
+		return rating.compareTo(o.rating);
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		return compareTo((MinimaxBoardState) obj) == 0;
+	public boolean isLeaf() {
+		return depth == 0;
 	}
-
+	
 	@Override
 	public List<? extends GraphTreeNode> getChildren() {
-		return possibleMoveStates;
+		return children;
 	}
-
+	
 	@Override
 	public String getNodeDescription() {
 		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + "|"
 				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex());
 	}
 	
+	private void maximize() {
+		for (MinimaxBoardState child : children) {
+			Rating childRating = child.rating;
+			
+			if (rating == null || childRating.compareTo(rating) > 0) {
+				rating = childRating;
+				bestChild = child;
+			}
+		}
+		
+		if (rating == null) {
+			throw new RuntimeException("Can't maximize without any child nodes!");
+		}
+	}
+	
+	private void minimize() {
+		for (MinimaxBoardState child : children) {
+			Rating childRating = child.rating;
+			
+			if (rating == null || childRating.compareTo(rating) < 0) {
+				rating = childRating;
+				bestChild = child;
+			}
+		}
+		
+		if (rating == null) {
+			throw new RuntimeException("Can't minimize without any child nodes!");
+		}
+	}
+
+	public List<MinimaxBoardState> getBestPath() {
+		List<MinimaxBoardState> path = new ArrayList<>();
+		path.add(this);
+		
+		if (!isLeaf()) {
+			path.addAll(bestChild.getBestPath());
+		}
+		
+		return path;
+	}
+	
+	public Move getBestMove() {
+		return bestChild.getLastMove();
+	}
+
+	public boolean isMaximizing() {
+		return maximize;
+	}
+	
 	@Override
 	public Color getColor() {
-		if (parent != null && parent.bestMoveState == this) {
+		if (parent != null && parent.bestChild == this) {
 			return Color.RED;
 		} else {
 			return Color.BLACK;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return getNodeDescription();
 	}
 }

@@ -1,11 +1,9 @@
 package com.thedroide.sc18.strategies;
 
-import com.thedroide.sc18.algorithmics.MoveRating;
+import com.thedroide.sc18.algorithmics.Rating;
 import com.thedroide.sc18.algorithmics.Strategy;
 import com.thedroide.sc18.minimax.IntRating;
-
-import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
+import com.thedroide.sc18.minimax.MinimaxBoardState;
 
 /**
  * A very simple strategy that focuses
@@ -15,10 +13,10 @@ import sc.plugin2018.Move;
  * doesn't event try to commit winning
  * moves.
  */
-public class RaceStrategy implements Strategy {
+public class RaceStrategy implements Strategy<MinimaxBoardState> {
 	@Override
-	public MoveRating evaluate(Move move, GameState state, boolean maximize) {
-		int field = state.getCurrentPlayer().getFieldIndex() * (maximize ? 1 : -1);
+	public Rating evaluate(MinimaxBoardState move) {
+		int field = move.getState().getCurrentPlayer().getFieldIndex() * (move.isMaximizing() ? 1 : -1);
 		return new IntRating(field);
 	}
 }

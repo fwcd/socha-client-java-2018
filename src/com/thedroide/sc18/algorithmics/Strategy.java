@@ -1,14 +1,11 @@
 package com.thedroide.sc18.algorithmics;
 
-import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
-
 /**
- * A "Strategy" that will evaluate a certain move.
+ * An evaluator.
  * 
- * @param <T> - Rating type
+ * @param <T> - Move type
  */
-public interface Strategy {
+public interface Strategy<T> {
 	/**
 	 * Evaluates a move.
 	 * 
@@ -16,5 +13,5 @@ public interface Strategy {
 	 * @param state - The state AFTER the move has been executed (should be cloned before writing to it though)
 	 * @return The rating of that move
 	 */
-	public MoveRating evaluate(Move move, GameState state, boolean maximize);
+	public Rating evaluate(T move);
 }

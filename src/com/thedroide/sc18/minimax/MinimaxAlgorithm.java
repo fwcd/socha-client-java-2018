@@ -4,6 +4,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import com.thedroide.sc18.algorithmics.Algorithm;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.debug.TreePlotter;
 import com.thedroide.sc18.strategies.SmartStrategy;
 
@@ -15,7 +16,7 @@ public class MinimaxAlgorithm implements Algorithm {
 	
 	private final TreePlotter plotter = new TreePlotter();
 	
-	private final Strategy strategy = new SmartStrategy();
+	private final Strategy<MinimaxBoardState> strategy = new SmartStrategy();
 	private int depth = 3;
 	
 	@Override
@@ -29,7 +30,9 @@ public class MinimaxAlgorithm implements Algorithm {
 		
 		plotter.setTree(tree);
 		
-		Move move = tree.getMove();
+		Move move = tree.getBestMove();
+		
+		GUILogger.log("Currently targetting path " + tree.getBestPath());
 		
 		// GUILogger.log("Done calculating move...");
 		// GUILogger.log(move);
