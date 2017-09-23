@@ -84,7 +84,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 		MoveRating chosenRating = null;
 		
 		for (Move move : state.getPossibleMoves()) {
-			MoveRating rating = strategy.evaluate(move, state, !maximize);
+			MoveRating rating = strategy.evaluate(move, state, maximize);
 			
 			if (chosenMove == null || (maximize ? rating.compareTo(chosenRating) > 0 : rating.compareTo(chosenRating) < 0)) {
 				chosenMove = move;
@@ -164,8 +164,8 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 
 	@Override
 	public int compareTo(MinimaxBoardState o) {
-		return strategy.evaluate(getMove(), state, !maximize)
-				.compareTo(strategy.evaluate(o.getMove(), o.state, !o.maximize));
+		return strategy.evaluate(getMove(), state, maximize)
+				.compareTo(strategy.evaluate(o.getMove(), o.state, o.maximize));
 	}
 	
 	@Override
