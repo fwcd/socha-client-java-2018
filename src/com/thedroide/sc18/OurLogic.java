@@ -53,7 +53,7 @@ public class OurLogic implements IGameHandler {
 		long startTime = System.nanoTime();
 		LOG.info("Move requested.");
 		
-		Move move = algorithm.getBestMove(gameState);
+		Move move = algorithm.getBestMove(gameState).getSCMove();
 		
 		move.orderActions();
 		LOG.info("Sending move {}", move);

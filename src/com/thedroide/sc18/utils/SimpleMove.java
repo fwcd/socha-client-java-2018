@@ -9,8 +9,8 @@ import sc.plugin2018.Move;
  * A Move wrapper simplifying API calls
  */
 public class SimpleMove {
-	private GameState stateAfterMove;
-	private Move move;
+	private final GameState stateAfterMove;
+	private final Move move;
 	
 	/**
 	 * Constructs a new SimpleMove.
@@ -34,5 +34,9 @@ public class SimpleMove {
 	
 	public Move getSCMove() {
 		return move;
+	}
+
+	public GameState getStateAfterMove() {
+		return stateAfterMove;
 	}
 }

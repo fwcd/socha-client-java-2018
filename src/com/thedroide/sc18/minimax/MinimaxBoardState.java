@@ -8,8 +8,8 @@ import java.util.concurrent.RecursiveAction;
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
 import com.thedroide.sc18.algorithmics.Rating;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.utils.SimpleMove;
 
-import sc.plugin2018.Action;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.shared.InvalidMoveException;
@@ -30,7 +30,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	private final GameState state;
 	private final Strategy<MinimaxBoardState> strategy;
 	private final int depth;
-	private final Move lastMove;
+	private final SimpleMove lastMove;
 	
 	public MinimaxBoardState(GameState state, Strategy<MinimaxBoardState> strategy, int depth) {
 		this(state, strategy, true, depth, null, null);
@@ -41,7 +41,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 			Strategy<MinimaxBoardState> strategy,
 			boolean maximize,
 			int depth,
-			Move lastMove,
+			SimpleMove lastMove,
 			MinimaxBoardState parent) {
 		this.state = state;
 		this.strategy = strategy;
@@ -55,37 +55,46 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 		return state;
 	}
 	
-	public List<Move> getAvailableMoves() {
-		return state.getPossibleMoves();
+	public List<SimpleMove> getAvailableMoves() {
+		try {
+			List<SimpleMove> availableMoves = new ArrayList<>();
+			
+			for (Move scMove : state.getPossibleMoves()) {
+				GameState nextState = state.clone();
+				scMove.perform(nextState);
+				
+				availableMoves.add(new SimpleMove(nextState, scMove));
+			}
+			
+			return availableMoves;
+		} catch (CloneNotSupportedException | InvalidMoveException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
-	public Move getLastMove() {
+	public SimpleMove getLastMove() {
 		return lastMove;
 	}
 	
 	@Override
 	protected void compute() {
-		if (!isLeaf()) {
-			for (Move move : getAvailableMoves()) {
-				try {
-					GameState nextState = state.clone();
+		try {
+			if (!isLeaf()) {
+				for (SimpleMove move : getAvailableMoves()) {
+					GameState switchedState = move.getStateAfterMove().clone();
+					switchedState.switchCurrentPlayer();
 					
-					for (Action action : move.getActions()) {
-						action.perform(nextState);
-					}
-					
-					nextState.switchCurrentPlayer();
-					MinimaxBoardState child = new MinimaxBoardState(nextState, strategy, !maximize, depth - 1, move, this);
+					MinimaxBoardState child = new MinimaxBoardState(switchedState, strategy, !maximize, depth - 1, move, this);
 					children.add(child);
 					child.quietlyInvoke();
-				} catch (CloneNotSupportedException | InvalidMoveException e) {
-					e.printStackTrace();
 				}
+				
+				minimax();
+			} else {
+				rating = strategy.evaluate(this);
 			}
-			
-			minimax();
-		} else {
-			rating = strategy.evaluate(this);
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -159,7 +168,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 		return path;
 	}
 	
-	public Move getBestMove() {
+	public SimpleMove getBestMove() {
 		return bestChild.getLastMove();
 	}
 

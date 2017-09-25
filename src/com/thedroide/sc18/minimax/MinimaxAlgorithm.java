@@ -7,9 +7,9 @@ import com.thedroide.sc18.algorithmics.Strategy;
 import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.debug.TreePlotter;
 import com.thedroide.sc18.strategies.SmartStrategy;
+import com.thedroide.sc18.utils.SimpleMove;
 
 import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
 
 public class MinimaxAlgorithm implements Algorithm {
 	private static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool();
@@ -20,7 +20,7 @@ public class MinimaxAlgorithm implements Algorithm {
 	private int depth = 3;
 	
 	@Override
-	public Move getBestMove(GameState state) {
+	public SimpleMove getBestMove(GameState state) {
 		MinimaxBoardState tree = new MinimaxBoardState(state, strategy, depth);
 		
 		// GUILogger.log("Calculating move...");
@@ -30,7 +30,7 @@ public class MinimaxAlgorithm implements Algorithm {
 		
 		plotter.setTree(tree);
 		
-		Move move = tree.getBestMove();
+		SimpleMove move = tree.getBestMove();
 		
 		GUILogger.log("Currently targetting path " + tree.getBestPath());
 		
