@@ -27,16 +27,20 @@ public class SmartStrategy implements Strategy<MinimaxBoardState> {
 	
 	@Override
 	public Rating evaluate(MinimaxBoardState move) {
-		Field destinationField = move.getLastMove().getDestination();
-		
-		for (FieldType priorizedType : priorizedFields.keySet()) {
-			if (destinationField.getType() == priorizedType) {
-				GUILogger.log("Found a " + priorizedType.toString() + " at " + destinationField.getIndex());
-				
-				return new IntRating(priorizedFields.get(priorizedType));
+		if (move.getLastMove() != null) {
+			Field destinationField = move.getLastMove().getDestination();
+			
+			for (FieldType priorizedType : priorizedFields.keySet()) {
+				if (destinationField.getType() == priorizedType) {
+					GUILogger.log("Found a " + priorizedType.toString() + " at " + destinationField.getIndex());
+					
+					return new IntRating(priorizedFields.get(priorizedType));
+				}
 			}
+			
+			return baseStrategy.evaluate(move);
+		} else {
+			return IntRating.getEmpty();
 		}
-		
-		return baseStrategy.evaluate(move);
 	}
 }
