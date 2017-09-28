@@ -1,7 +1,7 @@
-package com.thedroide.sc18.minimax.strategies;
+package com.thedroide.sc18.minimax.evaluators;
 
 import com.thedroide.sc18.algorithmics.Rating;
-import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.algorithmics.Evaluator;
 import com.thedroide.sc18.minimax.IntRating;
 import com.thedroide.sc18.minimax.MinimaxBoardState;
 
@@ -13,10 +13,10 @@ import com.thedroide.sc18.minimax.MinimaxBoardState;
  * doesn't event try to commit winning
  * moves.
  */
-public class RaceStrategy implements Strategy<MinimaxBoardState> {
+public class RaceEvaluator implements Evaluator<MinimaxBoardState> {
 	@Override
 	public Rating evaluate(MinimaxBoardState move) {
-		int field = move.getState().getCurrentPlayer().getFieldIndex() * (move.isMaximizing() ? 1 : -1);
+		int field = move.getState().getCurrentPlayer().getFieldIndex();
 		return new IntRating(field);
 	}
 }

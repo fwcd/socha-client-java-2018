@@ -3,10 +3,10 @@ package com.thedroide.sc18.minimax;
 import java.util.concurrent.ForkJoinPool;
 
 import com.thedroide.sc18.algorithmics.Algorithm;
-import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.algorithmics.Evaluator;
 import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.debug.TreePlotter;
-import com.thedroide.sc18.minimax.strategies.SmartStrategy;
+import com.thedroide.sc18.minimax.evaluators.SmartEvaluator;
 import com.thedroide.sc18.utils.SimpleMove;
 
 import sc.plugin2018.GameState;
@@ -16,7 +16,7 @@ public class MinimaxAlgorithm implements Algorithm {
 	
 	private final TreePlotter plotter = new TreePlotter();
 	
-	private final Strategy<MinimaxBoardState> strategy = new SmartStrategy();
+	private final Evaluator<MinimaxBoardState> strategy = new SmartEvaluator();
 	private int depth = 3;
 	
 	@Override

@@ -45,4 +45,9 @@ public class IntRating implements Rating {
 			throw new IllegalArgumentException("Compared MoveRating needs to be an instance of IntRating");
 		}
 	}
+
+	@Override
+	public Rating invert() {
+		return new IntRating(-value);
+	}
 }

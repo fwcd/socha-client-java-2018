@@ -5,10 +5,10 @@ package com.thedroide.sc18.algorithmics;
  * 
  * @param <T> - Move type
  */
-public interface Strategy<T> {
+public interface Evaluator<T> {
 	/**
 	 * Evaluates a move (how good this move would be
-	 * for YOU).
+	 * for the current player).
 	 * 
 	 * @param move - The move
 	 * @param state - The state AFTER the move has been executed (should be cloned before writing to it though)

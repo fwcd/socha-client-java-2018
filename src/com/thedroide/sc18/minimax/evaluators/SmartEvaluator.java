@@ -1,8 +1,7 @@
-package com.thedroide.sc18.minimax.strategies;
+package com.thedroide.sc18.minimax.evaluators;
 
 import com.thedroide.sc18.algorithmics.Rating;
-import com.thedroide.sc18.algorithmics.Strategy;
-import com.thedroide.sc18.debug.GUILogger;
+import com.thedroide.sc18.algorithmics.Evaluator;
 import com.thedroide.sc18.minimax.IntRating;
 import com.thedroide.sc18.minimax.MinimaxBoardState;
 
@@ -14,7 +13,7 @@ import sc.plugin2018.Player;
  * A smarter strategy. Currently the best
  * one available.
  */
-public class SmartStrategy implements Strategy<MinimaxBoardState> {
+public class SmartEvaluator implements Evaluator<MinimaxBoardState> {
 	@Override
 	public Rating evaluate(MinimaxBoardState move) {
 		if (move.getLastMove() != null) {
@@ -38,7 +37,7 @@ public class SmartStrategy implements Strategy<MinimaxBoardState> {
 			
 			int rating = (advance + salads + carrots) * multiplier;
 			
-			return new IntRating(rating * (move.isMaximizing() ? 1 : -1));
+			return new IntRating(rating);
 		} else {
 			return IntRating.getEmpty();
 		}
