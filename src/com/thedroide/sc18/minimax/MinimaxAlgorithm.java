@@ -6,7 +6,7 @@ import com.thedroide.sc18.algorithmics.Algorithm;
 import com.thedroide.sc18.algorithmics.Strategy;
 import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.debug.TreePlotter;
-import com.thedroide.sc18.strategies.SmartStrategy;
+import com.thedroide.sc18.minimax.strategies.SmartStrategy;
 import com.thedroide.sc18.utils.SimpleMove;
 
 import sc.plugin2018.GameState;

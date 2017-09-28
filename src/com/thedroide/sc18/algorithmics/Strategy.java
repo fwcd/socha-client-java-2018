@@ -7,7 +7,8 @@ package com.thedroide.sc18.algorithmics;
  */
 public interface Strategy<T> {
 	/**
-	 * Evaluates a move.
+	 * Evaluates a move (how good this move would be
+	 * for YOU).
 	 * 
 	 * @param move - The move
 	 * @param state - The state AFTER the move has been executed (should be cloned before writing to it though)

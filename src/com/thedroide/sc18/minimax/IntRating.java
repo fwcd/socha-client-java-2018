@@ -4,6 +4,8 @@ import com.thedroide.sc18.algorithmics.Rating;
 
 public class IntRating implements Rating {
 	private static final IntRating EMPTY_RATING = new IntRating(Integer.MIN_VALUE);
+	private static final IntRating MAX_RATING = new IntRating(Integer.MAX_VALUE);
+	
 	private final int value;
 	
 	/**
@@ -15,6 +17,10 @@ public class IntRating implements Rating {
 	
 	public static IntRating getEmpty() {
 		return EMPTY_RATING;
+	}
+	
+	public static IntRating getMax() {
+		return MAX_RATING;
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package com.thedroide.sc18.strategies;
+package com.thedroide.sc18.minimax.strategies;
 
 import com.thedroide.sc18.algorithmics.Rating;
 import com.thedroide.sc18.algorithmics.Strategy;

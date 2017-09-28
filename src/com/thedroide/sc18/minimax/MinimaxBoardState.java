@@ -90,7 +90,6 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 					child.quietlyInvoke();
 				}
 
-				rating = strategy.evaluate(this);
 				minimax();
 			} else {
 				rating = strategy.evaluate(this);
@@ -130,41 +129,33 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	}
 	
 	private void maximize() {
-		Rating maxRating = null;
-		
 		for (MinimaxBoardState child : children) {
 			Rating childRating = child.rating;
 			
-			if (maxRating == null || childRating.compareTo(maxRating) > 0) {
-				maxRating = childRating;
+			if (rating == null || childRating.compareTo(rating) > 0) {
+				rating = childRating;
 				bestChild = child;
 			}
 		}
 		
-		if (maxRating != null) {
-			rating = rating.add(maxRating);
-		} /*else {
-			throw new RuntimeException("Can't maximize without any child nodes! Depth: " + depth + " with no child nodes :(");
-		}*/
+		if (rating == null) {
+			throw new RuntimeException("Can't maximize without any child nodes! :( Depth: " + depth + "");
+		}
 	}
 	
 	private void minimize() {
-		Rating minRating = null;
-		
 		for (MinimaxBoardState child : children) {
 			Rating childRating = child.rating;
 			
-			if (minRating == null || childRating.compareTo(minRating) < 0) {
-				minRating = childRating;
+			if (rating == null || childRating.compareTo(rating) < 0) {
+				rating = childRating;
 				bestChild = child;
 			}
 		}
 		
-		if (minRating != null) {
-			rating = rating.add(minRating);
-		} /*else {
-			throw new RuntimeException("Can't minimize without any child nodes! Depth: " + depth + " with no child nodes :(");
-		}*/
+		if (rating == null) {
+			throw new RuntimeException("Can't minimize without any child nodes! :( Depth: " + depth + "");
+		}
 	}
 
 	public List<MinimaxBoardState> getBestPath() {
