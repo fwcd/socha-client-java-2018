@@ -30,7 +30,7 @@ public class Starter extends AbstractClient {
 
 		// strategie auswaehlen und zuweisen
 		IGameHandler logic;
-
+		
 		// Versuche für den strategy-Parameter eine passende Logik zu
 		// instanzieren, sonst verwende Standard
 		try {

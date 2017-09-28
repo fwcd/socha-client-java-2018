@@ -144,7 +144,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	
 	private void minimize() {
 		for (MinimaxBoardState child : children) {
-			Rating childRating = child.rating;
+			Rating childRating = rating.add(child.rating);
 			
 			if (rating == null || childRating.compareTo(rating) < 0) {
 				rating = childRating;

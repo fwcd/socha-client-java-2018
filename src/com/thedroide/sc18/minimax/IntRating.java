@@ -30,4 +30,13 @@ public class IntRating implements Rating {
 	public String toString() {
 		return Integer.toString(value);
 	}
+
+	@Override
+	public Rating add(Rating other) {
+		if (other instanceof IntRating) {
+			return new IntRating(value + ((IntRating) other).value);
+		} else {
+			throw new IllegalArgumentException("Compared MoveRating needs to be an instance of IntRating");
+		}
+	}
 }

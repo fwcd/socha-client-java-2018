@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.thedroide.sc18.algorithmics.Rating;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.minimax.IntRating;
 import com.thedroide.sc18.minimax.MinimaxBoardState;
 
@@ -21,7 +22,7 @@ public class SmartStrategy implements Strategy<MinimaxBoardState> {
 	
 	public SmartStrategy() {
 		priorizedFields.put(FieldType.GOAL, Integer.MAX_VALUE);
-		priorizedFields.put(FieldType.SALAD, 1000);
+		priorizedFields.put(FieldType.SALAD, 10000);
 	}
 	
 	@Override
@@ -30,6 +31,8 @@ public class SmartStrategy implements Strategy<MinimaxBoardState> {
 		
 		for (FieldType priorizedType : priorizedFields.keySet()) {
 			if (destinationField.getType() == priorizedType) {
+				GUILogger.log("Found a " + priorizedType.toString() + " at " + destinationField.getIndex());
+				
 				return new IntRating(priorizedFields.get(priorizedType));
 			}
 		}

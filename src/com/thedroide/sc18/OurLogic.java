@@ -23,7 +23,7 @@ public class OurLogic implements IGameHandler {
 	private Starter client;
 	private GameState gameState;
 	private Player currentPlayer;
-
+	
 	/**
 	 * The heart of our IGameHandler.
 	 */
