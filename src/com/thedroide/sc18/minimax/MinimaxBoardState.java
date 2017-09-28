@@ -25,6 +25,7 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	private List<MinimaxBoardState> children = new ArrayList<>();
 	private MinimaxBoardState bestChild = null;
 	private Rating rating = null;
+	private boolean rated = false;
 	
 	private final boolean maximize;
 	private final GameState state;
@@ -128,31 +129,39 @@ public class MinimaxBoardState extends RecursiveAction implements GraphTreeNode,
 	}
 	
 	private void maximize() {
+		Rating maxRating = null;
+		
 		for (MinimaxBoardState child : children) {
 			Rating childRating = child.rating;
 			
-			if (rating == null || childRating.compareTo(rating) > 0) {
-				rating = childRating;
+			if (maxRating == null || childRating.compareTo(maxRating) > 0) {
+				maxRating = childRating;
 				bestChild = child;
 			}
 		}
 		
-		if (rating == null) {
+		if (maxRating != null) {
+			rating = rating.add(maxRating);
+		} else {
 			throw new RuntimeException("Can't maximize without any child nodes!");
 		}
 	}
 	
 	private void minimize() {
+		Rating minRating = null;
+		
 		for (MinimaxBoardState child : children) {
-			Rating childRating = rating.add(child.rating);
+			Rating childRating = child.rating;
 			
-			if (rating == null || childRating.compareTo(rating) < 0) {
-				rating = childRating;
+			if (minRating == null || childRating.compareTo(minRating) < 0) {
+				minRating = childRating;
 				bestChild = child;
 			}
 		}
 		
-		if (rating == null) {
+		if (minRating != null) {
+			rating = rating.add(minRating);
+		} else {
 			throw new RuntimeException("Can't minimize without any child nodes!");
 		}
 	}
