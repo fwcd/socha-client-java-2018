@@ -2,8 +2,6 @@ package com.thedroide.sc18.algorithmics;
 
 import java.util.Optional;
 
-import sc.plugin2018.GameState;
-
 /**
  * A strategy acts as a filter, returning a potentially
  * good move for "obvious" situations (like reaching
@@ -21,5 +19,5 @@ public interface Strategy {
 	 * @param state - The given game state
 	 * @return Optionally the "best move" for this state
 	 */
-	public Optional<AMove> perform(GameState state);
+	public Optional<AMove> perform(ABoardState state);
 }

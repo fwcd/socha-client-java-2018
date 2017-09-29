@@ -66,7 +66,7 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 		} else {
 			for (AMove move : state.getPossibleMoves()) {
 				ABoardState nextState = state.copy();
-				move.perform(nextState);
+				move.performOn(nextState);
 				nextState.switchTurns();
 				
 				NegamaxNode child = new NegamaxNode(

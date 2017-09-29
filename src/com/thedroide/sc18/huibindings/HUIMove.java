@@ -22,7 +22,7 @@ public class HUIMove implements AMove {
 	}
 
 	@Override
-	public void perform(ABoardState boardState) {
+	public void performOn(ABoardState boardState) {
 		try {
 			HUIBoardState huiState = (HUIBoardState) boardState;
 			move.perform(huiState.getSCState());
