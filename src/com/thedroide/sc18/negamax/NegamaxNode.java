@@ -10,7 +10,6 @@ import com.thedroide.sc18.algorithmics.AMove;
 import com.thedroide.sc18.algorithmics.Evaluator;
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
 import com.thedroide.sc18.algorithmics.Rating;
-import com.thedroide.sc18.debug.GUILogger;
 
 public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Comparable<NegamaxNode> {
 	private static final long serialVersionUID = 3897798L;
@@ -83,7 +82,7 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 				children.add(child);
 				child.quietlyInvoke();
 				
-				Rating childRating = child.rating.invert();
+				Rating childRating = child.rating;
 				
 				// Maximize rating and child rating
 				if (childRating.compareTo(rating) > 0) {
@@ -101,7 +100,6 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 	}
 	
 	public AMove getBestMove() {
-		GUILogger.log("Best child: " + bestChild);
 		return bestChild.lastMove;
 	}
 	

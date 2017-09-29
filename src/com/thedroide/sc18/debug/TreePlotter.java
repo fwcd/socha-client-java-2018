@@ -30,6 +30,7 @@ public class TreePlotter {
 			}
 		}, BorderLayout.CENTER);
 		
+		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		view.setVisible(true);
 	}
 	

@@ -1,9 +1,9 @@
 package com.thedroide.sc18.algorithmics;
 
 /**
- * An evaluator.
+ * An evaluator that rates a move/board state.<br><br>
  * 
- * @param <T> - Move type
+ * May be used inside of a larger algorithm.
  */
 public interface Evaluator {
 	/**

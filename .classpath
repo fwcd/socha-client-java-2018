@@ -19,7 +19,7 @@
 	<classpathentry kind="lib" path="lib/jogl-all-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="lib/jogl-all-natives-windows-amd64.jar"/>
 	<classpathentry kind="lib" path="lib/jogl-all-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="lib/jogl-all.jar"/>
+	<classpathentry kind="lib" path="lib/jogl-all.jar" sourcepath="/tmp/.org.sf.feeling.decompiler1506685906109/source/jogl-all-2.1.5-01-sources.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/logback-access-0.9.15.jar"/>
 	<classpathentry kind="lib" path="lib/logback-classic-0.9.15.jar"/>

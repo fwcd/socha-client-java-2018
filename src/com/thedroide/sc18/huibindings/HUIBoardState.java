@@ -7,7 +7,6 @@ import com.thedroide.sc18.algorithmics.ABoard;
 import com.thedroide.sc18.algorithmics.ABoardState;
 import com.thedroide.sc18.algorithmics.AMove;
 import com.thedroide.sc18.algorithmics.APlayer;
-import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -43,12 +42,11 @@ public class HUIBoardState implements ABoardState {
 
 	@Override
 	public APlayer getCurrentPlayer() {
-		return HUIPlayer.of(board, state.getCurrentPlayer());
+		return new HUIPlayer(board, state.getCurrentPlayer());
 	}
 
 	@Override
 	public void switchTurns() {
-		GUILogger.log(state.getTurn());
 		state.switchCurrentPlayer();
 	}
 
