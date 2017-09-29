@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.thedroide.sc18.algorithmics.Algorithm;
-import com.thedroide.sc18.minimax.MinimaxAlgorithm;
+import com.thedroide.sc18.huibindings.HUIBoardState;
+import com.thedroide.sc18.huibindings.HUIMove;
+import com.thedroide.sc18.negamax.NegamaxAlgorithm;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
@@ -19,7 +21,7 @@ import sc.shared.PlayerColor;
 /**
  * Our customized logic.
  */
-public class OurLogic implements IGameHandler {
+public class SmartLogic implements IGameHandler {
 	private Starter client;
 	private GameState gameState;
 	private Player currentPlayer;
@@ -27,9 +29,9 @@ public class OurLogic implements IGameHandler {
 	/**
 	 * The heart of our IGameHandler.
 	 */
-	private final Algorithm algorithm = new MinimaxAlgorithm();
+	private final Algorithm algorithm = new NegamaxAlgorithm();
 
-	private static final Logger LOG = LoggerFactory.getLogger(OurLogic.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
 	// private static final Random RANDOM = new SecureRandom();
 
 	/**
@@ -37,7 +39,7 @@ public class OurLogic implements IGameHandler {
 	 * 
 	 * @param Starter - The player's client
 	 */
-	public OurLogic(Starter client) {
+	public SmartLogic(Starter client) {
 		this.client = client;
 	}
 
@@ -53,7 +55,7 @@ public class OurLogic implements IGameHandler {
 		long startTime = System.nanoTime();
 		LOG.info("Move requested.");
 		
-		Move move = algorithm.getBestMove(gameState).getSCMove();
+		Move move = ((HUIMove) algorithm.getBestMove(new HUIBoardState(gameState))).getSCMove();
 		
 		move.orderActions();
 		LOG.info("Sending move {}", move);

@@ -1,9 +1,9 @@
-package com.thedroide.sc18.minimax;
+package com.thedroide.sc18.utils;
 
 import com.thedroide.sc18.algorithmics.Rating;
 
 public class IntRating implements Rating {
-	private static final IntRating EMPTY_RATING = new IntRating(Integer.MIN_VALUE);
+	private static final IntRating MIN_RATING = new IntRating(Integer.MIN_VALUE);
 	private static final IntRating MAX_RATING = new IntRating(Integer.MAX_VALUE);
 	
 	private final int value;
@@ -15,8 +15,8 @@ public class IntRating implements Rating {
 		this.value = value;
 	}
 	
-	public static IntRating getEmpty() {
-		return EMPTY_RATING;
+	public static IntRating getMin() {
+		return MIN_RATING;
 	}
 	
 	public static IntRating getMax() {

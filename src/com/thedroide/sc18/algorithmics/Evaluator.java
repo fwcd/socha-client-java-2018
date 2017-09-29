@@ -5,14 +5,14 @@ package com.thedroide.sc18.algorithmics;
  * 
  * @param <T> - Move type
  */
-public interface Evaluator<T> {
+public interface Evaluator {
 	/**
 	 * Evaluates a move (how good this move would be
-	 * for the current player).
+	 * for the CURRENT player).
 	 * 
-	 * @param move - The move
-	 * @param state - The state AFTER the move has been executed (should be cloned before writing to it though)
+	 * @param move - The move (including the board state)
+	 * @param state - The state AFTER the move has been executed but with the current player set to the person who committed the move
 	 * @return The rating of that move
 	 */
-	public Rating evaluate(T move);
+	public Rating evaluate(AMove move, ABoardState state);
 }

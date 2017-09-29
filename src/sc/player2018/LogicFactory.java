@@ -3,7 +3,7 @@ package sc.player2018;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thedroide.sc18.OurLogic;
+import com.thedroide.sc18.SmartLogic;
 
 import sc.player2018.logic.RandomLogic;
 import sc.plugin2018.AbstractClient;
@@ -21,11 +21,11 @@ public enum LogicFactory {
 	RANDOM(RandomLogic.class),
 
 	// Unsere Strategie
-	OUR_LOGIC(OurLogic.class),
+	OUR_LOGIC(SmartLogic.class),
 	
 	// Die Logik die gewählt wird, wenn kein passender Eintrag zu der Eingabe
 	// gefunden wurde:
-	DEFAULT(OurLogic.class);
+	DEFAULT(SmartLogic.class);
 
 	private Class<? extends IGameHandler> logic;
 	private static final Logger	logger = LoggerFactory
