@@ -22,4 +22,9 @@ public class HUIField implements AField {
 	public FieldType getType() {
 		return type;
 	}
+	
+	@Override
+	public String toString() {
+		return type.toString() + " Field at " + Integer.toString(index);
+	}
 }

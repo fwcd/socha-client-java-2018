@@ -40,4 +40,9 @@ public class HUIBoard implements ABoard {
 	public Board getSCBoard() {
 		return board;
 	}
+	
+	@Override
+	public String toString() {
+		return board.toString();
+	}
 }

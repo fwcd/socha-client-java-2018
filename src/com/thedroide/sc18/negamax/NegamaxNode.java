@@ -14,7 +14,8 @@ import com.thedroide.sc18.debug.GUILogger;
 
 public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Comparable<NegamaxNode> {
 	private static final long serialVersionUID = 3897798L;
-
+	private static final boolean ALPHA_BETA_CUT = true;
+	
 	private List<NegamaxNode> children = new ArrayList<>();
 	private NegamaxNode bestChild;
 	
@@ -92,7 +93,7 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 				
 				alpha = alpha.max(childRating);
 				
-				if (alpha.compareTo(beta) >= 0) {
+				if (ALPHA_BETA_CUT && alpha.compareTo(beta) >= 0) {
 					break;
 				}
 			}

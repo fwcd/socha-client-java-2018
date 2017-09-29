@@ -40,6 +40,10 @@ public class GUILogger {
 		view.setVisible(true);
 	}
 	
+	public static void log() {
+		log("");
+	}
+	
 	public static void log(Object s) {
 		if (ENABLED) {
 			INSTANCE.println(getPrefix() + (s == null ? "null" : s.toString()));
