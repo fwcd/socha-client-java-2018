@@ -1,5 +1,8 @@
 package com.thedroide.sc18;
 
+import java.security.SecureRandom;
+import java.util.Random;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,19 +28,20 @@ public class SmartLogic implements IGameHandler {
 	private Starter client;
 	private GameState gameState;
 	private Player currentPlayer;
-	
+
 	/**
 	 * The heart of our IGameHandler.
 	 */
 	private final Algorithm algorithm = new NegamaxAlgorithm();
 
 	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
-	// private static final Random RANDOM = new SecureRandom();
+	private static final Random RANDOM = new SecureRandom();
 
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 
-	 * @param Starter - The player's client
+	 * @param Starter
+	 *            - The player's client
 	 */
 	public SmartLogic(Starter client) {
 		this.client = client;
@@ -54,9 +58,9 @@ public class SmartLogic implements IGameHandler {
 	public void onRequestAction() {
 		long startTime = System.nanoTime();
 		LOG.info("Move requested.");
-		
+
 		Move move = ((HUIMove) algorithm.getBestMove(new HUIBoardState(gameState))).getSCMove();
-		
+
 		move.orderActions();
 		LOG.info("Sending move {}", move);
 		long nowTime = System.nanoTime();
