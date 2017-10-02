@@ -1,5 +1,6 @@
 package com.thedroide.sc18.negamax;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveAction;
@@ -67,7 +68,6 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 			for (AMove move : state.getPossibleMoves()) {
 				ABoardState nextState = state.copy();
 				move.performOn(nextState);
-				// TODO: Debug - switchTurns() here or not?
 				
 				NegamaxNode child = new NegamaxNode(
 						depth - 1,
@@ -125,5 +125,19 @@ public class NegamaxNode extends RecursiveAction implements GraphTreeNode, Compa
 	@Override
 	public int compareTo(NegamaxNode o) {
 		return rating.compareTo(o.rating);
+	}
+	
+	@Override
+	public Color getColor() {
+		switch (state.getCurrentPlayer().getColor()) {
+		
+		case BLUE:
+			return Color.BLUE;
+		case RED:
+			return Color.RED;
+		default:
+			throw new RuntimeException("Invalid player color.");
+		
+		}
 	}
 }

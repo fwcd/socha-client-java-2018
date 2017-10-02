@@ -6,6 +6,7 @@ import com.thedroide.sc18.algorithmics.ABoardState;
 import com.thedroide.sc18.algorithmics.AMove;
 import com.thedroide.sc18.algorithmics.APlayer;
 import com.thedroide.sc18.algorithmics.Strategy;
+import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.FieldType;
 
@@ -19,6 +20,8 @@ public class CaptainObviousStrategy implements Strategy {
 			move.performOn(nextState);
 			
 			APlayer player = nextState.getCurrentPlayer();
+			
+			GUILogger.log(player.getColor());
 			
 			boolean playerWinning = player.getField().getType() == FieldType.GOAL;
 			boolean eatingSalad = player.getSalads() < initialSalads;

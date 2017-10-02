@@ -5,6 +5,7 @@ import com.thedroide.sc18.algorithmics.AField;
 import com.thedroide.sc18.algorithmics.APlayer;
 
 import sc.plugin2018.Player;
+import sc.shared.PlayerColor;
 
 public class HUIPlayer implements APlayer {
 	private final Player player;
@@ -33,5 +34,10 @@ public class HUIPlayer implements APlayer {
 	@Override
 	public AField getField() {
 		return board.getFields().get(player.getFieldIndex());
+	}
+
+	@Override
+	public PlayerColor getColor() {
+		return player.getPlayerColor();
 	}
 }

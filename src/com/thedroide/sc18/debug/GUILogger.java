@@ -15,7 +15,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 public class GUILogger {
-	private static final boolean ENABLED = false;
+	private static final boolean ENABLED = true;
 	private static final GUILogger INSTANCE = ENABLED ? new GUILogger() : null;
 	
 	private final JFrame view;
