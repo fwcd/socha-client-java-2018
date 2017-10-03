@@ -1,15 +1,14 @@
 package com.thedroide.sc18;
 
-import java.security.SecureRandom;
-import java.util.Random;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thedroide.sc18.algorithmics.Algorithm;
-import com.thedroide.sc18.huibindings.HUIBoardState;
-import com.thedroide.sc18.huibindings.HUIMove;
-import com.thedroide.sc18.negamax.NegamaxAlgorithm;
+import com.antelmann.game.AutoPlay;
+import com.antelmann.game.GameDriver;
+import com.antelmann.game.GamePlay;
+import com.thedroide.sc18.bindings.HUIEnumPlayer;
+import com.thedroide.sc18.bindings.HUIGamePlay;
+import com.thedroide.sc18.bindings.HUIMove;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
@@ -25,17 +24,17 @@ import sc.shared.PlayerColor;
  * Our customized logic.
  */
 public class SmartLogic implements IGameHandler {
+	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
+//	private static final Random RANDOM = new SecureRandom();
+	
 	private Starter client;
 	private GameState gameState;
 	private Player currentPlayer;
 
 	/**
-	 * The heart of our IGameHandler.
+	 * The depth of our search tree.
 	 */
-	private final Algorithm algorithm = new NegamaxAlgorithm();
-
-	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
-	private static final Random RANDOM = new SecureRandom();
+	private final int searchDepth = 3;
 
 	/**
 	 * Creates a new AI-player that commits moves.
@@ -59,7 +58,10 @@ public class SmartLogic implements IGameHandler {
 		long startTime = System.nanoTime();
 		LOG.info("Move requested.");
 
-		Move move = ((HUIMove) algorithm.getBestMove(new HUIBoardState(gameState))).getSCMove();
+		// Relevant stuff below
+		GamePlay game = new HUIGamePlay(gameState);
+		AutoPlay ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
+		Move move = ((HUIMove) ai.autoMove()).getSCMove();
 
 		move.orderActions();
 		LOG.info("Sending move {}", move);
