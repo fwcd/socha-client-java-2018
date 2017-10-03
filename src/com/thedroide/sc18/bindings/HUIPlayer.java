@@ -33,7 +33,8 @@ public class HUIPlayer extends TemplatePlayer {
 	@Override
 	public double heuristic(GamePlay game, GameMove move, int[] role) throws CannotPlayGameException, GameRuntimeException {
 		try {
-			HUIGamePlay huiGame = (HUIGamePlay) game.spawnChild(move);
+			HUIGamePlay huiGame = (HUIGamePlay) game.spawnChild(move); // TODO: Debug this
+			
 //			HUIMove huiMove = (HUIMove) move;
 			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(role);
 			Player scPlayer = huiEnumPlayer.getSCPlayer(huiGame.getSCState());

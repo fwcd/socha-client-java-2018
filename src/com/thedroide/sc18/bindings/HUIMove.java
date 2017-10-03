@@ -44,6 +44,11 @@ public class HUIMove implements GameMove {
 	}
 	
 	@Override
+	public boolean equals(Object obj) {
+		return move.equals(obj);
+	}
+	
+	@Override
 	public String toString() {
 		String s = "[Move: ";
 		
