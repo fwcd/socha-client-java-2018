@@ -9,6 +9,8 @@ import com.antelmann.game.GamePlay;
 import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.debug.GUILogger;
+import com.thedroide.sc18.debug.TreePlotter;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
@@ -58,11 +60,13 @@ public class SmartLogic implements IGameHandler {
 		long startTime = System.nanoTime();
 		LOG.info("Move requested.");
 
+		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor());
+		
 		// Relevant stuff below
 		GamePlay game = new HUIGamePlay(gameState);
 		AutoPlay ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
 		Move move = ((HUIMove) ai.autoMove()).getSCMove();
-
+		
 		move.orderActions();
 		LOG.info("Sending move {}", move);
 		long nowTime = System.nanoTime();

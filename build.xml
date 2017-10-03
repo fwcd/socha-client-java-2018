@@ -12,6 +12,8 @@
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="${dir.buildfile}/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/lib/antelmann.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/lib/game.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/lib/gluegen-rt-natives-linux-amd64.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/lib/gluegen-rt-natives-linux-armv6hf.jar"/>
             <zipfileset excludes="META-INF/*.SF" src="${dir.buildfile}/lib/gluegen-rt-natives-linux-i586.jar"/>

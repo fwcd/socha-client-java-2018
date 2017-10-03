@@ -2,25 +2,50 @@ package com.thedroide.sc18.bindings;
 
 import com.antelmann.game.AbstractGame;
 import com.antelmann.game.GameMove;
+import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.utils.Stack;
 
 import sc.plugin2018.GameState;
+import sc.shared.InvalidMoveException;
 
+/**
+ * Represents a state of the game.<br><br>
+ * 
+ * Provides the foundation for the Game-API
+ * to interact with the "Hase und Igel"-game.
+ */
 public class HUIGamePlay extends AbstractGame {
 	private static final long serialVersionUID = -6693551955267419333L;
 	
 	private Stack<GameState> states = new Stack<>();
-	
+
+	/**
+	 * Constructs a new {@link HUIGamePlay} from the
+	 * given {@link GameState} (Software Challenge API).
+	 * 
+	 * @param state - The GameState used as a base
+	 */
 	public HUIGamePlay(GameState state) {
 		super("HaseUndIgel", 2);
 		
 		states.push(state);
 	}
 	
+	/**
+	 * Fetches the current {@link GameState} (Software Challenge API)
+	 * associated with this {@link HUIGamePlay}.
+	 * 
+	 * @return The top-most/newest/current GameState from the stack
+	 */
 	public GameState getSCState() {
 		return states.peek();
 	}
 	
+	/**
+	 * Fetches the current player of this state.
+	 * 
+	 * @return The current {@link HUIEnumPlayer}
+	 */
 	private HUIEnumPlayer currentPlayer() {
 		return HUIEnumPlayer.of(getSCState().getCurrentPlayerColor());
 	}
@@ -54,9 +79,13 @@ public class HUIGamePlay extends AbstractGame {
 	protected boolean pushMove(GameMove move) {
 		try {
 			GameState newState = getSCState().clone();
+			GUILogger.log("Before: " + newState.getCurrentPlayer().getPlayerColor() + "R" + newState.getRedPlayer().getFieldIndex() + "B" + newState.getBluePlayer().getFieldIndex());
+			((HUIMove) move).getSCMove().perform(newState);
+			GUILogger.log("After: " + newState.getCurrentPlayer().getPlayerColor() + "R" + newState.getRedPlayer().getFieldIndex() + "B" + newState.getBluePlayer().getFieldIndex());
 			states.push(newState);
 			return true;
-		} catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException | InvalidMoveException e) {
+			GUILogger.log("Invalid move: " + move + " from " + toString());
 			return false;
 		}
 	}
@@ -69,5 +98,22 @@ public class HUIGamePlay extends AbstractGame {
 		} else {
 			return false;
 		}
+	}
+	
+	@Override
+	public String toString() {
+		GameState state = getSCState();
+		
+		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + " | "
+				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex())
+				+ " (" + state.getCurrentPlayerColor().toString() + "'s turn)";
+	}
+	
+	@Override
+	public HUIGamePlay clone() throws CloneNotSupportedException {
+		HUIGamePlay clone = (HUIGamePlay) super.clone();
+		clone.states = states.clone();
+		
+		return clone;
 	}
 }

@@ -5,9 +5,14 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.TemplatePlayer;
+import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.Player;
 
+/**
+ * Represents an abstract player containing AI
+ * logic that can evaluate a given game state.
+ */
 public class HUIPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 
@@ -26,10 +31,9 @@ public class HUIPlayer extends TemplatePlayer {
 	}
 
 	@Override
-	public double heuristic(GamePlay game, GameMove move, int[] role)
-			throws CannotPlayGameException, GameRuntimeException {
+	public double heuristic(GamePlay game, GameMove move, int[] role) throws CannotPlayGameException, GameRuntimeException {
 		try {
-			HUIGamePlay huiGame = (HUIGamePlay) game;
+			HUIGamePlay huiGame = (HUIGamePlay) game.spawnChild(move);
 //			HUIMove huiMove = (HUIMove) move;
 			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(role);
 			Player scPlayer = huiEnumPlayer.getSCPlayer(huiGame.getSCState());
@@ -41,9 +45,13 @@ public class HUIPlayer extends TemplatePlayer {
 				int carrots = scPlayer.getCarrots();
 				int fieldIndex = scPlayer.getFieldIndex();
 				
-				return (fieldIndex * fieldIndexWeight) // Large field-index: better
+				double rating = (fieldIndex * fieldIndexWeight) // Large field-index: better
 						- (salads * saladWeight) // Less salads: better
 						- Math.abs((carrots - carrotOptimum) * carrotWeight); // More or less carrots than optimum: worse
+				
+				GUILogger.log(huiEnumPlayer + ": " + rating + " @ " + huiGame + " using " + move);
+				
+				return rating;
 			}
 		} catch (ClassCastException e) {
 			throw new CannotPlayGameException(this, game, "Invalid game type.");

@@ -17,6 +17,13 @@ public enum HUIEnumPlayer {
 	private final int id;
 	private final Player player;
 	
+	/**
+	 * Internal constructor for a new player
+	 * enum value.
+	 * 
+	 * @param id - The identifier or role of this player
+	 * @param player - The Player object that does all the AI logic
+	 */
 	private HUIEnumPlayer(int id, Player player) {
 		this.id = id;
 		this.player = player;
@@ -90,6 +97,13 @@ public enum HUIEnumPlayer {
 		}
 	}
 	
+	/**
+	 * Fetches the associated player object that
+	 * carries the AI logic. Mainly used by the
+	 * Antelmann-Game-API.
+	 * 
+	 * @return The associated {@link Player}
+	 */
 	public Player getPlayer() {
 		return player;
 	}
