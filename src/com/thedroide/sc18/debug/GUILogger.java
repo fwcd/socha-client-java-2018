@@ -34,6 +34,7 @@ public class GUILogger {
 		outputArea.setBackground(Color.BLACK);
 		
 		scrollPane = new JScrollPane(outputArea);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(10);
 		view.add(scrollPane);
 		
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

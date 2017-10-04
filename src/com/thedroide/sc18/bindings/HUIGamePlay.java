@@ -79,9 +79,7 @@ public class HUIGamePlay extends AbstractGame {
 	protected boolean pushMove(GameMove move) {
 		try {
 			GameState newState = getSCState().clone();
-			GUILogger.log("Before: " + newState.getCurrentPlayer().getPlayerColor() + "R" + newState.getRedPlayer().getFieldIndex() + "B" + newState.getBluePlayer().getFieldIndex());
 			((HUIMove) move).getSCMove().perform(newState);
-			GUILogger.log("After: " + newState.getCurrentPlayer().getPlayerColor() + "R" + newState.getRedPlayer().getFieldIndex() + "B" + newState.getBluePlayer().getFieldIndex());
 			states.push(newState);
 			return true;
 		} catch (CloneNotSupportedException | InvalidMoveException e) {
@@ -120,7 +118,6 @@ public class HUIGamePlay extends AbstractGame {
 			}
 		});
 
-		GUILogger.log(states.size() + " | " + states.equals(clone.states) + " | " + clone.states.size());
 		return clone;
 	}
 }
