@@ -19,7 +19,6 @@ public class HUIPlayer extends TemplatePlayer {
 	private final int carrotWeight = 5;
 	private final int saladWeight = 25;
 	private final int fieldIndexWeight = 1;
-	private final int carrotOptimum = 8;
 	
 	/**
 	 * Checks if the given GamePlay is a valid
@@ -43,20 +42,20 @@ public class HUIPlayer extends TemplatePlayer {
 		try {
 			HUIGamePlay huiGame = (HUIGamePlay) game.spawnChild(move);
 			
-			// Choosing the opponent here (otherwise it won't work), is this a bug? TODO
-			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(role).getOpponent();
+			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(huiGame.getLastPlayer());
 			Player scPlayer = huiEnumPlayer.getSCPlayer(huiGame.getSCState());
 			
 			if (scPlayer.inGoal()) {
-				return Double.MAX_VALUE; // Obviously a very good rating when the player reaches the goal
+				// Obviously a very good rating when the player reaches the goal:
+				return Double.MAX_VALUE;
 			} else {
 				int salads = scPlayer.getSalads();
 				int carrots = scPlayer.getCarrots();
-				int fieldIndex = scPlayer.getFieldIndex();
+				int fieldIndex = scPlayer.getFieldIndex(); // Maximum field index is 64
 				
 				double rating = (fieldIndex * fieldIndexWeight) // Large field-index: better
 						- (salads * saladWeight) // Less salads: better
-						- Math.abs((carrots - carrotOptimum) * carrotWeight); // More or less carrots than optimum: worse
+						- Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight); // More or less carrots than optimum: worse
 				
 				GUILogger.log(huiEnumPlayer + ": " + rating + " results in the board " + huiGame + " using " + move);
 				
@@ -65,5 +64,20 @@ public class HUIPlayer extends TemplatePlayer {
 		} catch (ClassCastException e) {
 			throw new CannotPlayGameException(this, game, "Invalid game type.");
 		}
+	}
+	
+	// TODO: Track previous moves to prevent player from being stuck in a "drop carrot"/"take carrot"-loop
+	
+	private int carrotOptimum(int fieldIndex) {
+		int fieldsToGoal = fieldIndex - 64;
+		
+		/*
+		 * A linear function is used to determine the carrot optimum,
+		 * because we want to have a bunch of carrots in the beginning,
+		 * but as we approach the end of the track, we need to drop at
+		 * least below 10 carrots or we won't be able to reach the goal.
+		 */
+		
+		return (fieldsToGoal + 6) / 2;
 	}
 }
