@@ -35,7 +35,7 @@ public class SmartLogic implements IGameHandler {
 	/**
 	 * The depth of our search tree.
 	 */
-	private final int searchDepth = 3;
+	private final int searchDepth = 4;
 
 	/**
 	 * Creates a new AI-player that commits moves.

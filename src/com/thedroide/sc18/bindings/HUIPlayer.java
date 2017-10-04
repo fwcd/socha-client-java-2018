@@ -17,9 +17,9 @@ public class HUIPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 
 	private final int carrotWeight = 5;
-	private final int saladWeight = 10;
+	private final int saladWeight = 25;
 	private final int fieldIndexWeight = 1;
-	private final int carrotOptimum = 8; // Might need some tweaks
+	private final int carrotOptimum = 8;
 	
 	@Override
 	public boolean canPlayGame(GamePlay game) {
@@ -30,12 +30,17 @@ public class HUIPlayer extends TemplatePlayer {
 		}
 	}
 
+	/**
+	 * Calculates a domain-specific heuristic for
+	 * "Hase und Igel". 
+	 */
 	@Override
 	public double heuristic(GamePlay game, GameMove move, int[] role) throws CannotPlayGameException, GameRuntimeException {
 		try {
 			HUIGamePlay huiGame = (HUIGamePlay) game.spawnChild(move);
-//			HUIMove huiMove = (HUIMove) move;
-			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(role).getOpponent(); // Choosing the opponent here, because spawnChild() switches turns
+			
+			// Choosing the opponent here (otherwise it won't work), is this a bug? TODO
+			HUIEnumPlayer huiEnumPlayer = HUIEnumPlayer.of(role).getOpponent();
 			Player scPlayer = huiEnumPlayer.getSCPlayer(huiGame.getSCState());
 			
 			if (scPlayer.inGoal()) {
@@ -49,7 +54,7 @@ public class HUIPlayer extends TemplatePlayer {
 						- (salads * saladWeight) // Less salads: better
 						- Math.abs((carrots - carrotOptimum) * carrotWeight); // More or less carrots than optimum: worse
 				
-				GUILogger.log(huiEnumPlayer + ": " + rating + " @ " + huiGame + " using " + move);
+				GUILogger.log(huiEnumPlayer + ": " + rating + " results in the board " + huiGame + " using " + move);
 				
 				return rating;
 			}

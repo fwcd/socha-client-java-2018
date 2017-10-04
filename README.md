@@ -1,7 +1,19 @@
 # sochaclient
 
-My contribution to the yearly [Software Challenge](http://www.software-challenge.de), which
+My contribution to the annual [Software Challenge](http://www.software-challenge.de), which
 deals with creating an AI for a board game called "Hase und Igel".
+
+## General notes
+
+Package structure:
+
+* **com.thedroide.sc18** - Contains the interesting stuff including my game logic
+    * **algorithmics** - Useful interfaces for work with algorithms
+    * **bindings** - The main implementations used by the Game-API, including heuristics
+    * **debug** - Useful tools for debugging, mainly a custom logger window and a tree plotter
+    * **utils** - General classes/data-structures
+* **sc.player2018** - Necessary client code to interact with the game
+    * **logic** - Mainly a demo implementation of an AI player that randomly chooses legal moves
 
 ## Setting up Eclipse for development
 
