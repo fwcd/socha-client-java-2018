@@ -3,6 +3,11 @@
 My contribution to the yearly [Software Challenge](http://www.software-challenge.de), which
 deals with creating an AI for a board game called "Hase und Igel".
 
+## Setting up Eclipse for development
+
+* Simply link the main repository folder to your workspace by opening
+  it through "File" > "Open Projects from File System..."
+
 ## Running the client
 
 * [Download the Server here](http://www.software-challenge.de/downloads/).
