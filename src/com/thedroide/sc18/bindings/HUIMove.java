@@ -24,6 +24,10 @@ public class HUIMove implements GameMove {
 	private HUIEnumPlayer player;
 	
 	public HUIMove(HUIEnumPlayer player, Move move) {
+		if (move == null) {
+			throw new NullPointerException("Move shouldn't be null!");
+		}
+		
 		this.move = move;
 		this.player = player;
 	}
@@ -44,8 +48,16 @@ public class HUIMove implements GameMove {
 	}
 	
 	@Override
+	public int hashCode() {
+//		return move.getActions().hashCode();
+		return toString().hashCode();
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
-		return move.equals(obj);
+//		return move.equals(obj);
+//		return move.getActions().equals(((HUIMove) obj).move.getActions());
+		return toString().equals(obj.toString());
 	}
 	
 	@Override

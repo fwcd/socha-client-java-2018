@@ -3,7 +3,7 @@ package com.thedroide.sc18.bindings;
 import com.antelmann.game.AbstractGame;
 import com.antelmann.game.GameMove;
 import com.thedroide.sc18.debug.GUILogger;
-import com.thedroide.sc18.utils.Stack;
+import com.thedroide.sc18.utils.CopyStack;
 
 import sc.plugin2018.GameState;
 import sc.shared.InvalidMoveException;
@@ -17,7 +17,7 @@ import sc.shared.InvalidMoveException;
 public class HUIGamePlay extends AbstractGame {
 	private static final long serialVersionUID = -6693551955267419333L;
 	
-	private Stack<GameState> states = new Stack<>();
+	private CopyStack<GameState> states = new CopyStack<>();
 
 	/**
 	 * Constructs a new {@link HUIGamePlay} from the
@@ -92,7 +92,7 @@ public class HUIGamePlay extends AbstractGame {
 
 	@Override
 	protected boolean popMove() {
-		if (!states.isEmpty()) {
+		if (states.size() > 1) {
 			states.pop();
 			return true;
 		} else {
@@ -112,8 +112,15 @@ public class HUIGamePlay extends AbstractGame {
 	@Override
 	public HUIGamePlay clone() throws CloneNotSupportedException {
 		HUIGamePlay clone = (HUIGamePlay) super.clone();
-		clone.states = states.clone();
-		
+		clone.states = states.copy((original) -> {
+			try {
+				return (GameState) original.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new RuntimeException(e);
+			}
+		});
+
+		GUILogger.log(states.size() + " | " + states.equals(clone.states) + " | " + clone.states.size());
 		return clone;
 	}
 }

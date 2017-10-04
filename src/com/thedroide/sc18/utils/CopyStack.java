@@ -1,33 +1,36 @@
 package com.thedroide.sc18.utils;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
+import java.util.function.UnaryOperator;
 
 /**
- * A simple LIFO-Stack implementation.
+ * A LIFO-Stack implementation that can be
+ * (deeply) copied by passing an item copier.
  * 
  * @param <T> - The stack item type
  */
-public class Stack<T> implements Cloneable {
-	private Deque<T> data;
+public class CopyStack<T> {
+	private Deque<T> data = new ArrayDeque<>();
 	
 	/**
 	 * Constructs an empty stack.
 	 */
-	public Stack() {
-		data = new ArrayDeque<>();
+	public CopyStack() {
+		
 	}
 	
 	/**
-	 * Constructs a new stack using the given data.
+	 * Constructs a new stack from the given data.
 	 * 
-	 * @param data - The items used for the new stack
+	 * @param other
 	 */
-	public Stack(Collection<? extends T> data) {
-		data = new ArrayDeque<>(data);
+	private CopyStack(Iterable<? extends T> other, UnaryOperator<T> copier) {
+		for (T item : other) {
+			data.add(copier.apply(item));
+		}
 	}
-	
+
 	/**
 	 * Pushes a new item onto the stack.
 	 * 
@@ -76,8 +79,12 @@ public class Stack<T> implements Cloneable {
 	/**
 	 * Copies this stack.
 	 */
+	public CopyStack<T> copy(UnaryOperator<T> itemCopier) {
+		return new CopyStack<T>(data, itemCopier);
+	}
+	
 	@Override
-	public Stack<T> clone() {
-		return new Stack<>(data);
+	public String toString() {
+		return data.toString();
 	}
 }

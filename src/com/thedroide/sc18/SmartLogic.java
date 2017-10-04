@@ -10,7 +10,6 @@ import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
-import com.thedroide.sc18.debug.TreePlotter;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
