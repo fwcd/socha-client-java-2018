@@ -14,8 +14,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
+/**
+ * A graphical logger window to ease debugging when
+ * launching this application through the provided
+ * Software Challenge Server in absence of a proper
+ * console.
+ */
 public class GUILogger {
-	private static final boolean ENABLED = true;
+	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
 	private static final GUILogger INSTANCE = ENABLED ? new GUILogger() : null;
 	
 	private final JFrame view;
@@ -24,6 +30,9 @@ public class GUILogger {
 	
 	private List<String> output = new ArrayList<>();
 	
+	/**
+	 * Internal singleton initializer.
+	 */
 	private GUILogger() {
 		view = new JFrame("GUILogger");
 		view.setMinimumSize(new Dimension(600, 250));
@@ -41,16 +50,34 @@ public class GUILogger {
 		view.setVisible(true);
 	}
 	
+	/**
+	 * Prints a new line containing the given object's
+	 * String representation. Input may or may not
+	 * be null.
+	 * 
+	 * @param s - The object to be printed
+	 */
 	public static void log(Object s) {
 		if (ENABLED) {
 			INSTANCE.println(getPrefix() + (s == null ? "null" : s.toString()));
 		}
 	}
 
+	/**
+	 * Fetches this Thread's hashCode().
+	 * 
+	 * @return This Thread's hashCode()
+	 */
 	private static String getPrefix() {
 		return "[" + Integer.toHexString(Thread.currentThread().hashCode()) + "] ";
 	}
 	
+	/**
+	 * Prints a String to a new line on this
+	 * window. Input should not be null.
+	 * 
+	 * @param s - The String to be printed
+	 */
 	private void println(String s) {
 		view.repaint();
 		

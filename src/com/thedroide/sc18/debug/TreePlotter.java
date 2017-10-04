@@ -11,10 +11,16 @@ import javax.swing.JPanel;
 
 import com.thedroide.sc18.algorithmics.GraphTreeNode;
 
+/**
+ * A graphical tree plotter using Swing.
+ */
 public class TreePlotter {
 	private JFrame view;
 	private GraphTreeNode treeRoot;
 	
+	/**
+	 * Constructs a new, empty TreePlotter.
+	 */
 	public TreePlotter() {
 		view = new JFrame("GraphTreePlotter");
 		view.setSize(900, 400);
@@ -34,21 +40,45 @@ public class TreePlotter {
 		view.setVisible(true);
 	}
 	
+	/**
+	 * Changes and repaints the tree used by this plotter.
+	 * 
+	 * @param treeRoot - The new tree
+	 */
 	public void setTree(GraphTreeNode treeRoot) {
 		this.treeRoot = treeRoot;
 		view.repaint();
 	}
 	
+	/**
+	 * Fetches the center x-position of the window.
+	 * 
+	 * @return The center x-position
+	 */
 	private int centerX() {
 		return view.getWidth() / 2;
 	}
 	
+	/**
+	 * Renders the tree.
+	 * 
+	 * @param g2d - The graphics context the tree will be rendered in
+	 */
 	private void render(Graphics2D g2d) {
 		if (treeRoot != null) {
 			render(g2d, treeRoot, centerX(), 20, 0);
 		}
 	}
 	
+	/**
+	 * Internal, recursive tree drawing method.
+	 * 
+	 * @param g2d - The graphics context
+	 * @param node - The node to be rendered
+	 * @param x - The start x-position
+	 * @param y - The start y-position
+	 * @param incrementalDepth - The current depth of the tree
+	 */
 	private void render(Graphics2D g2d, GraphTreeNode node, int x, int y, int incrementalDepth) {
 		String nodeDesc = node.getNodeDescription();
 		FontMetrics metrics = g2d.getFontMetrics();

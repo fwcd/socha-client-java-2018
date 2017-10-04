@@ -21,6 +21,10 @@ public class HUIPlayer extends TemplatePlayer {
 	private final int fieldIndexWeight = 1;
 	private final int carrotOptimum = 8;
 	
+	/**
+	 * Checks if the given GamePlay is a valid
+	 * "Hase und Igel"-GamePlay.
+	 */
 	@Override
 	public boolean canPlayGame(GamePlay game) {
 		if (game instanceof HUIGamePlay) {
@@ -32,7 +36,7 @@ public class HUIPlayer extends TemplatePlayer {
 
 	/**
 	 * Calculates a domain-specific heuristic for
-	 * "Hase und Igel". 
+	 * "Hase und Igel". Might need some improvement.
 	 */
 	@Override
 	public double heuristic(GamePlay game, GameMove move, int[] role) throws CannotPlayGameException, GameRuntimeException {

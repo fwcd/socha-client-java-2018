@@ -27,8 +27,8 @@ Package structure:
 * Compile the client using the included ANT-script "build.xml".
   (The compiled jar will be placed in the parent directory of your cloned repository)
   
-  *Note that an automatic ANT-builder already should be preconfigured to compile
-  when saving in Eclipse.*
+  Note that an automatic ANT-builder already should be preconfigured to compile
+  when saving in Eclipse!
   
 * Launch the Server-GUI and load the compiled client as a computer-player.
   (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/),

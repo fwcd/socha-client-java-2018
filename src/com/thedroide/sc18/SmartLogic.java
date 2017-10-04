@@ -19,10 +19,11 @@ import sc.plugin2018.Player;
 import sc.shared.GameResult;
 import sc.shared.PlayerColor;
 
-// TODO: Clean up GUILogger calls in the end
+// TODO: Clean up GUILogger calls before handing in the client
 
 /**
- * Our customized logic.
+ * My custom logic connecting the Game-API with
+ * the Software Challenge API.
  */
 public class SmartLogic implements IGameHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
@@ -40,19 +41,25 @@ public class SmartLogic implements IGameHandler {
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 
-	 * @param Starter
-	 *            - The player's client
+	 * @param Starter - The client itself
 	 */
 	public SmartLogic(Starter client) {
 		this.client = client;
 	}
 
+	/**
+	 * An event handler for the game ending.
+	 */
+	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
 		LOG.info("Game ended.");
 	}
 
+	// TODO: Implement multithreading (single GameDriver instance calculating silently while the opponent moves)
+	
 	/**
 	 * Called whenever a turn is requested.
+	 * This method contains the relevant code.
 	 */
 	@Override
 	public void onRequestAction() {
@@ -73,12 +80,20 @@ public class SmartLogic implements IGameHandler {
 		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
 	}
 
+	/**
+	 * An event handler that get's called whenever turns
+	 * are switched.
+	 */
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
 		LOG.info("Switching turns: " + player.getPlayerColor());
 	}
 
+	/**
+	 * An event handler that get's called whenever the board
+	 * updates.
+	 */
 	@Override
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
@@ -87,6 +102,10 @@ public class SmartLogic implements IGameHandler {
 		LOG.info("Player: {}", currentPlayer.getPlayerColor());
 	}
 
+	/**
+	 * An API-implementation used to send a move to
+	 * the server.
+	 */
 	@Override
 	public void sendAction(Move move) {
 		client.sendMove(move);
