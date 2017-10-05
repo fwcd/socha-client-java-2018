@@ -16,8 +16,8 @@ import sc.plugin2018.Player;
 public class HUIPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 
-	private final int carrotWeight = 5;
-	private final int saladWeight = 25;
+	private final int carrotWeight = 4;
+	private final int saladWeight = 32;
 	private final int fieldIndexWeight = 1;
 	
 	/**
