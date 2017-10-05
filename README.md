@@ -7,10 +7,11 @@ deals with creating an AI for a board game called "Hase und Igel".
 
 Package structure:
 
-* **com.thedroide.sc18** - Contains the interesting stuff including my game logic
+* **com.thedroide.sc18** - Contains my own code
     * **algorithmics** - Useful interfaces for work with algorithms
-    * **bindings** - The main implementations used by the Game-API, including heuristics
+    * **bindings** - The main implementations used by the Game-API
     * **debug** - Useful tools for debugging, mainly a custom logger window and a tree plotter
+    * **strategies** - Contains the main game logic (including heuristics and strategies)
     * **utils** - General classes/data-structures
 * **sc.player2018** - Necessary client code to interact with the game
     * **logic** - Mainly a demo implementation of an AI player that randomly chooses legal moves

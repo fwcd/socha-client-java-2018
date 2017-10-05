@@ -5,7 +5,9 @@ import com.antelmann.game.GameMove;
 import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.utils.CopyStack;
 
+import sc.plugin2018.Field;
 import sc.plugin2018.GameState;
+import sc.plugin2018.Player;
 import sc.shared.InvalidMoveException;
 
 /**
@@ -52,17 +54,32 @@ public class HUIGamePlay extends AbstractGame {
 	}
 	
 	/**
-	 * Fetches the current player of this state.
+	 * Fetches the player who has to commit the next
+	 * move.
 	 * 
-	 * @return The current {@link HUIEnumPlayer}
+	 * @return The next player as a {@link HUIEnumPlayer}.
 	 */
-	private HUIEnumPlayer currentPlayer() {
+	public HUIEnumPlayer nextHUIEnumPlayer() {
 		return HUIEnumPlayer.of(getSCState().getCurrentPlayerColor());
+	}
+	
+	/**
+	 * Fetches the field of the given player.
+	 * 
+	 * @param player - The player
+	 * @return The current field of that player in this state
+	 */
+	public Field fieldOf(HUIEnumPlayer player) {
+		int index = player.getSCPlayer(getSCState()).getFieldIndex();
+		Field field = new Field(getSCState().getBoard().getTypeAt(index));
+		field.setIndex(index);
+		
+		return field;
 	}
 	
 	@Override
 	public int nextPlayer() {
-		return HUIEnumPlayer.of(getSCState().getOtherPlayerColor()).getID();
+		return nextHUIEnumPlayer().getID();
 	}
 
 	@Override
@@ -81,7 +98,7 @@ public class HUIGamePlay extends AbstractGame {
 		return getSCState()
 				.getPossibleMoves()
 				.stream()
-				.map((scMove) -> new HUIMove(currentPlayer(), scMove))
+				.map((scMove) -> new HUIMove(nextHUIEnumPlayer(), scMove))
 				.toArray((size) -> new GameMove[size]);
 	}
 
@@ -112,9 +129,16 @@ public class HUIGamePlay extends AbstractGame {
 	public String toString() {
 		GameState state = getSCState();
 		
-		return "R" + Integer.toString(state.getRedPlayer().getFieldIndex()) + " | "
-				+ "B" + Integer.toString(state.getBluePlayer().getFieldIndex())
+		return "[Board: R" + getStats(state.getRedPlayer()) + " | " + "B" + getStats(state.getBluePlayer())
 				+ " (" + state.getCurrentPlayerColor().toString() + "'s turn)";
+	}
+	
+	private String getStats(Player player) {
+		return "{"
+				+ "F: " + Integer.toString(player.getFieldIndex())
+				+ ", S: " + Integer.toString(player.getSalads())
+				+ ", C: " + Integer.toString(player.getCarrots())
+				+ "}";
 	}
 	
 	@Override

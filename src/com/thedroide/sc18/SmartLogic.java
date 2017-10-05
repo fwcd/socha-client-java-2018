@@ -8,6 +8,8 @@ import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
+import com.thedroide.sc18.strategies.ShallowStrategy;
+import com.thedroide.sc18.strategies.SimpleStrategy;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
@@ -25,13 +27,13 @@ import sc.shared.PlayerColor;
  */
 public class SmartLogic implements IGameHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
-//	private static final Random RANDOM = new SecureRandom();
 	
 	private Starter client;
 	private GameState gameState;
 	private Player currentPlayer;
 
-	private int searchDepth = 5; // The depth of our search tree
+	private int searchDepth = 4; // The depth of our search tree
+	private final ShallowStrategy strategy = new SimpleStrategy();
 	private final HUIGamePlay game = new HUIGamePlay();
 	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
 
@@ -65,9 +67,8 @@ public class SmartLogic implements IGameHandler {
 
 		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor());
 		
-		// Relevant stuff below
-		
-		Move move = ((HUIMove) ai.autoMove()).getSCMove();
+		// Picks the best move either from the ShallowStrategy or the AI
+		Move move = strategy.bestMove(gameState).orElse(((HUIMove) ai.autoMove()).getSCMove());
 		
 		move.orderActions();
 		LOG.info("Sending move {}", move);

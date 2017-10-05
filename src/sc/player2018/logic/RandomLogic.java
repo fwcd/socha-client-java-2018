@@ -84,7 +84,7 @@ public class RandomLogic implements IGameHandler {
 						// Zug auf Salatfeld
 						saladMoves.add(move);
 					} else {
-						// Ziehe Vorwärts, wenn möglich
+						// Ziehe Vorwaerts, wenn moeglich
 						selectedMoves.add(move);
 					}
 				} else if (action instanceof Card) {
@@ -93,7 +93,7 @@ public class RandomLogic implements IGameHandler {
 						// Zug auf Hasenfeld und danch Salatkarte
 						saladMoves.add(move);
 					} // Muss nicht zusätzlich ausgewählt werden, wurde schon
-						// durch Advance ausgewählt
+						// durch Advance ausgewaehlt
 				} else if (action instanceof ExchangeCarrots) {
 					ExchangeCarrots exchangeCarrots = (ExchangeCarrots) action;
 					if (exchangeCarrots.getValue() == 10 && currentPlayer.getCarrots() < 30 && index < 40
@@ -107,16 +107,16 @@ public class RandomLogic implements IGameHandler {
 					}
 				} else if (action instanceof FallBack) {
 					if (index > 56 /* letztes Salatfeld */ && currentPlayer.getSalads() > 0) {
-						// Falle nur am Ende (index > 56) zurück, außer du
+						// Falle nur am Ende (index > 56) zurueck, ausser du
 						// musst noch einen Salat loswerden
 						selectedMoves.add(move);
 					} else if (index <= 56 && index - gameState.getPreviousFieldByType(FieldType.HEDGEHOG, index) < 5) {
-						// Falle zurück, falls sich Rückzug lohnt (nicht zu
+						// Falle zuruek, falls sich Rueckzug lohnt (nicht zu
 						// viele Karotten aufnehmen)
 						selectedMoves.add(move);
 					}
 				} else {
-					// Füge Salatessen oder Skip hinzu
+					// Fuege Salatessen oder Skip hinzu
 					selectedMoves.add(move);
 				}
 			}
