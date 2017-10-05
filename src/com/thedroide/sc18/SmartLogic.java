@@ -3,9 +3,7 @@ package com.thedroide.sc18;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.antelmann.game.AutoPlay;
 import com.antelmann.game.GameDriver;
-import com.antelmann.game.GamePlay;
 import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
@@ -33,10 +31,9 @@ public class SmartLogic implements IGameHandler {
 	private GameState gameState;
 	private Player currentPlayer;
 
-	/**
-	 * The depth of our search tree.
-	 */
-	private final int searchDepth = 5;
+	private int searchDepth = 5; // The depth of our search tree
+	private final HUIGamePlay game = new HUIGamePlay();
+	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
 
 	/**
 	 * Creates a new AI-player that commits moves.
@@ -55,7 +52,7 @@ public class SmartLogic implements IGameHandler {
 		LOG.info("Game ended.");
 	}
 
-	// TODO: Implement multithreading (single GameDriver instance calculating silently while the opponent moves)
+	// TODO: Implement multithreading (GameDriver calculating silently while the opponent moves)
 	
 	/**
 	 * Called whenever a turn is requested.
@@ -69,8 +66,7 @@ public class SmartLogic implements IGameHandler {
 		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor());
 		
 		// Relevant stuff below
-		GamePlay game = new HUIGamePlay(gameState);
-		AutoPlay ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
+		
 		Move move = ((HUIMove) ai.autoMove()).getSCMove();
 		
 		move.orderActions();
@@ -98,6 +94,9 @@ public class SmartLogic implements IGameHandler {
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
+		
+		game.setSCState(gameState);
+		
 		LOG.info("New move: {}", gameState.getTurn());
 		LOG.info("Player: {}", currentPlayer.getPlayerColor());
 	}

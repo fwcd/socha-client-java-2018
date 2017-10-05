@@ -20,14 +20,24 @@ public class HUIGamePlay extends AbstractGame {
 	private CopyStack<GameState> states = new CopyStack<>();
 
 	/**
+	 * Constructs a new empty {@link HUIGamePlay}.
+	 */
+	public HUIGamePlay() {
+		super("HaseUndIgel", 2);
+	}
+
+	/**
 	 * Constructs a new {@link HUIGamePlay} from the
 	 * given {@link GameState} (Software Challenge API).
 	 * 
 	 * @param state - The GameState used as a base
 	 */
 	public HUIGamePlay(GameState state) {
-		super("HaseUndIgel", 2);
-		
+		this();
+		setSCState(state);
+	}
+
+	public void setSCState(GameState state) {
 		states.push(state);
 	}
 	
@@ -80,7 +90,7 @@ public class HUIGamePlay extends AbstractGame {
 		try {
 			GameState newState = getSCState().clone();
 			((HUIMove) move).getSCMove().perform(newState);
-			states.push(newState);
+			setSCState(newState);
 			return true;
 		} catch (CloneNotSupportedException | InvalidMoveException e) {
 			GUILogger.log("Invalid move: " + move + " from " + toString());
