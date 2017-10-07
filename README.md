@@ -18,7 +18,10 @@ Package structure:
 
 ## Setting up Eclipse for development
 
-* Simply link the main repository folder to your workspace by opening
+* Clone this repository to your pc using git:
+    git clone https://bitbucket.org/TheDroide/sochaclient.git
+
+* Link the root repository folder to your workspace by opening
   it through "File" > "Open Projects from File System..."
 
 ## Running the client
