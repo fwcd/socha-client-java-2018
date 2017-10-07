@@ -3,7 +3,7 @@ package com.thedroide.sc18.bindings;
 import com.antelmann.game.AbstractGame;
 import com.antelmann.game.GameMove;
 import com.thedroide.sc18.debug.GUILogger;
-import com.thedroide.sc18.utils.CopyStack;
+import com.thedroide.sc18.utils.CopyableStack;
 
 import sc.plugin2018.Field;
 import sc.plugin2018.GameState;
@@ -19,7 +19,7 @@ import sc.shared.InvalidMoveException;
 public class HUIGamePlay extends AbstractGame {
 	private static final long serialVersionUID = -6693551955267419333L;
 	
-	private CopyStack<GameState> states = new CopyStack<>();
+	private CopyableStack<GameState> states = new CopyableStack<>();
 
 	/**
 	 * Constructs a new empty {@link HUIGamePlay}.

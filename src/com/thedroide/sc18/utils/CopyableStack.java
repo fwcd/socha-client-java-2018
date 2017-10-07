@@ -10,13 +10,13 @@ import java.util.function.UnaryOperator;
  * 
  * @param <T> - The stack item type
  */
-public class CopyStack<T> {
+public class CopyableStack<T> {
 	private Deque<T> data = new ArrayDeque<>();
 	
 	/**
 	 * Constructs an empty stack.
 	 */
-	public CopyStack() {
+	public CopyableStack() {
 		
 	}
 	
@@ -25,7 +25,7 @@ public class CopyStack<T> {
 	 * 
 	 * @param other
 	 */
-	private CopyStack(Iterable<? extends T> other, UnaryOperator<T> copier) {
+	private CopyableStack(Iterable<? extends T> other, UnaryOperator<T> copier) {
 		for (T item : other) {
 			data.add(copier.apply(item));
 		}
@@ -79,8 +79,8 @@ public class CopyStack<T> {
 	/**
 	 * Copies this stack.
 	 */
-	public CopyStack<T> copy(UnaryOperator<T> itemCopier) {
-		return new CopyStack<T>(data, itemCopier);
+	public CopyableStack<T> copy(UnaryOperator<T> itemCopier) {
+		return new CopyableStack<T>(data, itemCopier);
 	}
 	
 	@Override

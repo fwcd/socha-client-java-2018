@@ -7,7 +7,11 @@ import sc.plugin2018.Move;
 
 /**
  * Provides a way to filter "obvious" best moves
- * (like salad-fields or goal-moves) quickly.
+ * (like salad-fields or goal-moves) quickly before
+ * even building a game tree or using minimax. It's
+ * called shallow strategy, because it shouldn't predict
+ * any moves and is basically the first check when
+ * evaluating a board.
  */
 public interface ShallowStrategy {
 	/**

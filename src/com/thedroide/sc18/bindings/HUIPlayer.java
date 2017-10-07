@@ -9,8 +9,8 @@ import com.thedroide.sc18.strategies.LeafHeuristic;
 import com.thedroide.sc18.strategies.SmartHeuristic;
 
 /**
- * Represents an abstract player containing AI
- * logic that can evaluate a given game state.
+ * Represents an abstract player delegating to
+ * a {@link LeafHeuristic} that can evaluate a given game state.
  */
 public class HUIPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
@@ -31,12 +31,25 @@ public class HUIPlayer extends TemplatePlayer {
 
 	/**
 	 * Calculates a domain-specific heuristic for
-	 * "Hase und Igel". Might need some improvement.
+	 * "Hase und Igel". Delegates to {@link LeafHeuristic}.
 	 */
 	@Override
 	public double heuristic(GamePlay game, GameMove move, int[] role) throws CannotPlayGameException, GameRuntimeException {
 		try {
 			return heuristic.heuristic((HUIGamePlay) game, (HUIMove) move, HUIEnumPlayer.of(role));
+		} catch (ClassCastException e) {
+			throw new CannotPlayGameException(this, game, "Invalid game type.");
+		}
+	}
+
+	/**
+	 * Decides in domain-specific way if a move should
+	 * be prunes. Delegates to {@link LeafHeuristic}.
+	 */
+	@Override
+	public boolean pruneMove(GamePlay game, GameMove move, int[] role) {
+		try {
+			return heuristic.pruneMove((HUIGamePlay) game, (HUIMove) move, HUIEnumPlayer.of(role));
 		} catch (ClassCastException e) {
 			throw new CannotPlayGameException(this, game, "Invalid game type.");
 		}
