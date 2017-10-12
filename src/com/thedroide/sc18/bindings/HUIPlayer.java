@@ -52,10 +52,11 @@ public class HUIPlayer extends TemplatePlayer {
 	 */
 	@Override
 	public boolean pruneMove(GamePlay game, GameMove move, int[] role) {
-		try {
-			return heuristic.pruneMove((HUIGamePlay) game, (HUIMove) move, HUIEnumPlayer.of(role));
-		} catch (ClassCastException e) {
-			throw new CannotPlayGameException(this, game, "Invalid game type.");
-		}
+//		try {
+//			return heuristic.pruneMove((HUIGamePlay) game, (HUIMove) move, HUIEnumPlayer.of(role));
+//		} catch (ClassCastException e) {
+//			throw new CannotPlayGameException(this, game, "Invalid game type.");
+//		}
+		return false;
 	}
 }

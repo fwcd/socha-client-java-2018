@@ -60,6 +60,16 @@ public class HUIMove implements GameMove {
 		return toString().equals(obj.toString());
 	}
 	
+	public boolean isSkip() {
+		for (Action action : move.getActions()) {
+			if (action instanceof Skip) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public String toString() {
 		String s = "[Move: ";

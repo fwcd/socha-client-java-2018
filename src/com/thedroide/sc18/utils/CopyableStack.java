@@ -76,6 +76,20 @@ public class CopyableStack<T> {
 		return data.isEmpty();
 	}
 	
+	public void clear() {
+		data.clear();
+	}
+	
+	/**
+	 * Clears the stack and places a new item in it.
+	 * 
+	 * @param base - The only item in the stack after rebasing
+	 */
+	public void rebase(T base) {
+		clear();
+		push(base);
+	}
+	
 	/**
 	 * Copies this stack.
 	 */

@@ -45,7 +45,7 @@ public class SmartLogic implements IGameHandler {
 	public SmartLogic(Starter client) {
 		this.client = client;
 		
-		ai.setResponseTime(1800); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
+		ai.setResponseTime(500); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
 	}
 
 	/**
@@ -72,11 +72,11 @@ public class SmartLogic implements IGameHandler {
 		// Picks the best move either from the ShallowStrategy or the AI
 		Move move = strategy.bestMove(gameState).orElse(((HUIMove) ai.autoMove()).getSCMove());
 		
+		GUILogger.log("Committed " + move);
+		
 		move.orderActions();
-		LOG.info("Sending move {}", move);
 		long nowTime = System.nanoTime();
 		sendAction(move);
-		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
 	}
 
 	/**
@@ -97,6 +97,8 @@ public class SmartLogic implements IGameHandler {
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
+		
+		// TODO: Multithreading, background calculation?
 		
 		game.setSCState(gameState);
 		

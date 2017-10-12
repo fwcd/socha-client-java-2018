@@ -1,5 +1,6 @@
 package com.thedroide.sc18.strategies;
 
+import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
@@ -25,28 +26,33 @@ public class SmartHeuristic implements LeafHeuristic {
 	
 	@Override
 	public double heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
-		HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
-		
-		Player playerAfterMove = player.getSCPlayer(gameAfterMove.getSCState());
-		
-		if (playerAfterMove.inGoal()) {
-			// Obviously a very good rating if the player reaches the goal:
-			return Double.MAX_VALUE;
+		try {
+			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
+			
+			Player playerAfterMove = player.getSCPlayer(gameAfterMove.getSCState());
+			
+			if (playerAfterMove.inGoal()) {
+				// Obviously a very good rating if the player reaches the goal:
+				return Double.MAX_VALUE;
+			}
+			
+			int salads = playerAfterMove.getSalads();
+			int carrots = playerAfterMove.getCarrots();
+			int fieldIndex = playerAfterMove.getFieldIndex(); // Maximum field index is 64
+			
+			int saladRating = -(salads * saladWeight); // Less salads: better
+			int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
+			int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
+			
+			double rating = saladRating + fieldRating + carrotRating;
+			
+//			GUILogger.log(player + ": " + rating + " results in the board " + gameAfterMove + " using " + move);
+			
+			return rating;
+		} catch (GameRuntimeException e) {
+			GUILogger.log("Warning: " + e.getMessage());
+			return Double.MIN_VALUE;
 		}
-		
-		int salads = playerAfterMove.getSalads();
-		int carrots = playerAfterMove.getCarrots();
-		int fieldIndex = playerAfterMove.getFieldIndex(); // Maximum field index is 64
-		
-		int saladRating = -(salads * saladWeight); // Less salads: better
-		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-		int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
-		
-		double rating = saladRating + fieldRating + carrotRating;
-		
-		GUILogger.log(player + ": " + rating + " results in the board " + gameAfterMove + " using " + move);
-		
-		return rating;
 	}
 	
 	private int carrotOptimum(int fieldIndex) {
@@ -64,8 +70,6 @@ public class SmartHeuristic implements LeafHeuristic {
 
 	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
-		GUILogger.log("Pruned move");
-		
 		Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
 		
 		for (Action action : move.getSCMove().getActions()) {

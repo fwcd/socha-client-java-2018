@@ -36,11 +36,28 @@ public class HUIGamePlay extends AbstractGame {
 	 */
 	public HUIGamePlay(GameState state) {
 		this();
-		setSCState(state);
+		pushSCState(state);
 	}
 
-	public void setSCState(GameState state) {
+	/**
+	 * Pushes a new {@link GameState} onto the internal
+	 * state history stack. Note that this is NOT the
+	 * move stack in {@link AbstractGame}.
+	 * 
+	 * @param state
+	 */
+	private void pushSCState(GameState state) {
 		states.push(state);
+	}
+
+	/**
+	 * Discards all previous states and replaces it
+	 * with the given new state.
+	 * 
+	 * @param gameState - The new game state
+	 */
+	public void setSCState(GameState gameState) {
+		states.rebase(gameState);
 	}
 	
 	/**
@@ -105,9 +122,17 @@ public class HUIGamePlay extends AbstractGame {
 	@Override
 	protected boolean pushMove(GameMove move) {
 		try {
+			HUIMove huiMove = (HUIMove) move;
+			
+			// Player isn't allowed to skip move if there are other legal moves
+			
+			if (huiMove.isSkip() && listLegalMoves().length > 1) {
+				return false;
+			}
+			
 			GameState newState = getSCState().clone();
-			((HUIMove) move).getSCMove().perform(newState);
-			setSCState(newState);
+			huiMove.getSCMove().perform(newState);
+			pushSCState(newState);
 			return true;
 		} catch (CloneNotSupportedException | InvalidMoveException e) {
 			GUILogger.log("Invalid move: " + move + " from " + toString());
