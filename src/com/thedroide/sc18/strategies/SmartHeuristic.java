@@ -22,7 +22,7 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int saladWeight = 128;
 	private final int fieldIndexWeight = 1;
 	
-	// TODO: Track previous moves to prevent player from being stuck in a "drop carrot"/"take carrot"-loop
+	// TODO: Prevent "drop carrot"/"take carrot"-loop somehow
 	
 	@Override
 	public double heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {

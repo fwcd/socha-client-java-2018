@@ -42,7 +42,7 @@ public class SmartLogic implements IGameHandler {
 	public SmartLogic(Starter client) {
 		this.client = client;
 		
-		ai.setResponseTime(500); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
+		ai.setResponseTime(2000); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class SmartLogic implements IGameHandler {
 		HUIMove huiMove = (HUIMove) ai.autoMove();
 		Move scMove = huiMove.getSCMove();
 
-		long nowTime = System.nanoTime();
+		long nowTime = System.currentTimeMillis();
 		GUILogger.log("Committed " + huiMove + " in " + Long.toString(nowTime - startTime) + "ms");
 		
 		scMove.orderActions();
