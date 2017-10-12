@@ -6,10 +6,10 @@ import com.thedroide.sc18.bindings.HUIMove;
 
 /**
  * An API wrapper providing heuristics about
- * leaf moves in the game-tree and more
+ * moves in the game-tree and more
  * convenient parameters.
  */
-public interface LeafHeuristic {
+public interface HUIHeuristic {
 	/**
 	 * Decides if a move should be "cut off".
 	 * 

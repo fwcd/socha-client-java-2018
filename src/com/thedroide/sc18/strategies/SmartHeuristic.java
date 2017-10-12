@@ -14,10 +14,10 @@ import sc.plugin2018.Player;
 
 /**
  * Provides a more-or-less good implementation
- * of a {@link LeafHeuristic} that is based
+ * of a {@link HUIHeuristic} that is based
  * on player statistics.
  */
-public class SmartHeuristic implements LeafHeuristic {
+public class SmartHeuristic implements HUIHeuristic {
 	private final int carrotWeight = 1;
 	private final int saladWeight = 128;
 	private final int fieldIndexWeight = 1;

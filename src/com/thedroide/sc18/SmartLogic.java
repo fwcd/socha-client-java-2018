@@ -8,8 +8,6 @@ import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
-import com.thedroide.sc18.strategies.ShallowStrategy;
-import com.thedroide.sc18.strategies.SimpleStrategy;
 
 import sc.player2018.Starter;
 import sc.plugin2018.GameState;
@@ -33,7 +31,6 @@ public class SmartLogic implements IGameHandler {
 	private Player currentPlayer;
 
 	private int searchDepth = 4; // The depth of our search tree
-	private final ShallowStrategy strategy = new SimpleStrategy();
 	private final HUIGamePlay game = new HUIGamePlay();
 	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), searchDepth);
 
@@ -64,19 +61,20 @@ public class SmartLogic implements IGameHandler {
 	 */
 	@Override
 	public void onRequestAction() {
-		long startTime = System.nanoTime();
+		long startTime = System.currentTimeMillis();
 		LOG.info("Move requested.");
 
-		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor());
+		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor() + " with board " + game.toString());
 		
 		// Picks the best move either from the ShallowStrategy or the AI
-		Move move = strategy.bestMove(gameState).orElse(((HUIMove) ai.autoMove()).getSCMove());
-		
-		GUILogger.log("Committed " + move);
-		
-		move.orderActions();
+		HUIMove huiMove = (HUIMove) ai.autoMove();
+		Move scMove = huiMove.getSCMove();
+
 		long nowTime = System.nanoTime();
-		sendAction(move);
+		GUILogger.log("Committed " + huiMove + " in " + Long.toString(nowTime - startTime) + "ms");
+		
+		scMove.orderActions();
+		sendAction(scMove);
 	}
 
 	/**
