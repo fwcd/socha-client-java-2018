@@ -64,6 +64,8 @@ public class SmartHeuristic implements LeafHeuristic {
 
 	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+		GUILogger.log("Pruned move");
+		
 		Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
 		
 		for (Action action : move.getSCMove().getActions()) {

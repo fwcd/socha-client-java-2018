@@ -5,6 +5,7 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.TemplatePlayer;
+import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.strategies.LeafHeuristic;
 import com.thedroide.sc18.strategies.SmartHeuristic;
 
@@ -15,6 +16,10 @@ import com.thedroide.sc18.strategies.SmartHeuristic;
 public class HUIPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 	private final LeafHeuristic heuristic = new SmartHeuristic();
+	
+	public HUIPlayer() {
+		super("HUIPlayer", 2, true);
+	}
 	
 	/**
 	 * Checks if the given GamePlay is a valid

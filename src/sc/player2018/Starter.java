@@ -23,13 +23,13 @@ public class Starter extends AbstractClient {
 	private static final Logger logger = LoggerFactory.getLogger(Starter.class);
 
 	public Starter(String host, int port, String reservation, String strategy) throws Exception {
-		// client starten
+		// Launch client
 		super(host, port);
-
+		
 		// strategie auswaehlen und zuweisen
 		IGameHandler logic;
 
-		// Versuche für den strategy-Parameter eine passende Logik zu
+		// Versuche fuer den strategy-Parameter eine passende Logik zu
 		// instanzieren, sonst verwende Standard
 		try {
 			logic = LogicFactory.valueOf(strategy.toUpperCase()).getInstance(this);
