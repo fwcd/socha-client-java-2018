@@ -44,6 +44,8 @@ public class SmartLogic implements IGameHandler {
 	 */
 	public SmartLogic(Starter client) {
 		this.client = client;
+		
+		ai.setResponseTime(1800); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
 	}
 
 	/**

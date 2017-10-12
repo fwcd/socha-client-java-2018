@@ -21,7 +21,7 @@ import javax.swing.JScrollPane;
  * console.
  */
 public class GUILogger {
-	private static final boolean ENABLED = false; // When disabling permanently, remove all log() calls to increase performance
+	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
 	private static final GUILogger INSTANCE = ENABLED ? new GUILogger() : null;
 	
 	private final JFrame view;

@@ -5,7 +5,6 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.TemplatePlayer;
-import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.strategies.LeafHeuristic;
 import com.thedroide.sc18.strategies.SmartHeuristic;
 
