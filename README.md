@@ -30,7 +30,7 @@ Package structure:
 * [Download the Server here](http://www.software-challenge.de/downloads/).
   
 * Compile the client using the included ANT-script "build.xml".
-  (The compiled jar will be placed in the parent directory of your cloned repository)
+  (The compiled jar will be placed in the "builds" folder)
   
   Note that an automatic ANT-builder already should be preconfigured to compile
   when saving in Eclipse!

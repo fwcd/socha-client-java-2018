@@ -1,5 +1,7 @@
 package com.thedroide.sc18.bindings;
 
+import java.util.Iterator;
+
 import com.antelmann.game.GameMove;
 
 import sc.plugin2018.Action;
@@ -17,11 +19,13 @@ import sc.plugin2018.Skip;
  * Used as a bridge-implementation between the
  * Software Challenge API and the Antelmann-Game-API.
  */
-public class HUIMove implements GameMove {
+public class HUIMove implements GameMove, Iterable<Action> {
 	private static final long serialVersionUID = -8856272531609224268L;
 
 	private Move move;
 	private HUIEnumPlayer player;
+	
+	private boolean discarded = false;
 	
 	public HUIMove(HUIEnumPlayer player, Move move) {
 		if (move == null) {
@@ -70,6 +74,20 @@ public class HUIMove implements GameMove {
 		return false;
 	}
 	
+	/**
+	 * Marks this move as "useless". <b>Use this with caution!</b>
+	 */
+	public void discard() {
+		discarded = true;
+	}
+	
+	public boolean isDiscarded() {
+		return discarded;
+	}
+	
+	/**
+	 * Provides a concise string representation of a game move.
+	 */
 	@Override
 	public String toString() {
 		String s = "[Move: ";
@@ -91,5 +109,10 @@ public class HUIMove implements GameMove {
 		}
 		
 		return s + "]";
+	}
+
+	@Override
+	public Iterator<Action> iterator() {
+		return move.getActions().iterator();
 	}
 }

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -72,6 +73,10 @@ public class GUILogger {
 	 */
 	private void println(String s) {
 		outputArea.setText(outputArea.getText() + "\n" + s);
+		
+		JScrollBar bar = scrollPane.getVerticalScrollBar();
+		bar.setValue(bar.getMaximum());
+		
 		view.repaint();
 	}
 }

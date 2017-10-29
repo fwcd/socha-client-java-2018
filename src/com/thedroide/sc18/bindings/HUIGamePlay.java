@@ -116,6 +116,7 @@ public class HUIGamePlay extends AbstractGame {
 				.getPossibleMoves()
 				.stream()
 				.map((scMove) -> new HUIMove(nextHUIEnumPlayer(), scMove))
+				.filter((huiMove) -> !huiMove.isSkip())
 				.toArray((size) -> new GameMove[size]);
 	}
 
@@ -179,4 +180,14 @@ public class HUIGamePlay extends AbstractGame {
 
 		return clone;
 	}
+
+//	@Override
+//	public GamePlay spawnChild(GameMove move) throws GameRuntimeException {
+//		if (((HUIMove) move).isSkip()) {
+//			try {
+//				GUILogger.log(">> MOVE: " + move + " vs legal moves: " + Arrays.toString(clone().getLegalMoves()));
+//			} catch (Exception e) {}
+//		}
+//		return super.spawnChild(move);
+//	}
 }

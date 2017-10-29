@@ -8,7 +8,7 @@
     <target name="create_run_jar">
         <jar destfile="${dir.jarfile}/sochaclient.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="sc.player2018.Starter"/>
+                <attribute name="Main-Class" value="sc.player2018.SochaClientMain"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="${dir.buildfile}/bin"/>

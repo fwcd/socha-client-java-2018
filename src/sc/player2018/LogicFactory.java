@@ -5,38 +5,33 @@ import org.slf4j.LoggerFactory;
 
 import com.thedroide.sc18.SmartLogic;
 
-import sc.player2018.logic.RandomLogic;
+import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
 
 /**
- * Erlaubt es verschiedene Logiken zu verwenden und eine davon auszuwählen und
+ * Erlaubt es verschiedene Logiken zu verwenden und eine davon auszuwaehlen und
  * Instanzen dieser Logik zu erzeugen
  * 
  * @author and
  */
 public enum LogicFactory {
-	// Verfügbare Taktiken (Implementierungen des IGameHandler) müssen hier
+	// Verfuegbare Taktiken (Implementierungen des IGameHandler) muessen hier
 	// eingetragen wie im Beispiel eingetragen und ihre Klasse angegeben werden
-	RANDOM(RandomLogic.class),
+	SIMPLE(SimpleLogic.class),
 
 	// Unsere Strategie
-	OUR_LOGIC(SmartLogic.class),
-	
-	// Die Logik die gewählt wird, wenn kein passender Eintrag zu der Eingabe
-	// gefunden wurde:
-	DEFAULT(SmartLogic.class);
+	SMART(SmartLogic.class);
 
 	private Class<? extends IGameHandler> logic;
-	private static final Logger	logger = LoggerFactory
-			.getLogger(LogicFactory.class);
+	private static final Logger	LOGGER = LoggerFactory.getLogger(LogicFactory.class);
 
 	private LogicFactory(Class<? extends IGameHandler> chosenLogic) {
 		logic = chosenLogic;
 	}
 
 	/**
-	 * Erstellt eine Logik-Instanz und gibt diese zurück
+	 * Erstellt eine Logik-Instanz und gibt diese zurueck
 	 * 
 	 * @param client
 	 *            Der aktuelle Client
@@ -46,7 +41,7 @@ public enum LogicFactory {
 	 *             werden konnte, wird eine Exception geworfen!
 	 */
 	public IGameHandler getInstance(AbstractClient client) throws Exception {
-		logger.debug("Erzeuge Instanz von: {}", name());
+		LOGGER.debug("Erzeuge Instanz von: {}", name());
 		return (IGameHandler) logic.getConstructor(client.getClass())
 				.newInstance(client);
 	}

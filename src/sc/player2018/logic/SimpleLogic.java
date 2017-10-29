@@ -8,7 +8,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sc.player2018.Starter;
+import sc.player2018.SochaClientMain;
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
 import sc.plugin2018.Card;
@@ -29,12 +29,12 @@ import sc.shared.PlayerColor;
  * waehlt, aber gueltige Zuege macht. Ausserdem werden zum Spielverlauf
  * Konsolenausgaben gemacht.
  */
-public class RandomLogic implements IGameHandler {
-	private Starter client;
+public class SimpleLogic implements IGameHandler {
+	private SochaClientMain client;
 	private GameState gameState;
 	private Player currentPlayer;
 
-	private static final Logger LOG = LoggerFactory.getLogger(RandomLogic.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleLogic.class);
 	/*
 	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse einmalig
 	 * erzeugt wird und darin immer zur Verfuegung steht.
@@ -48,7 +48,7 @@ public class RandomLogic implements IGameHandler {
 	 *            Der Zugrundeliegende Client der mit dem Spielserver kommunizieren
 	 *            kann.
 	 */
-	public RandomLogic(Starter client) {
+	public SimpleLogic(SochaClientMain client) {
 		this.client = client;
 	}
 

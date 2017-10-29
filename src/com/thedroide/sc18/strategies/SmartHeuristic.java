@@ -9,7 +9,6 @@ import com.thedroide.sc18.debug.GUILogger;
 import sc.plugin2018.Action;
 import sc.plugin2018.ExchangeCarrots;
 import sc.plugin2018.FallBack;
-import sc.plugin2018.FieldType;
 import sc.plugin2018.Player;
 
 /**
@@ -18,22 +17,34 @@ import sc.plugin2018.Player;
  * on player statistics.
  */
 public class SmartHeuristic implements HUIHeuristic {
+	private static final double GOOD_HEURISTIC = 9999999999999999999999999D;
+	private static final double BAD_HEURISTIC = -9999999999999999999999999D;
+	
 	private final int carrotWeight = 1;
-	private final int saladWeight = 128;
-	private final int fieldIndexWeight = 1;
+	private final int saladWeight = 256;
+	private final int fieldIndexWeight = 2;
 	
 	// TODO: Prevent "drop carrot"/"take carrot"-loop somehow
 	
 	@Override
 	public double heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+		if (move.isDiscarded()) {
+			return BAD_HEURISTIC;
+		}
+		
 		try {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
 			
+			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
 			Player playerAfterMove = player.getSCPlayer(gameAfterMove.getSCState());
+			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
 			if (playerAfterMove.inGoal()) {
 				// Obviously a very good rating if the player reaches the goal:
-				return Double.MAX_VALUE;
+				GUILogger.log(playerAfterMove.getPlayerColor() + " in goal");
+				return GOOD_HEURISTIC;
+			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
+				return BAD_HEURISTIC;
 			}
 			
 			int salads = playerAfterMove.getSalads();
@@ -51,12 +62,12 @@ public class SmartHeuristic implements HUIHeuristic {
 			return rating;
 		} catch (GameRuntimeException e) {
 			GUILogger.log("Warning: " + e.getMessage());
-			return Double.MIN_VALUE;
+			return BAD_HEURISTIC;
 		}
 	}
 	
 	private int carrotOptimum(int fieldIndex) {
-		int fieldsToGoal = fieldIndex - 64;
+		int fieldsToGoal = 64 - fieldIndex;
 		
 		/*
 		 * A linear function is used to determine the carrot optimum,
@@ -70,40 +81,18 @@ public class SmartHeuristic implements HUIHeuristic {
 
 	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
-		Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
-		
-		for (Action action : move.getSCMove().getActions()) {
-			if (action instanceof ExchangeCarrots) {
-				ExchangeCarrots carrotAction = (ExchangeCarrots) action;
-				
-				if (carrotAction.getValue() > 0 // When picking up carrots
-						|| playerBeforeMove.getCarrots() > 30
-						|| playerBeforeMove.getFieldIndex() > 40
-						|| playerBeforeMove.getLastNonSkipAction() instanceof ExchangeCarrots) {
-					// Bad multiplier if player is near goal, wants to pick up
-					// too many carrots or already has commited a carrot move previously
-					return true;
-				} else if (carrotAction.getValue() < 0 // When dropping carrots
-						|| playerBeforeMove.getCarrots() < 30
-						|| playerBeforeMove.getFieldIndex() < 40) {
-					// Bad multiplier if player has to few carrots or is near
-					// the start and wants to drop carrots.
-					return true;
-				}
-				
-			} else if (action instanceof FallBack) {
-				final int lastSaladField = 56;
-				
-				if (playerBeforeMove.getFieldIndex() > lastSaladField
-						|| playerBeforeMove.getFieldIndex() - gameBeforeMove.getSCState()
-								.getPreviousFieldByType(FieldType.HEDGEHOG, playerBeforeMove.getFieldIndex()) >= 5) {
-					// Be cautious when falling back because we
-					// don't want to pick up too many carrots.
-					return true;
-				}
+		try {
+			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
+			
+			if (gameAfterMove.getWinner() != null) {
+				GUILogger.log("Found winning move: " + move + " by " + player);
+				return true;
 			}
+			
+			return false;
+		} catch (Exception e) {
+			GUILogger.log("ERROR: " + e.getMessage());
+			return false;
 		}
-		
-		return false;
 	}
 }

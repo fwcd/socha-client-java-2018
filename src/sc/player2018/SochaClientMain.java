@@ -1,41 +1,33 @@
 package sc.player2018;
 
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import sc.framework.plugins.SimplePlayer;
-import sc.player2018.logic.RandomLogic;
+import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
 import sc.shared.SharedConfiguration;
-
-import java.io.IOException;
 
 /**
  * Hauptklasse des Clients, die ueber Konsolenargumente gesteuert werden kann.
  * Sie veranlasst eine Verbindung zum Spielserver und waehlt eine Strategie.
  *
  */
-public class Starter extends AbstractClient {
-
-	private static final Logger logger = LoggerFactory.getLogger(Starter.class);
-
-	public Starter(String host, int port, String reservation, String strategy) throws Exception {
+public class SochaClientMain extends AbstractClient {
+	private static final Logger logger = LoggerFactory.getLogger(SochaClientMain.class);
+	
+	public SochaClientMain(String host, int port, String reservation, String strategy) throws Exception {
 		// Launch client
 		super(host, port);
 		
 		// strategie auswaehlen und zuweisen
-		IGameHandler logic;
-
-		// Versuche fuer den strategy-Parameter eine passende Logik zu
-		// instanzieren, sonst verwende Standard
-		try {
-			logic = LogicFactory.valueOf(strategy.toUpperCase()).getInstance(this);
-		} catch (IllegalArgumentException e) {
-			logic = LogicFactory.DEFAULT.getInstance(this);
-		}
+		IGameHandler logic = LogicFactory.SMART.getInstance(this);
 
 		setHandler(logic);
 
@@ -55,7 +47,7 @@ public class Starter extends AbstractClient {
 		// you may use this code to enable debug output:
 		Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		((ch.qos.logback.classic.Logger) rootLogger).setLevel(ch.qos.logback.classic.Level.WARN);
-		Logger randomlogiclogger = LoggerFactory.getLogger(RandomLogic.class);
+		Logger randomlogiclogger = LoggerFactory.getLogger(SimpleLogic.class);
 		((ch.qos.logback.classic.Logger) randomlogiclogger).setLevel(ch.qos.logback.classic.Level.WARN);
 
 		// parameter definieren
@@ -82,7 +74,7 @@ public class Starter extends AbstractClient {
 
 		// einen neuen client erzeugen
 		try {
-			new Starter(host, port, reservation, strategy);
+			new SochaClientMain(host, port, reservation, strategy);
 		} catch (Exception e) {
 			logger.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
 			// System.err
