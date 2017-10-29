@@ -55,6 +55,7 @@ public class RandomLogic implements IGameHandler {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
 		LOG.info("Das Spiel ist beendet.");
 	}

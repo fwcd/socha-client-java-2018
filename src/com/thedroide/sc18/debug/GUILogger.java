@@ -3,16 +3,10 @@ package com.thedroide.sc18.debug;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * A graphical logger window to ease debugging when
@@ -26,9 +20,7 @@ public class GUILogger {
 	
 	private final JFrame view;
 	private final JScrollPane scrollPane;
-	private final JPanel outputArea;
-	
-	private List<String> output = new ArrayList<>();
+	private final JTextArea outputArea;
 	
 	/**
 	 * Internal singleton initializer.
@@ -38,9 +30,9 @@ public class GUILogger {
 		view.setMinimumSize(new Dimension(600, 250));
 		view.setLayout(new BorderLayout());
 		
-		outputArea = new JPanel();
-		outputArea.setLayout(new BoxLayout(outputArea, BoxLayout.Y_AXIS));
+		outputArea = new JTextArea();
 		outputArea.setBackground(Color.BLACK);
+		outputArea.setForeground(Color.WHITE);
 		
 		scrollPane = new JScrollPane(outputArea);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(10);
@@ -79,17 +71,7 @@ public class GUILogger {
 	 * @param s - The String to be printed
 	 */
 	private void println(String s) {
+		outputArea.setText(outputArea.getText() + "\n" + s);
 		view.repaint();
-		
-		for (String line : Arrays.asList(s.split("\n"))) {
-			JLabel label = new JLabel(line);
-			label.setForeground(Color.WHITE);
-			
-			outputArea.add(label);
-			output.add(line);
-		}
-		
-		JScrollBar vScrollBar = scrollPane.getVerticalScrollBar();
-		vScrollBar.setValue(vScrollBar.getMaximum());
 	}
 }
