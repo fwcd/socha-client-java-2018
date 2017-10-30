@@ -20,7 +20,7 @@ import sc.shared.SharedConfiguration;
  *
  */
 public class SochaClientMain extends AbstractClient {
-	private static final Logger logger = LoggerFactory.getLogger(SochaClientMain.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SochaClientMain.class);
 	
 	public SochaClientMain(String host, int port, String reservation, String strategy) throws Exception {
 		// Launch client
@@ -76,7 +76,7 @@ public class SochaClientMain extends AbstractClient {
 		try {
 			new SochaClientMain(host, port, reservation, strategy);
 		} catch (Exception e) {
-			logger.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
+			LOGGER.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
 			// System.err
 			// .println("Beim Starten den Clients ist ein Fehler aufgetreten:");
 			e.printStackTrace();
