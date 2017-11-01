@@ -78,7 +78,7 @@ public class SmartLogic implements IGameHandler {
 			increasedSearchDepth = true;
 		}
 		
-		// Picks the best move either from the ShallowStrategy or the AI
+		// Picks the best move from the AI
 		HUIMove huiMove = (HUIMove) ai.autoMove();
 		Move scMove = huiMove.getSCMove();
 
