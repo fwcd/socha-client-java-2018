@@ -3,6 +3,8 @@ package com.thedroide.clienttester.ui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -46,7 +48,15 @@ public class ClientTesterApp {
 	public ClientTesterApp(String title, int width, int height) {
 		view = new JFrame(title);
 		view.setSize(width, height);
-		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		view.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		view.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				System.exit(0);
+			}
+			
+		});
 		view.setLayout(new BorderLayout());
 		
 		// Title and client load buttons
@@ -150,8 +160,8 @@ public class ClientTesterApp {
 				server = new TestServer(serverOutput, mainOutput, serverLoadPane.getName(), serverLoadPane.getFile());
 			}
 			
-			TestClient client1 = new TestClient(client1Output, client1LoadPane.getName(), client1LoadPane.getFile());
-			TestClient client2 = new TestClient(client2Output, client2LoadPane.getName(), client2LoadPane.getFile());
+			TestClient client1 = new TestClient(client1Output, server, client1LoadPane.getName(), client1LoadPane.getFile());
+			TestClient client2 = new TestClient(client2Output, server, client2LoadPane.getName(), client2LoadPane.getFile());
 			
 			runner = new TestGameRunner(mainOutput, server, client1, client2);
 			runThread = new Thread(() -> runner.start(getPort(), getRounds()), "Client Runner Thread");

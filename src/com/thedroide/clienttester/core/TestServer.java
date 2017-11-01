@@ -7,12 +7,17 @@ import java.util.Optional;
 
 public class TestServer extends LaunchableJAR {
 	private OutputLogger mainLogger;
+	private boolean foundWinner = false;
 	
 	public TestServer(OutputLogger output, OutputLogger mainLogger, String name, File file) {
 		super(output, name, file);
 		this.mainLogger = mainLogger;
 	}
 
+	public void resetWinner() {
+		foundWinner = false;
+	}
+	
 	@Override
 	protected Optional<String> handleJAROut(String line) {
 		if (line.contains("<winner")) {
@@ -26,7 +31,10 @@ public class TestServer extends LaunchableJAR {
 					+ winner.get("carrots")
 					+ " Karotten!";
 			
+			foundWinner = true;
 			mainLogger.log(out);
+		} else if (line.contains("<") || line.contains(">")) {
+			return Optional.empty();
 		}
 		
 		return Optional.of(line);
@@ -54,5 +62,14 @@ public class TestServer extends LaunchableJAR {
 	@Override
 	protected String[] getLaunchCommand(int port) {
 		return new String[] {"java", "-jar", getFile().getName()};
+	}
+
+	@Override
+	protected boolean finished() {
+		return false;
+	}
+
+	public boolean foundWinner() {
+		return foundWinner;
 	}
 }

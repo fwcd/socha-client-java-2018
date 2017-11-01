@@ -3,6 +3,8 @@ package com.thedroide.clienttester.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -10,12 +12,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import com.thedroide.clienttester.core.OutputLogger;
+import com.thedroide.clienttester.utils.QueueHandler;
 
 public class OutputPane implements OutputLogger {
 	private static final int BUFFER_LENGTH = 50000; // In characters
 	private final JPanel view;
 	private final JTextArea area;
 	private final JScrollPane scrollPane;
+	
+	private final Queue<String> outQueue = new ArrayDeque<>();
+	private final Thread printThread;
 	
 	public OutputPane() {
 		view = new JPanel();
@@ -28,6 +34,9 @@ public class OutputPane implements OutputLogger {
 		
 		scrollPane = new JScrollPane(area);
 		view.add(scrollPane, BorderLayout.CENTER);
+		
+		printThread = new Thread(new QueueHandler<>(outQueue, this::logDirectly), "Output logging thread");
+		printThread.start();
 	}
 	
 	private String truncate(String text) {
@@ -38,8 +47,7 @@ public class OutputPane implements OutputLogger {
 		}
 	}
 	
-	@Override
-	public void log(String line) {
+	private void logDirectly(String line) {
 		if (line != null) {
 			String prevText = area.getText();
 			area.setText(truncate(prevText) + "\n" + line);
@@ -49,6 +57,11 @@ public class OutputPane implements OutputLogger {
 			
 			view.repaint();
 		}
+	}
+	
+	@Override
+	public void log(String line) {
+		outQueue.offer(line);
 	}
 	
 	@Override
