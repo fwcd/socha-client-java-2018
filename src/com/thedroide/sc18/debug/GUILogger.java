@@ -17,11 +17,23 @@ import javax.swing.JTextArea;
  */
 public class GUILogger {
 	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
-	private static final GUILogger INSTANCE = ENABLED ? new GUILogger() : null;
+	private static final StringBuilder QUEUE = new StringBuilder();
+	private static GUILogger instance = null;
 	
 	private final JFrame view;
 	private final JScrollPane scrollPane;
 	private final JTextArea outputArea;
+	
+	static {
+		// Seperate init thread to speed up startup of the client
+		new Thread(() -> {
+			if (ENABLED) {
+				GUILogger logger = new GUILogger();
+				logger.println(QUEUE.toString());
+				instance = logger;
+			}
+		}, "GUILogger initializer").start();
+	}
 	
 	/**
 	 * Internal singleton initializer.
@@ -51,8 +63,14 @@ public class GUILogger {
 	 * @param s - The object to be printed
 	 */
 	public static void log(Object s) {
+		String out = getPrefix() + (s == null ? "null" : s.toString());
+		
 		if (ENABLED) {
-			INSTANCE.println(getPrefix() + (s == null ? "null" : s.toString()));
+			if (instance == null) {
+				QUEUE.append(s + "\n");
+			} else {
+				instance.println(out);
+			}
 		}
 	}
 

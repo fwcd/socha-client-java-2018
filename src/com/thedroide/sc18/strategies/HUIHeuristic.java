@@ -28,5 +28,5 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return A rating of this move
 	 */
-	public double heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
+	public float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
 }

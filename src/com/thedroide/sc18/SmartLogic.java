@@ -26,21 +26,28 @@ import sc.shared.PlayerColor;
 public class SmartLogic implements IGameHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
 	
-	// Dynamic search depths:
+	// === Parameters that may be tweaked and tested: ==
 	
-	private final int minSearchDepth = 2; // Used during first move due to slow JVM startup
-	private final int maxSearchDepth = 4; // Used for all subsequent moves
+	private final int minSearchDepth = 1; // Used during beginning to slow JVM startup
+	private final int maxSearchDepth = 6; // Used for all subsequent moves
+	
+	private final boolean dynamicSearchDepth = true; // Dynamically modifies search depth based off response times
+	private final int minTime = 200; // in ms - Minimum move time
+	private final int softMaxTime = 1200; // in ms - Maximum move time
+	private final int hardMaxTime = 1800; // in ms - Hard move time limit
+	
+	// == End of parameters ==
 	
 	private SochaClientMain client;
 	private GameState gameState;
 	private Player currentPlayer;
-	
+
+	private int depth = minSearchDepth;
 	private int committedMoves = 0;
-	private boolean increasedSearchDepth = false;
 	
 	private final HUIGamePlay game = new HUIGamePlay();
-	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), minSearchDepth);
-
+	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), depth);
+	
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 
@@ -49,9 +56,9 @@ public class SmartLogic implements IGameHandler {
 	public SmartLogic(SochaClientMain client) {
 		this.client = client;
 		
-		ai.setResponseTime(1500); // TODO: Tweak this value, max response time is IIRC 2000 or 3000
+		ai.setResponseTime(hardMaxTime);
 	}
-
+	
 	/**
 	 * An event handler for the game ending.
 	 */
@@ -70,25 +77,46 @@ public class SmartLogic implements IGameHandler {
 	public void onRequestAction() {
 		long startTime = System.currentTimeMillis();
 		LOG.info("Move requested.");
-
-		GUILogger.log("Initial player turn: " + gameState.getCurrentPlayerColor() + " with board " + game.toString());
 		
-		if (committedMoves > 0 && !increasedSearchDepth) {
-			ai.setLevel(maxSearchDepth);
-			increasedSearchDepth = true;
+		GUILogger.log(
+				"Player turn: "
+				+ gameState.getCurrentPlayerColor()
+				+ " with board "
+				+ game.toString()
+				+ " and tree depth "
+				+ Integer.toString(depth)
+		);
+		
+		if (!dynamicSearchDepth) {
+			if (committedMoves == 1) {
+				setDepth(maxSearchDepth);
+			}
 		}
 		
 		// Picks the best move from the AI
 		HUIMove huiMove = (HUIMove) ai.autoMove();
 		Move scMove = huiMove.getSCMove();
-
-		committedMoves++;
-		
-		long nowTime = System.currentTimeMillis();
-		GUILogger.log("Committed " + huiMove + " in " + Long.toString(nowTime - startTime) + "ms");
 		
 		scMove.orderActions();
 		sendAction(scMove);
+
+		committedMoves++;
+		int responseTime = (int) (System.currentTimeMillis() - startTime);
+		
+		if (dynamicSearchDepth) {
+			if (responseTime < minTime && depth < maxSearchDepth) {
+				setDepth(++depth);
+			} else if (responseTime > softMaxTime && depth > minSearchDepth) {
+				setDepth(--depth);
+			};
+		}
+		
+		GUILogger.log("Committed " + huiMove + " in " + Integer.toString(responseTime) + "ms");
+	}
+
+	private void setDepth(int depth) {
+		this.depth = depth;
+		ai.setLevel(depth);
 	}
 
 	/**

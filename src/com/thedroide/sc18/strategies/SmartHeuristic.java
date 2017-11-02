@@ -17,8 +17,8 @@ import sc.plugin2018.Player;
  * on player statistics.
  */
 public class SmartHeuristic implements HUIHeuristic {
-	private static final double GOOD_HEURISTIC = 9999999999999999999999999D;
-	private static final double BAD_HEURISTIC = -9999999999999999999999999D;
+	private static final float GOOD_HEURISTIC = Float.POSITIVE_INFINITY;
+	private static final float BAD_HEURISTIC = Float.NEGATIVE_INFINITY;
 	
 	private final int carrotWeight = 1;
 	private final int saladWeight = 256;
@@ -27,16 +27,15 @@ public class SmartHeuristic implements HUIHeuristic {
 	// TODO: Prevent "drop carrot"/"take carrot"-loop somehow
 	
 	@Override
-	public double heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+	public float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
 		if (move.isDiscarded()) {
 			return BAD_HEURISTIC;
 		}
 		
 		try {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
-			
-			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
 			Player playerAfterMove = player.getSCPlayer(gameAfterMove.getSCState());
+			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
 			if (playerAfterMove.inGoal()) {
@@ -55,7 +54,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
 			int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
 			
-			double rating = saladRating + fieldRating + carrotRating;
+			float rating = saladRating + fieldRating + carrotRating;
 			
 //			GUILogger.log(player + ": " + rating + " results in the board " + gameAfterMove + " using " + move);
 			
@@ -85,7 +84,12 @@ public class SmartHeuristic implements HUIHeuristic {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
 			
 			if (gameAfterMove.getWinner() != null) {
-				GUILogger.log("Found winning move: " + move + " by " + player);
+				GUILogger.log(
+						"Found winning move: "
+						+ move
+						+ " by "
+						+ HUIEnumPlayer.of(gameAfterMove.getWinner())
+				);
 				return true;
 			}
 			
