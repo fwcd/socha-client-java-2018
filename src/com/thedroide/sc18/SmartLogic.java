@@ -28,13 +28,14 @@ public class SmartLogic implements IGameHandler {
 	
 	// === Parameters that may be tweaked and tested: ==
 	
-	private final int minSearchDepth = 1; // Used during beginning to slow JVM startup
-	private final int maxSearchDepth = 6; // Used for all subsequent moves
+	private final int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
+	private final int maxSearchDepth = 6;
 	
 	private final boolean dynamicSearchDepth = true; // Dynamically modifies search depth based off response times
 	private final int minTime = 200; // in ms - Minimum move time
 	private final int softMaxTime = 1200; // in ms - Maximum move time
-	private final int hardMaxTime = 1800; // in ms - Hard move time limit
+	private final int hardMaxTime = 2000; // in ms - Hard move time limit
+	private final int hardMaxBuffer = 800; // in ms - Buffer time, because AI might not be able to respond in hardMaxTime
 	
 	// == End of parameters ==
 	
@@ -56,7 +57,7 @@ public class SmartLogic implements IGameHandler {
 	public SmartLogic(SochaClientMain client) {
 		this.client = client;
 		
-		ai.setResponseTime(hardMaxTime);
+		ai.setResponseTime(hardMaxTime - hardMaxBuffer);
 	}
 	
 	/**

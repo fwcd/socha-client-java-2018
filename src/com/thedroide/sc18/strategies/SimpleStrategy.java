@@ -38,6 +38,8 @@ public class SimpleStrategy implements ShallowStrategy {
 		// than tree searches using minimax. It might be possible using clever
 		// node pruning to address these problems, so for now I've commented
 		// out this code and hope that there will be a more elegant solution.
+		//
+		// If these problems are fixed you may delete this class and ShallowStrategy!
 
 		Player currentPlayer = game.getCurrentPlayer();
 		int index = currentPlayer.getFieldIndex();
