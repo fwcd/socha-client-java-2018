@@ -80,7 +80,7 @@ public class GUILogger {
 	 * @return This Thread's hashCode()
 	 */
 	private static String getPrefix() {
-		return "[" + Integer.toHexString(Thread.currentThread().hashCode()) + "] ";
+		return "[" + Integer.toHexString(Thread.currentThread().hashCode()) + "]\t";
 	}
 	
 	/**

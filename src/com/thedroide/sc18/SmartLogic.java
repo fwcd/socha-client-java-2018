@@ -30,12 +30,12 @@ public class SmartLogic implements IGameHandler {
 	
 	private final int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
 	private final int maxSearchDepth = 6;
+	private final boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
 	
-	private final boolean dynamicSearchDepth = true; // Dynamically modifies search depth based off response times
-	private final int minTime = 200; // in ms - Minimum move time
-	private final int softMaxTime = 1200; // in ms - Maximum move time
-	private final int hardMaxTime = 2000; // in ms - Hard move time limit
-	private final int hardMaxBuffer = 800; // in ms - Buffer time, because AI might not be able to respond in hardMaxTime
+	private final int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
+	private final int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
+	private final int stdMaxTime = 1500; // in ms - Standard time limit, causes AI to finish all current evaluations and return
+	private final int hardMaxTime = 1800; // in ms - Hard move time limit, instantly returns a move (evaluator threads finish in background)
 	
 	// == End of parameters ==
 	
@@ -49,6 +49,9 @@ public class SmartLogic implements IGameHandler {
 	private final HUIGamePlay game = new HUIGamePlay();
 	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), depth);
 	
+	private Thread aiThread = null;
+	private HUIMove aiMove = null;
+	
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 
@@ -57,7 +60,7 @@ public class SmartLogic implements IGameHandler {
 	public SmartLogic(SochaClientMain client) {
 		this.client = client;
 		
-		ai.setResponseTime(hardMaxTime - hardMaxBuffer);
+		ai.setResponseTime(stdMaxTime);
 	}
 	
 	/**
@@ -95,12 +98,36 @@ public class SmartLogic implements IGameHandler {
 		}
 		
 		// Picks the best move from the AI
-		HUIMove huiMove = (HUIMove) ai.autoMove();
-		Move scMove = huiMove.getSCMove();
 		
+		aiThread = new Thread(() -> {
+			// FIXME: Urgent! Fix bug where the AI fails to return anything after an "invalid move"
+			// in the logger and thus relies on picking a (horribly bad) random move as to be seen below
+			
+			aiMove = (HUIMove) ai.autoMove();
+		});
+		aiThread.start();
+		
+		try {
+			aiThread.join(hardMaxTime);
+		} catch (InterruptedException e) {}
+		
+		if (aiMove == null) {
+			// This is a "Killswitch" to handle the case where the AI doesn't return in time - hopefully this does not happen too often
+			
+			// TODO: Store evaluated heuristics somewhere and use that move instead
+			// TODO: The lines below may return a horribly bad move
+			game.setSCState(gameState);
+			aiMove = (HUIMove) game.getLegalMoves()[0]; // FIXME: Bug causing the game to return an illegal move
+		}
+		
+		// Some boilerplate required to send the move
+		
+		Move scMove = aiMove.getSCMove();
 		scMove.orderActions();
 		sendAction(scMove);
-
+		
+		// Dynamic customization of response times
+		
 		committedMoves++;
 		int responseTime = (int) (System.currentTimeMillis() - startTime);
 		
@@ -112,7 +139,7 @@ public class SmartLogic implements IGameHandler {
 			};
 		}
 		
-		GUILogger.log("Committed " + huiMove + " in " + Integer.toString(responseTime) + "ms");
+		GUILogger.log("Committed " + aiMove + " in " + Integer.toString(responseTime) + "ms");
 	}
 
 	private void setDepth(int depth) {
