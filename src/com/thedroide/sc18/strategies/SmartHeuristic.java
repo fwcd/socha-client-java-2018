@@ -24,8 +24,6 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int saladWeight = 256;
 	private final int fieldIndexWeight = 2;
 	
-	// TODO: Prevent "drop carrot"/"take carrot"-loop somehow
-	
 	@Override
 	public float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
 		if (move.isDiscarded()) {

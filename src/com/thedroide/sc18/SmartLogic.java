@@ -49,7 +49,7 @@ public class SmartLogic implements IGameHandler {
 	private final HUIGamePlay game = new HUIGamePlay();
 	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), depth);
 	
-	private Thread aiThread = null;
+	private AIThread aiThread = null;
 	private HUIMove aiMove = null;
 	
 	/**
@@ -99,25 +99,28 @@ public class SmartLogic implements IGameHandler {
 		
 		// Picks the best move from the AI
 		
-		aiThread = new Thread(() -> {
-			// FIXME: Urgent! Fix bug where the AI fails to return anything after an "invalid move"
-			// in the logger and thus relies on picking a (horribly bad) random move as to be seen below
-			
-			aiMove = (HUIMove) ai.autoMove();
-		});
+		if (aiThread != null) {
+			aiThread.discard(); // Discard old thread
+		}
+		
+		aiThread = new AIThread(ai);
 		aiThread.start();
 		
-		try {
-			aiThread.join(hardMaxTime);
-		} catch (InterruptedException e) {}
+		if (aiThread.join(hardMaxTime)) {
+			aiMove = aiThread.getNullableMove();
+		} else {
+			aiMove = null;
+		}
+		
+		// FIXME: FATAL bug where AI returns an invalid move and then never
+		// responds in time anymore (thus has to always rely on the killswitch)
 		
 		if (aiMove == null) {
 			// This is a "Killswitch" to handle the case where the AI doesn't return in time - hopefully this does not happen too often
-			
 			// TODO: Store evaluated heuristics somewhere and use that move instead
 			// TODO: The lines below may return a horribly bad move
 			game.setSCState(gameState);
-			aiMove = (HUIMove) game.getLegalMoves()[0]; // FIXME: Bug causing the game to return an illegal move
+			aiMove = (HUIMove) game.getLegalMoves()[0]; // FIXME: Bug where an invalid move is returned here (I have no idea how to fix this)
 		}
 		
 		// Some boilerplate required to send the move

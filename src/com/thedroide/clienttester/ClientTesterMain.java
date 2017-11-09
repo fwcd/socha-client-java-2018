@@ -9,6 +9,8 @@ import com.thedroide.clienttester.ui.ClientTesterApp;
  * may be used to test clients against each other.
  */
 public class ClientTesterMain {
+	// TODO: Rework client-tester to use the official test server/client setup
+	
 	public static void main(String[] args) {
 		new ClientTesterApp("Software Challenge Client Tester", 640, 480);
 	}
