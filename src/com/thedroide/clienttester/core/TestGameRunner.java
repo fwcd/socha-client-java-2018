@@ -1,60 +1,50 @@
 package com.thedroide.clienttester.core;
 
+import java.util.function.BooleanSupplier;
+
 public class TestGameRunner {
-	private final TestServer server;
-	private final OutputLogger output;
-	private final TestClient client1;
-	private final TestClient client2;
+	private final ServerJAR server;
+	private final TesterJAR tester;
 	
-	public TestGameRunner(OutputLogger output, TestServer server, TestClient client1, TestClient client2) {
-		this.output = output;
+	public TestGameRunner(ServerJAR server, TesterJAR tester) {
 		this.server = server;
-		this.client1 = client1;
-		this.client2 = client2;
+		this.tester = tester;
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			if (server != null) {
 				server.kill();
 			}
 			
-			if (client1 != null) {
-				client1.kill();
-			}
-			
-			if (client2 != null) {
-				client2.kill();
+			if (tester != null) {
+				tester.kill();
 			}
 		}));
 	}
 	
-	public void start(int port, int rounds) {
-		output.clear();
+	private void waitUntil(BooleanSupplier condition, long timeout) {
+		long start = System.currentTimeMillis();
 		
-		if (!server.isAlive()) {
-			server.launch(port);
-			
+		while (!condition.getAsBoolean() && (System.currentTimeMillis() - start) < timeout) {
 			try {
-				output.log("Starting soon...");
-				Thread.sleep(1500);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
-				return;
+				throw new RuntimeException(e);
 			}
 		}
+	}
+	
+	public void start(int port, int rounds) {
+		if (!server.isAlive()) {
+			server.launch(port);
+			waitUntil(server::isReady, 1500);
+		}
 		
-		for (int i=0; i<rounds; i++) {
-			output.log("\n==== Round " + Integer.toString(i) + " ====\n");
-			
-			client1.launch(port);
-			client2.launch(port);
-			
-			try {
-				client1.waitFor();
-				client2.waitFor();
-			} catch (InterruptedException e) {
-				client1.kill();
-				client2.kill();
-				break;
-			}
+		tester.launch(port, rounds);
+		
+		try {
+			tester.waitFor();
+		} catch (InterruptedException e) {
+			tester.kill();
 		}
 	}
 }

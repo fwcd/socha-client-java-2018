@@ -24,7 +24,7 @@ public class LoaderPane {
 	private final JLabel fileLabel;
 	private final JTextField nameField;
 	
-	public LoaderPane(JFileChooser fileChooser, boolean isClient, int clientID) {
+	public LoaderPane(JFileChooser fileChooser, String name) {
 		this.fileChooser = fileChooser;
 		
 		// GUI
@@ -32,7 +32,7 @@ public class LoaderPane {
 		view = new JPanel();
 		view.setLayout(new GridLayout(3, 1));
 		
-		selectButton = new JButton("Select " + (isClient ? "Client " + Integer.toString(clientID) : "Server"));
+		selectButton = new JButton("Select " + name);
 		selectButton.addActionListener(l -> chooseFile());
 		view.add(selectButton);
 		

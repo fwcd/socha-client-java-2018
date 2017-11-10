@@ -9,7 +9,11 @@ import java.util.Queue;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import com.thedroide.clienttester.core.OutputLogger;
 import com.thedroide.clienttester.utils.QueueHandler;
@@ -17,8 +21,11 @@ import com.thedroide.clienttester.utils.QueueHandler;
 public class OutputPane implements OutputLogger {
 	private static final int BUFFER_LENGTH = 50000; // In characters
 	private final JPanel view;
-	private final JTextArea area;
+	private final JTextPane area;
 	private final JScrollPane scrollPane;
+
+	private final StyledDocument doc;
+	private final Style style;
 	
 	private final Queue<String> outQueue = new ArrayDeque<>();
 	private final Thread printThread;
@@ -28,9 +35,12 @@ public class OutputPane implements OutputLogger {
 		view.setLayout(new BorderLayout());
 		view.setPreferredSize(new Dimension(150, 150));
 		
-		area = new JTextArea();
+		area = new JTextPane();
 		area.setForeground(Color.WHITE);
 		area.setBackground(Color.BLACK);
+		
+		doc = area.getStyledDocument();
+		style = doc.addStyle("ColoredLog", null);
 		
 		scrollPane = new JScrollPane(area);
 		view.add(scrollPane, BorderLayout.CENTER);
@@ -39,23 +49,41 @@ public class OutputPane implements OutputLogger {
 		printThread.start();
 	}
 	
-	private String truncate(String text) {
-		if (text.length() > BUFFER_LENGTH) {
-			return text.substring(text.length() - BUFFER_LENGTH);
-		} else {
-			return text;
+	private void truncate() {
+		if (doc.getLength() > BUFFER_LENGTH) {
+			try {
+				doc.remove(0, 5);
+			} catch (BadLocationException e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 	
 	private void logDirectly(String line) {
 		if (line != null) {
-			String prevText = area.getText();
-			area.setText(truncate(prevText) + "\n" + line);
+			truncate();
+			int length = doc.getLength();
 			
-			JScrollBar bar = scrollPane.getVerticalScrollBar();
-			bar.setValue(bar.getMaximum());
+			StyleConstants.setForeground(style, getColor(line));
+			try {
+				doc.insertString(length, line + "\n", style);
+			} catch (BadLocationException e) {
+				throw new RuntimeException(e);
+			}
+			
+			area.setCaretPosition(length);
 			
 			view.repaint();
+		}
+	}
+	
+	private Color getColor(String line) {
+		if (line.contains("WARN")) {
+			return Color.YELLOW;
+		} else if (line.contains("DEBUG")) {
+			return Color.CYAN;
+		} else {
+			return Color.WHITE;
 		}
 	}
 	

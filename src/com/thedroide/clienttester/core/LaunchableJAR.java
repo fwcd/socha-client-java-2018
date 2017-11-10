@@ -53,10 +53,8 @@ public abstract class LaunchableJAR {
 		}, "Running JAR Thread").start();
 	}
 	
-	protected abstract boolean finished();
-	
 	public void waitFor() throws InterruptedException {
-		while (!isAlive() || !finished()) {
+		while (!isAlive()) {
 			Thread.sleep(100);
 		}
 	}
