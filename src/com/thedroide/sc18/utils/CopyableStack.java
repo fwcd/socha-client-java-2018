@@ -10,7 +10,7 @@ import java.util.function.UnaryOperator;
  * 
  * @param <T> - The stack item type
  */
-public class CopyableStack<T> {
+public class CopyableStack<T> implements Stack<T> {
 	private Deque<T> data = new ArrayDeque<>();
 	
 	/**
@@ -36,6 +36,7 @@ public class CopyableStack<T> {
 	 * 
 	 * @param item - The item to be added
 	 */
+	@Override
 	public void push(T item) {
 		data.push(item);
 	}
@@ -45,6 +46,7 @@ public class CopyableStack<T> {
 	 * 
 	 * @return The removed item.
 	 */
+	@Override
 	public T pop() {
 		return data.pop();
 	}
@@ -54,6 +56,7 @@ public class CopyableStack<T> {
 	 * 
 	 * @return The top-most item from the stack
 	 */
+	@Override
 	public T peek() {
 		return data.peek();
 	}
@@ -63,6 +66,7 @@ public class CopyableStack<T> {
 	 * 
 	 * @return The amount of items held by this stack
 	 */
+	@Override
 	public int size() {
 		return data.size();
 	}
@@ -72,10 +76,12 @@ public class CopyableStack<T> {
 	 * 
 	 * @return Whether this stack is empty
 	 */
+	@Override
 	public boolean isEmpty() {
 		return data.isEmpty();
 	}
 	
+	@Override
 	public void clear() {
 		data.clear();
 	}
@@ -85,6 +91,7 @@ public class CopyableStack<T> {
 	 * 
 	 * @param base - The only item in the stack after rebasing
 	 */
+	@Override
 	public void rebase(T base) {
 		clear();
 		push(base);
