@@ -122,6 +122,8 @@ public class HUIGamePlay extends AbstractGame {
 
 	@Override
 	protected boolean pushMove(GameMove move) {
+		GameState newState = null;
+		
 		try {
 			HUIMove huiMove = (HUIMove) move;
 			
@@ -131,12 +133,15 @@ public class HUIGamePlay extends AbstractGame {
 				return false;
 			}
 			
-			GameState newState = getSCState().clone();
+			// FIXME: Unfinished
+			
+			newState = getSCState().clone();
 			huiMove.getSCMove().perform(newState);
 			pushSCState(newState);
 			return true;
 		} catch (CloneNotSupportedException | InvalidMoveException e) {
-			GUILogger.log("Invalid move: " + move + " from " + toString());
+			e.printStackTrace(GUILogger.getWriter());
+			GUILogger.log("Invalid move: " + move + " - legal moves: " + newState.getPossibleMoves().toString());
 			return false;
 		}
 	}
@@ -180,14 +185,4 @@ public class HUIGamePlay extends AbstractGame {
 
 		return clone;
 	}
-
-//	@Override
-//	public GamePlay spawnChild(GameMove move) throws GameRuntimeException {
-//		if (((HUIMove) move).isSkip()) {
-//			try {
-//				GUILogger.log(">> MOVE: " + move + " vs legal moves: " + Arrays.toString(clone().getLegalMoves()));
-//			} catch (Exception e) {}
-//		}
-//		return super.spawnChild(move);
-//	}
 }

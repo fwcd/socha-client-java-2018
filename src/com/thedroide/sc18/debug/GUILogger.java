@@ -3,6 +3,8 @@ package com.thedroide.sc18.debug;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
@@ -18,6 +20,7 @@ import javax.swing.JTextArea;
 public class GUILogger {
 	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
 	private static final StringBuilder QUEUE = new StringBuilder();
+	private static final PrintWriter WRITER;
 	private static GUILogger instance = null;
 	
 	private final JFrame view;
@@ -25,6 +28,30 @@ public class GUILogger {
 	private final JTextArea outputArea;
 	
 	static {
+		WRITER = new PrintWriter(new ByteArrayOutputStream(0)) {
+
+			@Override
+			public void write(String s) {
+				log(s);
+			}
+
+			@Override
+			public void write(char[] buf, int off, int len) {
+				log(new String(buf));
+			}
+
+			@Override
+			public void write(char[] buf) {
+				log(new String(buf));
+			}
+
+			@Override
+			public void write(String s, int off, int len) {
+				log(s);
+			}
+			
+		};
+		
 		// Seperate init thread to speed up startup of the client
 		new Thread(() -> {
 			if (ENABLED) {
@@ -53,6 +80,10 @@ public class GUILogger {
 		
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		view.setVisible(true);
+	}
+
+	public static PrintWriter getWriter() {
+		return WRITER;
 	}
 	
 	/**
