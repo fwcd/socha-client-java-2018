@@ -7,7 +7,6 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;

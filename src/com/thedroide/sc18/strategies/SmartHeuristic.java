@@ -38,7 +38,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			if (playerAfterMove.inGoal()) {
 				// Obviously a very good rating if the player reaches the goal:
-				GUILogger.log(playerAfterMove.getPlayerColor() + " in goal");
+				GUILogger.println(playerAfterMove.getPlayerColor() + " in goal");
 				return GOOD_HEURISTIC;
 			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
 				return BAD_HEURISTIC;
@@ -58,7 +58,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return rating;
 		} catch (GameRuntimeException e) {
-			GUILogger.log("Warning: " + e.getMessage());
+			GUILogger.println("Warning: " + e.getMessage());
 			return BAD_HEURISTIC;
 		}
 	}
@@ -82,7 +82,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
 			
 			if (gameAfterMove.getWinner() != null) {
-				GUILogger.log(
+				GUILogger.println(
 						"Found winning move: "
 						+ move
 						+ " by "
@@ -93,7 +93,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return false;
 		} catch (Exception e) {
-			GUILogger.log("ERROR: " + e.getMessage());
+			GUILogger.println("ERROR: " + e.getMessage());
 			return false;
 		}
 	}

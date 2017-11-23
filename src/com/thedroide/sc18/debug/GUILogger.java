@@ -3,13 +3,14 @@ package com.thedroide.sc18.debug;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import com.thedroide.sc18.utils.CustomPrintWriter;
 
 /**
  * A graphical logger window to ease debugging when
@@ -28,35 +29,13 @@ public class GUILogger {
 	private final JTextArea outputArea;
 	
 	static {
-		WRITER = new PrintWriter(new ByteArrayOutputStream(0)) {
-
-			@Override
-			public void write(String s) {
-				log(s);
-			}
-
-			@Override
-			public void write(char[] buf, int off, int len) {
-				log(new String(buf));
-			}
-
-			@Override
-			public void write(char[] buf) {
-				log(new String(buf));
-			}
-
-			@Override
-			public void write(String s, int off, int len) {
-				log(s);
-			}
-			
-		};
+		WRITER = new CustomPrintWriter(GUILogger::println);
 		
 		// Seperate init thread to speed up startup of the client
 		new Thread(() -> {
 			if (ENABLED) {
 				GUILogger logger = new GUILogger();
-				logger.println(QUEUE.toString());
+				logger.writeln(QUEUE.toString());
 				instance = logger;
 			}
 		}, "GUILogger initializer").start();
@@ -81,9 +60,21 @@ public class GUILogger {
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		view.setVisible(true);
 	}
-
-	public static PrintWriter getWriter() {
-		return WRITER;
+	
+	private static void print(Object s) {
+		String out = getPrefix() + (s == null ? "null" : s.toString());
+		
+		if (ENABLED) {
+			if (instance == null) {
+				QUEUE.append(s);
+			} else {
+				instance.write(out);
+			}
+		}
+	}
+	
+	public static void printStack(Throwable t) {
+		t.printStackTrace(WRITER);
 	}
 	
 	/**
@@ -93,16 +84,8 @@ public class GUILogger {
 	 * 
 	 * @param s - The object to be printed
 	 */
-	public static void log(Object s) {
-		String out = getPrefix() + (s == null ? "null" : s.toString());
-		
-		if (ENABLED) {
-			if (instance == null) {
-				QUEUE.append(s + "\n");
-			} else {
-				instance.println(out);
-			}
-		}
+	public static void println(Object s) {
+		print(s + "\n");
 	}
 
 	/**
@@ -114,14 +97,18 @@ public class GUILogger {
 		return "[" + Integer.toHexString(Thread.currentThread().hashCode()) + "]\t";
 	}
 	
+	private void writeln(String s) {
+		write(s + "\n");
+	}
+	
 	/**
-	 * Prints a String to a new line on this
+	 * Writes a String to a new line on this
 	 * window. Input should not be null.
 	 * 
 	 * @param s - The String to be printed
 	 */
-	private void println(String s) {
-		outputArea.setText(outputArea.getText() + "\n" + s);
+	private void write(String s) {
+		outputArea.setText(outputArea.getText() + s);
 		
 		JScrollBar bar = scrollPane.getVerticalScrollBar();
 		bar.setValue(bar.getMaximum());

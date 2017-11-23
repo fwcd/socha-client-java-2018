@@ -139,9 +139,13 @@ public class HUIGamePlay extends AbstractGame {
 			huiMove.getSCMove().perform(newState);
 			pushSCState(newState);
 			return true;
-		} catch (CloneNotSupportedException | InvalidMoveException e) {
-			e.printStackTrace(GUILogger.getWriter());
-			GUILogger.log("Invalid move: " + move + " - legal moves: " + newState.getPossibleMoves().toString());
+		} catch (CloneNotSupportedException e) {
+			GUILogger.println("Invalid clone:");
+			GUILogger.printStack(e);
+			return false;
+		} catch (InvalidMoveException e) {
+			GUILogger.println("Invalid move: " + move + " - legal moves: " + newState.getPossibleMoves().toString());
+			GUILogger.printStack(e);
 			return false;
 		}
 	}

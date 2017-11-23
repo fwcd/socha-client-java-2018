@@ -19,7 +19,7 @@ public enum LogicFactory {
 	SIMPLE(SimpleLogic::new), // Die SimpleClient-Logik
 	SMART(SmartLogic::new); // Unsere Strategie
 
-	private static final Logger	LOGGER = LoggerFactory.getLogger(LogicFactory.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LogicFactory.class);
 	private final LogicBuilder builder;
 
 	private LogicFactory(LogicBuilder builder) {

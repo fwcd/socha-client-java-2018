@@ -80,7 +80,7 @@ public class SmartLogic implements IGameHandler {
 		long startTime = System.currentTimeMillis();
 		LOG.info("Move requested.");
 		
-		GUILogger.log(
+		GUILogger.println(
 				"Player turn: "
 				+ gameState.getCurrentPlayerColor()
 				+ " with board "
@@ -140,7 +140,7 @@ public class SmartLogic implements IGameHandler {
 			};
 		}
 		
-		GUILogger.log("Committed " + aiMove + " in " + Integer.toString(responseTime) + "ms");
+		GUILogger.println("Committed " + aiMove + " in " + Integer.toString(responseTime) + "ms");
 	}
 	
 	/**
