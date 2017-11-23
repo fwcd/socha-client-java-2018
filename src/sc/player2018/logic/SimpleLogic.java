@@ -8,7 +8,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sc.player2018.SochaClientMain;
+import sc.plugin2018.AbstractClient;
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
 import sc.plugin2018.Card;
@@ -30,7 +30,7 @@ import sc.shared.PlayerColor;
  * Konsolenausgaben gemacht.
  */
 public class SimpleLogic implements IGameHandler {
-	private SochaClientMain client;
+	private AbstractClient client;
 	private GameState gameState;
 	private Player currentPlayer;
 
@@ -48,7 +48,7 @@ public class SimpleLogic implements IGameHandler {
 	 *            Der Zugrundeliegende Client der mit dem Spielserver kommunizieren
 	 *            kann.
 	 */
-	public SimpleLogic(SochaClientMain client) {
+	public SimpleLogic(AbstractClient client) {
 		this.client = client;
 	}
 

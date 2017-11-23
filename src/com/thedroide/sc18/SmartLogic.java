@@ -9,7 +9,7 @@ import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
 
-import sc.player2018.SochaClientMain;
+import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.IGameHandler;
 import sc.plugin2018.Move;
@@ -39,7 +39,7 @@ public class SmartLogic implements IGameHandler {
 	
 	// == End of parameters ==
 	
-	private SochaClientMain client;
+	private AbstractClient client;
 	private GameState gameState;
 	private Player currentPlayer;
 
@@ -57,7 +57,7 @@ public class SmartLogic implements IGameHandler {
 	 * 
 	 * @param SochaClientMain - The client itself
 	 */
-	public SmartLogic(SochaClientMain client) {
+	public SmartLogic(AbstractClient client) {
 		this.client = client;
 		
 		ai.setResponseTime(stdMaxTime);
@@ -70,8 +70,6 @@ public class SmartLogic implements IGameHandler {
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
 		LOG.info("Game ended.");
 	}
-
-	// TODO: Implement multithreading (GameDriver calculating silently while the opponent moves)
 	
 	/**
 	 * Called whenever a turn is requested.
@@ -144,7 +142,12 @@ public class SmartLogic implements IGameHandler {
 		
 		GUILogger.log("Committed " + aiMove + " in " + Integer.toString(responseTime) + "ms");
 	}
-
+	
+	/**
+	 * Sets the game tree depth.
+	 * 
+	 * @param depth - The new depth of the search tree
+	 */
 	private void setDepth(int depth) {
 		this.depth = depth;
 		ai.setLevel(depth);
@@ -168,8 +171,8 @@ public class SmartLogic implements IGameHandler {
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
-		
-		// TODO: Multithreading, background calculation?
+
+		// TODO: Let the GameDriver calculate silently while the opponent moves (multithreading?)
 		
 		game.setSCState(gameState);
 		

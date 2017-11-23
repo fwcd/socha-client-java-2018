@@ -16,18 +16,14 @@ import sc.plugin2018.IGameHandler;
  * @author and
  */
 public enum LogicFactory {
-	// Verfuegbare Taktiken (Implementierungen des IGameHandler) muessen hier
-	// eingetragen wie im Beispiel eingetragen und ihre Klasse angegeben werden
-	SIMPLE(SimpleLogic.class),
+	SIMPLE(SimpleLogic::new), // Die SimpleClient-Logik
+	SMART(SmartLogic::new); // Unsere Strategie
 
-	// Unsere Strategie
-	SMART(SmartLogic.class);
-
-	private Class<? extends IGameHandler> logic;
 	private static final Logger	LOGGER = LoggerFactory.getLogger(LogicFactory.class);
+	private final LogicBuilder builder;
 
-	private LogicFactory(Class<? extends IGameHandler> chosenLogic) {
-		logic = chosenLogic;
+	private LogicFactory(LogicBuilder builder) {
+		this.builder = builder;
 	}
 
 	/**
@@ -40,10 +36,8 @@ public enum LogicFactory {
 	 *             Wenn etwas schief gelaufen ist und keine Instanz erstellt
 	 *             werden konnte, wird eine Exception geworfen!
 	 */
-	public IGameHandler getInstance(AbstractClient client) throws Exception {
+	public IGameHandler createInstance(AbstractClient client) throws Exception {
 		LOGGER.debug("Erzeuge Instanz von: {}", name());
-		return (IGameHandler) logic.getConstructor(client.getClass())
-				.newInstance(client);
+		return builder.build(client);
 	}
-
 }

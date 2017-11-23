@@ -17,7 +17,6 @@ import sc.shared.SharedConfiguration;
 /**
  * Hauptklasse des Clients, die ueber Konsolenargumente gesteuert werden kann.
  * Sie veranlasst eine Verbindung zum Spielserver und waehlt eine Strategie.
- *
  */
 public class SochaClientMain extends AbstractClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SochaClientMain.class);
@@ -26,12 +25,12 @@ public class SochaClientMain extends AbstractClient {
 		// Launch client
 		super(host, port);
 		
-		// strategie auswaehlen und zuweisen
-		IGameHandler logic = LogicFactory.SMART.getInstance(this);
+		// Choose strategy
+		IGameHandler logic = LogicFactory.SMART.createInstance(this);
 
 		setHandler(logic);
 
-		// einem spiel beitreten
+		// Join a game
 		if (reservation == null || reservation.isEmpty()) {
 			joinAnyGame();
 		} else {
@@ -101,7 +100,7 @@ public class SochaClientMain extends AbstractClient {
 
 	@Override
 	public void onGamePaused(String roomId, SimplePlayer nextPlayer) {
-
+		
 	}
 
 	@Override
