@@ -13,7 +13,7 @@ import javax.swing.JTextArea;
  * A graphical logger window to ease debugging when
  * launching this application through the provided
  * Software Challenge Server in absence of a proper
- * console.
+ * console or debugging environment.
  */
 public class GUILogger {
 	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
