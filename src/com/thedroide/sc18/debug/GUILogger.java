@@ -21,7 +21,7 @@ import com.thedroide.sc18.utils.CustomPrintWriter;
 public class GUILogger {
 	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
 	private static final StringBuilder QUEUE = new StringBuilder();
-	private static final PrintWriter WRITER;
+	private static final PrintWriter WRITER = new CustomPrintWriter(GUILogger::println);
 	private static GUILogger instance = null;
 	
 	private final JFrame view;
@@ -29,8 +29,6 @@ public class GUILogger {
 	private final JTextArea outputArea;
 	
 	static {
-		WRITER = new CustomPrintWriter(GUILogger::println);
-		
 		// Seperate init thread to speed up startup of the client
 		new Thread(() -> {
 			if (ENABLED) {
