@@ -113,18 +113,12 @@ public class SmartLogic implements IGameHandler {
 			aiMove = null;
 		}
 		
-		// FIXME: FATAL bug where AI returns an invalid move and then never
-		// responds in time anymore (thus has to always rely on the killswitch)
-		
 		if (aiMove == null) {
-			// This is a "Killswitch" to handle the case where the AI doesn't return in time - hopefully this does not happen too often
-			// TODO: Store evaluated heuristics somewhere and use that move instead
-			// TODO: The lines below may return a horribly bad move
-			game.setSCState(gameState);
+			// This is a "Killswitch" to handle the case where the AI doesn't return in time
 			aiMove = new HUIMove(
-					HUIEnumPlayer.of(gameState.getCurrentPlayerColor()),
+					HUIEnumPlayer.of(currentPlayer),
 					shallowStrategy.bestMove(gameState)
-			); // FIXME: Bug where an invalid move is returned here (I have no idea how to fix this)
+			);
 		}
 		
 		// Some boilerplate required to send the move
@@ -180,7 +174,7 @@ public class SmartLogic implements IGameHandler {
 
 		// TODO: Let the GameDriver calculate silently while the opponent moves (multithreading?)
 		
-		game.setSCState(gameState);
+		game.setState(gameState);
 		
 		LOG.info("New move: {}", gameState.getTurn());
 		LOG.info("Player: {}", currentPlayer.getPlayerColor());

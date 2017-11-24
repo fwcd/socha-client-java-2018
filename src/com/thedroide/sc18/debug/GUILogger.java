@@ -60,9 +60,9 @@ public class GUILogger {
 	}
 	
 	private static void print(Object s) {
-		String out = getPrefix() + (s == null ? "null" : s.toString());
-		
 		if (ENABLED) {
+			String out = getPrefix() + (s == null ? "null" : s.toString());
+			
 			if (instance == null) {
 				QUEUE.append(s);
 			} else {
@@ -72,7 +72,9 @@ public class GUILogger {
 	}
 	
 	public static void printStack(Throwable t) {
-		t.printStackTrace(WRITER);
+		if (ENABLED) {
+			t.printStackTrace(WRITER);
+		}
 	}
 	
 	/**

@@ -67,6 +67,10 @@ public enum HUIEnumPlayer {
 		}
 	}
 
+	public static HUIEnumPlayer of(sc.plugin2018.Player player) {
+		return of(player.getPlayerColor());
+	}
+
 	/**
 	 * Fetches all the {@link Player} instances of this
 	 * game.

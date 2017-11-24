@@ -19,4 +19,6 @@ public interface Stack<T> {
 	public void clear();
 	
 	public void rebase(T base);
+	
+	public <E> E[] toArray(E[] array);
 }

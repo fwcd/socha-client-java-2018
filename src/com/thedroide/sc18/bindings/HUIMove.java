@@ -22,8 +22,8 @@ import sc.plugin2018.Skip;
 public class HUIMove implements GameMove, Iterable<Action> {
 	private static final long serialVersionUID = -8856272531609224268L;
 
-	private Move move;
-	private HUIEnumPlayer player;
+	private final Move move;
+	private final HUIEnumPlayer player;
 	
 	private boolean discarded = false;
 	

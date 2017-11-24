@@ -108,4 +108,9 @@ public class CopyableStack<T> implements Stack<T> {
 	public String toString() {
 		return data.toString();
 	}
+	
+	@Override
+	public <E> E[] toArray(E[] array) {
+		return data.toArray(array);
+	}
 }

@@ -1,9 +1,14 @@
 package com.thedroide.sc18.bindings;
 
-import com.antelmann.game.AbstractGame;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.antelmann.game.GameMove;
+import com.antelmann.game.GamePlay;
+import com.antelmann.game.GameRuntimeException;
+import com.antelmann.game.GameUtilities;
 import com.thedroide.sc18.debug.GUILogger;
-import com.thedroide.sc18.utils.CopyableStack;
 
 import sc.plugin2018.Field;
 import sc.plugin2018.GameState;
@@ -11,23 +16,31 @@ import sc.plugin2018.Player;
 import sc.shared.InvalidMoveException;
 
 /**
- * Represents a state of the game.<br><br>
+ * Represents a (mutable) state of the game.<br><br>
  * 
  * Provides the foundation for the Game-API
  * to interact with the "Hase und Igel"-game.
  */
-public class HUIGamePlay extends AbstractGame {
+public class HUIGamePlay implements GamePlay {
 	private static final long serialVersionUID = -6693551955267419333L;
 	
-	private CopyableStack<GameState> states = new CopyableStack<>();
+	private GameState state;
+	private List<HUIMove> moveHistory = new ArrayList<>();
+	private List<HUIMove> legalMoves = null;
 
+	// TODO: Thread-safety??
+	
 	/**
-	 * Constructs a new empty {@link HUIGamePlay}.
+	 * Constructs a new empty HUIGamePlay.<br><br>
+	 * 
+	 * This constructor should
+	 * always be used with caution as it might cause NullPointerExceptions
+	 * at unexpected places.
 	 */
 	public HUIGamePlay() {
-		super("HaseUndIgel", 2);
+		
 	}
-
+	
 	/**
 	 * Constructs a new {@link HUIGamePlay} from the
 	 * given {@link GameState} (Software Challenge API).
@@ -35,29 +48,18 @@ public class HUIGamePlay extends AbstractGame {
 	 * @param state - The GameState used as a base
 	 */
 	public HUIGamePlay(GameState state) {
-		this();
-		pushSCState(state);
+		setState(state);
 	}
-
-	/**
-	 * Pushes a new {@link GameState} onto the internal
-	 * state history stack. Note that this is NOT the
-	 * move stack in {@link AbstractGame}.
-	 * 
-	 * @param state
-	 */
-	private void pushSCState(GameState state) {
-		states.push(state);
-	}
-
-	/**
-	 * Discards all previous states and replaces it
-	 * with the given new state.
-	 * 
-	 * @param gameState - The new game state
-	 */
-	public void setSCState(GameState gameState) {
-		states.rebase(gameState);
+	
+	public void setState(GameState state) {
+		try {
+			moveHistory.clear();
+			this.state = state.clone();
+			updateLegalMoves();
+		} catch (CloneNotSupportedException e) {
+			GUILogger.printStack(e);
+			throw new RuntimeException(e);
+		}
 	}
 	
 	/**
@@ -67,7 +69,7 @@ public class HUIGamePlay extends AbstractGame {
 	 * @return The top-most/newest/current GameState from the stack
 	 */
 	public GameState getSCState() {
-		return states.peek();
+		return state;
 	}
 	
 	/**
@@ -110,53 +112,109 @@ public class HUIGamePlay extends AbstractGame {
 		}
 	}
 
-	@Override
-	protected GameMove[] listLegalMoves() {
-		return getSCState()
+	private synchronized void updateLegalMoves() {
+		legalMoves = state
 				.getPossibleMoves()
 				.stream()
 				.map((scMove) -> new HUIMove(nextHUIEnumPlayer(), scMove))
 				.filter((huiMove) -> !huiMove.isSkip())
-				.toArray((size) -> new GameMove[size]);
+				.collect(Collectors.toList());
+	}
+	
+	private String getStats(Player player) {
+		return "{"
+				+ "F: " + Integer.toString(player.getFieldIndex())
+				+ ", S: " + Integer.toString(player.getSalads())
+				+ ", C: " + Integer.toString(player.getCarrots())
+				+ "}";
 	}
 
 	@Override
-	protected boolean pushMove(GameMove move) {
-		GameState newState = null;
-		
+	public String getGameName() {
+		return "HaseUndIgel";
+	}
+
+	@Override
+	public int numberOfPlayers() {
+		return 2;
+	}
+
+	@Override
+	public boolean makeMove(GameMove move) {
 		try {
 			HUIMove huiMove = (HUIMove) move;
 			
 			// Player isn't allowed to skip move if there are other legal moves
 			
-			if (huiMove.isSkip() && listLegalMoves().length > 1) {
-				return false;
-			}
+//			if (huiMove.isSkip() && legalMoves.size() > 1) {
+//				return false;
+//			}
 			
 			// FIXME: Unfinished
 			
-			newState = getSCState().clone();
-			huiMove.getSCMove().perform(newState);
-			pushSCState(newState);
+			huiMove.getSCMove().perform(state);
+			moveHistory.add(huiMove);
+			updateLegalMoves();
 			return true;
-		} catch (CloneNotSupportedException e) {
-			GUILogger.println("Invalid clone:");
-			GUILogger.printStack(e);
-			return false;
 		} catch (InvalidMoveException e) {
-			GUILogger.println("Invalid move: " + move + " - legal moves: " + newState.getPossibleMoves().toString());
+			GUILogger.println("Invalid move: " + move.toString() + " - legal moves: " + state.getPossibleMoves().toString());
 			GUILogger.printStack(e);
 			return false;
 		}
 	}
 
 	@Override
-	protected boolean popMove() {
-		if (states.size() > 1) {
-			states.pop();
-			return true;
-		} else {
-			return false;
+	public GameMove[] getLegalMoves() {
+		return legalMoves.toArray(new GameMove[0]);
+	}
+
+	@Override
+	public boolean isLegalMove(GameMove move) {
+		return legalMoves.contains(move);
+	}
+
+	@Override
+	public GameMove[] getMoveHistory() {
+		return moveHistory.toArray(new GameMove[0]);
+	}
+
+	@Override
+	public GameMove[] getRedoList() {
+		return new GameMove[0];
+	}
+
+	@Override
+	public boolean undoLastMove() {
+		return false;
+	}
+
+	@Override
+	public boolean redoMove() {
+		return false;
+	}
+	
+	public boolean gameOver() {
+		if (getLegalMoves().length == 0) return true;
+		return false;
+	}
+
+	@Override
+	public double getResult(int playerRole) throws GameRuntimeException {
+		if (!gameOver()) {
+            throw new GameRuntimeException(this, "The game is still in progress and thus doesn't have a result yet!");
+        }
+        return GameUtilities.checkForWin(this, new int[] {playerRole});
+	}
+
+	@Override
+	public GamePlay spawnChild(GameMove move) throws GameRuntimeException {
+		try {
+			HUIGamePlay child = clone();
+			child.makeMove(move);
+			return child;
+		} catch (CloneNotSupportedException e) {
+			GUILogger.printStack(e);
+			throw new GameRuntimeException("Game state couldn't be cloned.", e);
 		}
 	}
 	
@@ -168,24 +226,11 @@ public class HUIGamePlay extends AbstractGame {
 				+ " (" + state.getCurrentPlayerColor().toString() + "'s turn)";
 	}
 	
-	private String getStats(Player player) {
-		return "{"
-				+ "F: " + Integer.toString(player.getFieldIndex())
-				+ ", S: " + Integer.toString(player.getSalads())
-				+ ", C: " + Integer.toString(player.getCarrots())
-				+ "}";
-	}
-	
 	@Override
 	public HUIGamePlay clone() throws CloneNotSupportedException {
 		HUIGamePlay clone = (HUIGamePlay) super.clone();
-		clone.states = states.copy((original) -> {
-			try {
-				return (GameState) original.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		clone.state = state.clone();
+		clone.moveHistory = new ArrayList<>(moveHistory);
 
 		return clone;
 	}
