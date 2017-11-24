@@ -8,6 +8,8 @@ import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
 import com.thedroide.sc18.bindings.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
+import com.thedroide.sc18.strategies.ShallowStrategy;
+import com.thedroide.sc18.strategies.SimpleStrategy;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
@@ -42,10 +44,11 @@ public class SmartLogic implements IGameHandler {
 	private AbstractClient client;
 	private GameState gameState;
 	private Player currentPlayer;
-
+	
 	private int depth = minSearchDepth;
 	private int committedMoves = 0;
 	
+	private final ShallowStrategy shallowStrategy = new SimpleStrategy();
 	private final HUIGamePlay game = new HUIGamePlay();
 	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), depth);
 	
@@ -118,7 +121,10 @@ public class SmartLogic implements IGameHandler {
 			// TODO: Store evaluated heuristics somewhere and use that move instead
 			// TODO: The lines below may return a horribly bad move
 			game.setSCState(gameState);
-			aiMove = (HUIMove) game.getLegalMoves()[0]; // FIXME: Bug where an invalid move is returned here (I have no idea how to fix this)
+			aiMove = new HUIMove(
+					HUIEnumPlayer.of(gameState.getCurrentPlayerColor()),
+					shallowStrategy.bestMove(gameState)
+			); // FIXME: Bug where an invalid move is returned here (I have no idea how to fix this)
 		}
 		
 		// Some boilerplate required to send the move

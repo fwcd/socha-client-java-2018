@@ -1,11 +1,9 @@
 package com.thedroide.sc18.strategies;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
+import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
 import sc.plugin2018.Card;
@@ -19,28 +17,19 @@ import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
 
 /**
- * Provides a strategy that uses the SimpleClient logic to filter good moves
- * before using any kind of deeper AI like minimax.
- * 
- * @deprecated Use {@link HUIHeuristic} and it's pruneMove() instead.
+ * Horribly messy code providing a somewhat simple
+ * strategy to use (as a last resort - to conform
+ * time limits). This code is directly taken from
+ * {@link SimpleLogic}, which was provided by the
+ * Software Challenge API.
  */
-@Deprecated
 public class SimpleStrategy implements ShallowStrategy {
-	private static final Random RANDOM = new SecureRandom();
-	
 	@Override
-	public Optional<Move> bestMove(GameState game) {
+	public Move bestMove(GameState game) {
 		List<Move> possibleMoves = game.getPossibleMoves();
 		List<Move> saladMoves = new ArrayList<>();
 		List<Move> selectedMoves = new ArrayList<>();
 		
-		// TODO: The problem here is currently that this logic is better
-		// than tree searches using minimax. It might be possible using clever
-		// node pruning to address these problems, so for now I've commented
-		// out this code and hope that there will be a more elegant solution.
-		//
-		// If these problems are fixed you may delete this class and ShallowStrategy!
-
 		Player currentPlayer = game.getCurrentPlayer();
 		int index = currentPlayer.getFieldIndex();
 		
@@ -49,8 +38,8 @@ public class SimpleStrategy implements ShallowStrategy {
 				if (action instanceof Advance) {
 					Advance advance = (Advance) action;
 					if (advance.getDistance() + index == Constants.NUM_FIELDS - 1) {
-						// Choose winning move
-						return Optional.of(move);
+						// Return winning move
+						return move;
 					} else if (game.getBoard().getTypeAt(advance.getDistance() + index) == FieldType.SALAD) {
 						// Remember salad-move
 						saladMoves.add(move);
@@ -93,16 +82,15 @@ public class SimpleStrategy implements ShallowStrategy {
 		}
 		
 		if (!saladMoves.isEmpty()) {
-			return Optional.of(chooseBest(saladMoves));
+			return chooseBest(saladMoves);
 		} else if (!selectedMoves.isEmpty()) {
-			return Optional.of(chooseBest(selectedMoves));
+			return chooseBest(selectedMoves);
+		} else {
+			return chooseBest(possibleMoves);
 		}
-		
-		return Optional.empty();
 	}
 	
 	private Move chooseBest(List<Move> moves) {
-		// Might need some refinements...
-		return moves.get(RANDOM.nextInt(moves.size()));
+		return moves.get(0); // Using computionally efficient 
 	}
 }

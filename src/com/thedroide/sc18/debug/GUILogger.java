@@ -44,7 +44,7 @@ public class GUILogger {
 	 */
 	private GUILogger() {
 		view = new JFrame("GUILogger");
-		view.setMinimumSize(new Dimension(600, 250));
+		view.setMinimumSize(new Dimension(800, 400));
 		view.setLayout(new BorderLayout());
 		
 		outputArea = new JTextArea();
@@ -107,10 +107,9 @@ public class GUILogger {
 	 */
 	private void write(String s) {
 		outputArea.setText(outputArea.getText() + s);
+		view.repaint();
 		
 		JScrollBar bar = scrollPane.getVerticalScrollBar();
 		bar.setValue(bar.getMaximum());
-		
-		view.repaint();
 	}
 }
