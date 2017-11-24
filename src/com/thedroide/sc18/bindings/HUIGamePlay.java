@@ -146,11 +146,12 @@ public class HUIGamePlay implements GamePlay {
 			
 			// Player isn't allowed to skip move if there are other legal moves
 			
-//			if (huiMove.isSkip() && legalMoves.size() > 1) {
-//				return false;
-//			}
-			
-			// FIXME: Unfinished
+			if (huiMove.isSkip() && legalMoves.size() > 1) {
+				// TODO: This block of code shouldn't actually be required...
+				// but I'm not sure if it's needed or not!
+				
+				return false;
+			}
 			
 			huiMove.getSCMove().perform(state);
 			moveHistory.add(huiMove);
