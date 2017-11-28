@@ -18,7 +18,7 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return Whether the move should be pruned
 	 */
-	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
+	boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
 	
 	/**
 	 * Rates a move on the associated game board.
@@ -28,5 +28,5 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return A rating of this move
 	 */
-	public float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
+	float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
 }

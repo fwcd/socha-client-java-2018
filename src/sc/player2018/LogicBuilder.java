@@ -16,5 +16,5 @@ import sc.plugin2018.IGameHandler;
  */
 @FunctionalInterface
 public interface LogicBuilder {
-	public IGameHandler build(AbstractClient client);
+	IGameHandler build(AbstractClient client);
 }

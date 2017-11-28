@@ -20,5 +20,5 @@ public interface ShallowStrategy {
 	 * @param game - The state (before any move)
 	 * @return A good move
 	 */
-	public Move bestMove(GameState game);
+	Move bestMove(GameState game);
 }

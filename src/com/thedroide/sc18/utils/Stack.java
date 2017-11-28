@@ -6,19 +6,19 @@ package com.thedroide.sc18.utils;
  * @param <T> - The item type
  */
 public interface Stack<T> {
-	public void push(T item);
+	void push(T item);
 	
-	public T pop();
+	T pop();
 	
-	public T peek();
+	T peek();
 	
-	public int size();
+	int size();
 	
-	public boolean isEmpty();
+	boolean isEmpty();
 	
-	public void clear();
+	void clear();
 	
-	public void rebase(T base);
+	void rebase(T base);
 	
-	public <E> E[] toArray(E[] array);
+	<E> E[] toArray(E[] array);
 }
