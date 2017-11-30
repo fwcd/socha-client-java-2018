@@ -1,7 +1,5 @@
 package com.thedroide.sc18.strategies;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
@@ -79,8 +77,6 @@ public class SmartHeuristic implements HUIHeuristic {
 
 	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
-		if (ThreadLocalRandom.current().nextInt(100) < 30) return true; // FIXME: Hack
-		
 		try {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
 			

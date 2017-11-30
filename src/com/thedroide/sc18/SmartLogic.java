@@ -30,14 +30,14 @@ public class SmartLogic implements IGameHandler {
 	
 	// === Parameters that may be tweaked and tested: ==
 	
-	private final int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
-	private final int maxSearchDepth = 6;
-	private final boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
+	private int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
+	private int maxSearchDepth = 12;
+	private boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
 	
-	private final int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
-	private final int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
-	private final int stdMaxTime = 1500; // in ms - Standard time limit, causes AI to finish all current evaluations and return
-	private final int hardMaxTime = 1800; // in ms - Hard move time limit, instantly returns a move (evaluator threads finish in background)
+	private int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
+	private int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
+	private int stdMaxTime = 1500; // in ms - Standard time limit, causes AI to finish all current evaluations and return
+	private int hardMaxTime = 1800; // in ms - Hard move time limit, instantly returns a move (evaluator threads finish in background)
 	
 	// == End of parameters ==
 	
@@ -94,10 +94,8 @@ public class SmartLogic implements IGameHandler {
 				+ Integer.toString(depth)
 		);
 		
-		if (!dynamicSearchDepth) {
-			if (committedMoves == 1) {
-				setDepth(maxSearchDepth);
-			}
+		if (!dynamicSearchDepth && committedMoves == 1) {
+			setDepth(maxSearchDepth);
 		}
 		
 		// Picks the best move from the AI
