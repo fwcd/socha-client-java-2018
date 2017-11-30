@@ -1,7 +1,7 @@
 package com.thedroide.sc18.strategies;
 
-import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
+import com.thedroide.sc18.bindings.HUIGamePlay;
+import com.thedroide.sc18.bindings.HUIMove;
 
 /**
  * <b>Quickly</b> calculates a move from a game state (as a last
@@ -20,5 +20,5 @@ public interface ShallowStrategy {
 	 * @param game - The state (before any move)
 	 * @return A good move
 	 */
-	Move bestMove(GameState game);
+	HUIMove bestMove(HUIGamePlay game);
 }

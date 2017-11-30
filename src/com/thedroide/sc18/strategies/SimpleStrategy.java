@@ -3,15 +3,18 @@ package com.thedroide.sc18.strategies;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.thedroide.sc18.bindings.HUIGamePlay;
+import com.thedroide.sc18.bindings.HUIMove;
+
 import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
+import sc.plugin2018.Board;
 import sc.plugin2018.Card;
 import sc.plugin2018.CardType;
 import sc.plugin2018.ExchangeCarrots;
 import sc.plugin2018.FallBack;
 import sc.plugin2018.FieldType;
-import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
@@ -25,57 +28,59 @@ import sc.plugin2018.util.Constants;
  */
 public class SimpleStrategy implements ShallowStrategy {
 	@Override
-	public Move bestMove(GameState game) {
-		List<Move> possibleMoves = game.getPossibleMoves();
-		List<Move> saladMoves = new ArrayList<>();
-		List<Move> selectedMoves = new ArrayList<>();
+	public HUIMove bestMove(HUIGamePlay gamePlay) {
+		List<HUIMove> possibleMoves = gamePlay.getLegalMovesList();
+		List<HUIMove> saladMoves = new ArrayList<>();
+		List<HUIMove> selectedMoves = new ArrayList<>();
+
+		Board board = gamePlay.getBoard();
+		Player player = gamePlay.nextHUIEnumPlayer().getSCPlayer(gamePlay);
+		int index = player.getFieldIndex();
 		
-		Player currentPlayer = game.getCurrentPlayer();
-		int index = currentPlayer.getFieldIndex();
-		
-		for (Move move : possibleMoves) {
-			for (Action action : move.actions) {
+		for (HUIMove huiMove : possibleMoves) {
+			Move move = huiMove.getSCMove();
+			for (Action action : move.getActions()) {
 				if (action instanceof Advance) {
 					Advance advance = (Advance) action;
 					if (advance.getDistance() + index == Constants.NUM_FIELDS - 1) {
 						// Return winning move
-						return move;
-					} else if (game.getBoard().getTypeAt(advance.getDistance() + index) == FieldType.SALAD) {
+						return huiMove;
+					} else if (board.getTypeAt(advance.getDistance() + index) == FieldType.SALAD) {
 						// Remember salad-move
-						saladMoves.add(move);
+						saladMoves.add(huiMove);
 					} else {
 						// Otherwise advance if possible
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				} else if (action instanceof Card) {
 					if (((Card) action).getType() == CardType.EAT_SALAD) {
 						// Remember salad-move
-						saladMoves.add(move);
+						saladMoves.add(huiMove);
 					}
 				} else if (action instanceof ExchangeCarrots) {
 					ExchangeCarrots exchangeCarrots = (ExchangeCarrots) action;
 					if (exchangeCarrots.getValue() == 10
-							&& currentPlayer.getCarrots() < 30
+							&& player.getCarrots() < 30
 							&& index < 40
-							&& !(currentPlayer.getLastNonSkipAction() instanceof ExchangeCarrots)) {
+							&& !(player.getLastNonSkipAction() instanceof ExchangeCarrots)) {
 						// Pick up carrots only when there are too few, the player isn't near the goal
 						// and not two times in a row.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					} else if (exchangeCarrots.getValue() == -10
-							&& currentPlayer.getCarrots() > 30
+							&& player.getCarrots() > 30
 							&& index >= 40) {
 						// Drop carrots only near the goal.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				} else if (action instanceof FallBack) {
 					if (index > 56 // Last salad field
-							&& currentPlayer.getSalads() > 0) {
+							&& player.getSalads() > 0) {
 						// Fall back only at the end when we need to
 						// drop salads.
-						selectedMoves.add(move);
-					} else if (index <= 56 && index - game.getPreviousFieldByType(FieldType.HEDGEHOG, index) < 5) {
+						selectedMoves.add(huiMove);
+					} else if (index <= 56 && index - board.getPreviousFieldByType(FieldType.HEDGEHOG, index) < 5) {
 						// Be cautious when falling back.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				}
 			}
@@ -90,7 +95,7 @@ public class SimpleStrategy implements ShallowStrategy {
 		}
 	}
 	
-	private Move chooseBest(List<Move> moves) {
-		return moves.get(0); // Using computionally efficient 
+	private HUIMove chooseBest(List<HUIMove> moves) {
+		return moves.get(0); // For computational efficiency
 	}
 }

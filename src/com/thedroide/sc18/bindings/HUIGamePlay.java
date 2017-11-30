@@ -1,7 +1,9 @@
 package com.thedroide.sc18.bindings;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import com.antelmann.game.GameMove;
@@ -10,6 +12,7 @@ import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
 import com.thedroide.sc18.debug.GUILogger;
 
+import sc.plugin2018.Board;
 import sc.plugin2018.Field;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Player;
@@ -27,8 +30,6 @@ public class HUIGamePlay implements GamePlay {
 	private GameState state;
 	private List<HUIMove> moveHistory = new ArrayList<>();
 	private List<HUIMove> legalMoves = null;
-
-	// TODO: Thread-safety??
 	
 	/**
 	 * Constructs a new empty HUIGamePlay.<br><br>
@@ -63,23 +64,13 @@ public class HUIGamePlay implements GamePlay {
 	}
 	
 	/**
-	 * Fetches the current {@link GameState} (Software Challenge API)
-	 * associated with this {@link HUIGamePlay}.
-	 * 
-	 * @return The top-most/newest/current GameState from the stack
-	 */
-	public GameState getSCState() {
-		return state;
-	}
-	
-	/**
 	 * Fetches the player who has to commit the next
 	 * move.
 	 * 
 	 * @return The next player as a {@link HUIEnumPlayer}.
 	 */
 	public HUIEnumPlayer nextHUIEnumPlayer() {
-		return HUIEnumPlayer.of(getSCState().getCurrentPlayerColor());
+		return HUIEnumPlayer.of(state.getCurrentPlayerColor());
 	}
 	
 	/**
@@ -89,8 +80,8 @@ public class HUIGamePlay implements GamePlay {
 	 * @return The current field of that player in this state
 	 */
 	public Field fieldOf(HUIEnumPlayer player) {
-		int index = player.getSCPlayer(getSCState()).getFieldIndex();
-		Field field = new Field(getSCState().getBoard().getTypeAt(index));
+		int index = getSCPlayer(player).getFieldIndex();
+		Field field = new Field(state.getBoard().getTypeAt(index));
 		field.setIndex(index);
 		
 		return field;
@@ -103,24 +94,34 @@ public class HUIGamePlay implements GamePlay {
 
 	@Override
 	public int[] getWinner() {
-		if (getSCState().getRedPlayer().inGoal()) {
+		if (state.getRedPlayer().inGoal()) {
 			return new int[] {HUIEnumPlayer.RED.getID()};
-		} else if (getSCState().getBluePlayer().inGoal()) {
+		} else if (state.getBluePlayer().inGoal()) {
 			return new int[] {HUIEnumPlayer.BLUE.getID()};
 		} else {
 			return null;
 		}
 	}
-
+	
+	/**
+	 * Updates the list of legal moves internally. <b>Should
+	 * be called whenever the field "state" is updated!!</b>
+	 */
 	private synchronized void updateLegalMoves() {
 		legalMoves = state
 				.getPossibleMoves()
 				.stream()
-				.map((scMove) -> new HUIMove(nextHUIEnumPlayer(), scMove))
-				.filter((huiMove) -> !huiMove.isSkip())
+				.map(scMove -> new HUIMove(nextHUIEnumPlayer(), scMove))
+				.filter(huiMove -> !huiMove.isSkip())
 				.collect(Collectors.toList());
 	}
 	
+	/**
+	 * Fetches information about a given player.
+	 * 
+	 * @param player - A player (from the software challenge API)
+	 * @return A string representation of the "stats"
+	 */
 	private String getStats(Player player) {
 		return "{"
 				+ "F: " + Integer.toString(player.getFieldIndex())
@@ -140,7 +141,7 @@ public class HUIGamePlay implements GamePlay {
 	}
 
 	@Override
-	public boolean makeMove(GameMove move) {
+	public synchronized boolean makeMove(GameMove move) {
 		try {
 			HUIMove huiMove = (HUIMove) move;
 			
@@ -158,12 +159,32 @@ public class HUIGamePlay implements GamePlay {
 			updateLegalMoves();
 			return true;
 		} catch (InvalidMoveException e) {
-			GUILogger.println("Invalid move: " + move.toString() + " - legal moves: " + state.getPossibleMoves().toString());
-			GUILogger.printStack(e);
+			// This exception is expected to happen, when the hard max time
+			// is reached and a ShallowStrategy is used to determine the best
+			// move in SmartLogic. Thus it is intended that no stacktrace is
+			// printed.
 			return false;
 		}
 	}
-
+	
+	/**
+	 * Fetches the legal moves as a list.
+	 * 
+	 * @return A read-only list containing the possible/legal moves
+	 */
+	public List<HUIMove> getLegalMovesList() {
+		return Collections.unmodifiableList(legalMoves);
+	}
+	
+	/**
+	 * Fetches the game board.
+	 * 
+	 * @return The board instance
+	 */
+	public Board getBoard() {
+		return state.getBoard();
+	}
+	
 	@Override
 	public GameMove[] getLegalMoves() {
 		return legalMoves.toArray(new GameMove[0]);
@@ -181,22 +202,21 @@ public class HUIGamePlay implements GamePlay {
 
 	@Override
 	public GameMove[] getRedoList() {
-		return new GameMove[0];
+		return new GameMove[0]; // Due to undo/redo not being supported
 	}
-
+	
 	@Override
 	public boolean undoLastMove() {
-		return false;
+		return false; // Not supported
 	}
 
 	@Override
 	public boolean redoMove() {
-		return false;
+		return false; // Not supported
 	}
 	
 	public boolean gameOver() {
-		if (getLegalMoves().length == 0) return true;
-		return false;
+		return getLegalMoves().length == 0;
 	}
 
 	@Override
@@ -221,8 +241,6 @@ public class HUIGamePlay implements GamePlay {
 	
 	@Override
 	public String toString() {
-		GameState state = getSCState();
-		
 		return "[Board: R" + getStats(state.getRedPlayer()) + " | " + "B" + getStats(state.getBluePlayer())
 				+ " (" + state.getCurrentPlayerColor().toString() + "'s turn)";
 	}
@@ -234,5 +252,25 @@ public class HUIGamePlay implements GamePlay {
 		clone.moveHistory = new ArrayList<>(moveHistory);
 
 		return clone;
+	}
+	
+	/**
+	 * A bridge method between {@link HUIEnumPlayer} and
+	 * the associated {@link sc.plugin2018.Player} (Software Challenge API).
+	 * 
+	 * @param player - The HUIEnumPlayer
+	 * @return The Player from the Software Challenge API
+	 */
+	protected Player getSCPlayer(HUIEnumPlayer player) {
+		switch (player) {
+		
+		case RED:
+			return state.getRedPlayer();
+		case BLUE:
+			return state.getBluePlayer();
+		default:
+			throw new NoSuchElementException("Couldn't find required player!");
+		
+		}
 	}
 }

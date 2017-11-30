@@ -26,6 +26,7 @@ public class AIThread implements Runnable {
 		if (!started) {
 			thread = new Thread(this, "AIThread");
 			thread.start();
+			started = true;
 		} else {
 			throw new IllegalThreadStateException("Can't start an already started AIThread again!");
 		}

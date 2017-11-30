@@ -26,7 +26,7 @@ import sc.shared.PlayerColor;
  * the Software Challenge API.
  */
 public class SmartLogic implements IGameHandler {
-	private static final Logger LOG = LoggerFactory.getLogger(SmartLogic.class);
+	private static final Logger STD_LOG = LoggerFactory.getLogger(SmartLogic.class);
 	
 	// === Parameters that may be tweaked and tested: ==
 	
@@ -42,7 +42,6 @@ public class SmartLogic implements IGameHandler {
 	// == End of parameters ==
 	
 	private AbstractClient client;
-	private GameState gameState;
 	private Player currentPlayer;
 	
 	private int depth = minSearchDepth;
@@ -54,7 +53,7 @@ public class SmartLogic implements IGameHandler {
 	
 	private AIThread aiThread = null;
 	private HUIMove aiMove = null;
-	
+	 
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 
@@ -71,7 +70,10 @@ public class SmartLogic implements IGameHandler {
 	 */
 	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
-		LOG.info("Game ended.");
+		GUILogger.println("  ======================  ");
+		GUILogger.println("    " + data.getWinners().get(0).getDisplayName().toString() + " WINS!");
+		GUILogger.println("  ======================  ");
+		STD_LOG.info("Game ended.");
 	}
 	
 	/**
@@ -81,11 +83,11 @@ public class SmartLogic implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		long startTime = System.currentTimeMillis();
-		LOG.info("Move requested.");
+		STD_LOG.info("Move requested.");
 		
 		GUILogger.println(
-				"Player turn: "
-				+ gameState.getCurrentPlayerColor()
+				"[Turn]\t"
+				+ game.nextHUIEnumPlayer().name()
 				+ " with board "
 				+ game.toString()
 				+ " and tree depth "
@@ -115,10 +117,7 @@ public class SmartLogic implements IGameHandler {
 		
 		if (aiMove == null) {
 			// This is a "Killswitch" to handle the case where the AI doesn't return in time
-			aiMove = new HUIMove(
-					HUIEnumPlayer.of(currentPlayer),
-					shallowStrategy.bestMove(gameState)
-			);
+			aiMove = shallowStrategy.bestMove(game);
 		}
 		
 		// Some boilerplate required to send the move
@@ -140,7 +139,7 @@ public class SmartLogic implements IGameHandler {
 			};
 		}
 		
-		GUILogger.println("Committed " + aiMove + " in " + Integer.toString(responseTime) + "ms");
+		GUILogger.println("[Committed]\t" + aiMove + " in " + Integer.toString(responseTime) + "ms");
 	}
 	
 	/**
@@ -160,7 +159,7 @@ public class SmartLogic implements IGameHandler {
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
-		LOG.info("Switching turns: " + player.getPlayerColor());
+		STD_LOG.info("Switching turns: " + player.getPlayerColor());
 	}
 
 	/**
@@ -169,15 +168,14 @@ public class SmartLogic implements IGameHandler {
 	 */
 	@Override
 	public void onUpdate(GameState gameState) {
-		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
 
 		// TODO: Let the GameDriver calculate silently while the opponent moves (multithreading?)
 		
 		game.setState(gameState);
 		
-		LOG.info("New move: {}", gameState.getTurn());
-		LOG.info("Player: {}", currentPlayer.getPlayerColor());
+		STD_LOG.info("New move: {}", gameState.getTurn());
+		STD_LOG.info("Player: {}", currentPlayer.getPlayerColor());
 	}
 
 	/**

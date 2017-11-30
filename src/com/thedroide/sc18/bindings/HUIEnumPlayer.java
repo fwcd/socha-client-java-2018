@@ -2,7 +2,6 @@ package com.thedroide.sc18.bindings;
 
 import com.antelmann.game.Player;
 
-import sc.plugin2018.GameState;
 import sc.shared.PlayerColor;
 
 /**
@@ -88,17 +87,8 @@ public enum HUIEnumPlayer {
 	 * @param state - The current game state
 	 * @return The Player from the Software Challenge API
 	 */
-	public sc.plugin2018.Player getSCPlayer(GameState state) {
-		switch (this) {
-		
-		case RED:
-			return state.getRedPlayer();
-		case BLUE:
-			return state.getBluePlayer();
-		default:
-			throw new RuntimeException("Invalid player color!");
-		
-		}
+	public sc.plugin2018.Player getSCPlayer(HUIGamePlay state) {
+		return state.getSCPlayer(this);
 	}
 	
 	/**

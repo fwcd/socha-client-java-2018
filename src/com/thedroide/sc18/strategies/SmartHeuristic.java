@@ -1,5 +1,7 @@
 package com.thedroide.sc18.strategies;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.bindings.HUIEnumPlayer;
 import com.thedroide.sc18.bindings.HUIGamePlay;
@@ -32,13 +34,12 @@ public class SmartHeuristic implements HUIHeuristic {
 		
 		try {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
-			Player playerAfterMove = player.getSCPlayer(gameAfterMove.getSCState());
-			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove.getSCState());
+			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
+			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove);
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
 			if (playerAfterMove.inGoal()) {
 				// Obviously a very good rating if the player reaches the goal:
-				GUILogger.println(playerAfterMove.getPlayerColor() + " in goal");
 				return GOOD_HEURISTIC;
 			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
 				return BAD_HEURISTIC;
@@ -58,7 +59,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return rating;
 		} catch (GameRuntimeException e) {
-			GUILogger.println("Warning: " + e.getMessage());
+			GUILogger.println("[Warn]\t" + e.getMessage());
 			return BAD_HEURISTIC;
 		}
 	}
@@ -78,12 +79,14 @@ public class SmartHeuristic implements HUIHeuristic {
 
 	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+		if (ThreadLocalRandom.current().nextInt(100) < 30) return true; // FIXME: Hack
+		
 		try {
 			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
 			
 			if (gameAfterMove.getWinner() != null) {
 				GUILogger.println(
-						"Found winning move: "
+						"[Info]\tFound winning move: "
 						+ move
 						+ " by "
 						+ HUIEnumPlayer.of(gameAfterMove.getWinner())

@@ -7,6 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A {@link HashMap}-based implementation of an
+ * indexed map.
+ * 
+ * @param <K> - The key type
+ * @param <V> - The value type
+ */
 public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 	private List<K> keyIndex = new ArrayList<>();
 	private Map<K, V> data = new HashMap<>();

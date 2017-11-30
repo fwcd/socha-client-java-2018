@@ -6,9 +6,9 @@ import java.awt.Dimension;
 import java.io.PrintWriter;
 
 import javax.swing.JFrame;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.text.DefaultCaret;
 
 import com.thedroide.sc18.utils.CustomPrintWriter;
 
@@ -51,8 +51,12 @@ public class GUILogger {
 		outputArea.setBackground(Color.BLACK);
 		outputArea.setForeground(Color.WHITE);
 		
+		try {
+			((DefaultCaret) outputArea.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		} catch (ClassCastException e) {}
+		
 		scrollPane = new JScrollPane(outputArea);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		view.add(scrollPane);
 		
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -75,6 +79,13 @@ public class GUILogger {
 		if (ENABLED) {
 			t.printStackTrace(WRITER);
 		}
+	}
+	
+	/**
+	 * Prints an empty line.
+	 */
+	public static void println() {
+		print("\n");
 	}
 	
 	/**
@@ -110,8 +121,5 @@ public class GUILogger {
 	private void write(String s) {
 		outputArea.setText(outputArea.getText() + s);
 		view.repaint();
-		
-		JScrollBar bar = scrollPane.getVerticalScrollBar();
-		bar.setValue(bar.getMaximum());
 	}
 }
