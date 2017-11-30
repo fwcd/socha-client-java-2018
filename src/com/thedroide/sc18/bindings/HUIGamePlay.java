@@ -2,6 +2,7 @@ package com.thedroide.sc18.bindings;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -101,6 +102,10 @@ public class HUIGamePlay implements GamePlay {
 		} else {
 			return null;
 		}
+	}
+	
+	public synchronized void sortLegalMoves(Comparator<HUIMove> comparator) {
+		Collections.sort(legalMoves, comparator);
 	}
 	
 	/**

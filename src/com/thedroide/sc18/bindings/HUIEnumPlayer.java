@@ -10,8 +10,8 @@ import sc.shared.PlayerColor;
  * color and HUIPlayer.
  */
 public enum HUIEnumPlayer {
-	RED(0, new HUIPlayer()),
-	BLUE(1, new HUIPlayer());
+	RED(0, new HUIAutoPlay()),
+	BLUE(1, new HUIAutoPlay());
 	
 	private final int id;
 	private final Player player;

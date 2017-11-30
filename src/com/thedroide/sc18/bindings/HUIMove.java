@@ -53,15 +53,34 @@ public class HUIMove implements GameMove, Iterable<Action> {
 	
 	@Override
 	public int hashCode() {
-//		return move.getActions().hashCode();
-		return toString().hashCode();
+		return move.getActions().hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-//		return move.equals(obj);
-//		return move.getActions().equals(((HUIMove) obj).move.getActions());
-		return toString().equals(obj.toString());
+		return move.equals(obj);
+	}
+	
+	/**
+	 * Fetches the total fields advanced by the player
+	 * with this move.<br><br>
+	 * 
+	 * <b>Note that this method runs in
+	 * linear time and might require "computationally expensive"
+	 * instanceof-checks.</b>
+	 * 
+	 * @return The amount of fields moved forward
+	 */
+	public int getFieldsDelta() {
+		int fieldsDelta = 0;
+		
+		for (Action action : move.getActions()) {
+			if (action instanceof Advance) {
+				fieldsDelta += ((Advance) action).getDistance();
+			}
+		}
+		
+		return fieldsDelta;
 	}
 	
 	public boolean isSkip() {

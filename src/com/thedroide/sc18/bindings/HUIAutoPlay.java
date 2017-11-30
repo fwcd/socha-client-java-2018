@@ -9,14 +9,14 @@ import com.thedroide.sc18.strategies.HUIHeuristic;
 import com.thedroide.sc18.strategies.SmartHeuristic;
 
 /**
- * Represents an abstract player delegating to
+ * Represents an abstract ai player delegating to
  * a {@link HUIHeuristic} that can evaluate a given game state.
  */
-public class HUIPlayer extends TemplatePlayer {
+public class HUIAutoPlay extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 	private final HUIHeuristic heuristic = new SmartHeuristic();
 	
-	public HUIPlayer() {
+	public HUIAutoPlay() {
 		super("HUIPlayer", 2, true);
 	}
 	

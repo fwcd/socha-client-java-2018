@@ -76,9 +76,25 @@ public class SmartHeuristic implements HUIHeuristic {
 	}
 
 	@Override
+	public float quickHeuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+		if (move.isDiscarded()) {
+			return BAD_HEURISTIC;
+		}
+		
+		// This method basically returns the field index of the player BEFORE
+		// the evaluated move. While that might not be the best solution, it
+		// provides a computationally inexpensive evaluation to sort game states
+		// in the tree.
+		
+		// TODO: Use this method somehow (in a similar fashion to orderMoves in GameUtilities.alphaBetaSearch())
+		
+		return player.getSCPlayer(gameBeforeMove).getFieldIndex();
+	}
+
+	@Override
 	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
 		try {
-			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
+			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move); // TODO: Performance optimizations here??
 			
 			if (gameAfterMove.getWinner() != null) {
 				GUILogger.println(
