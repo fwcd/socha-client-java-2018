@@ -1,7 +1,7 @@
 package com.thedroide.sc18.strategies;
 
-import com.thedroide.sc18.bindings.HUIGamePlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIGamePlay;
+import com.thedroide.sc18.core.HUIMove;
 
 /**
  * <b>Quickly</b> calculates a move from a game state (as a last

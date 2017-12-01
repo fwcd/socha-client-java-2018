@@ -1,4 +1,4 @@
-package com.thedroide.sc18.bindings;
+package com.thedroide.sc18.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
+import com.thedroide.sc18.algorithmics.GraphTreeNode;
 import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.Board;

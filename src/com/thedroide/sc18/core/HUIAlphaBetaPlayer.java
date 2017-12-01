@@ -1,4 +1,4 @@
-package com.thedroide.sc18.bindings;
+package com.thedroide.sc18.core;
 
 import com.antelmann.game.CannotPlayGameException;
 import com.antelmann.game.GameMove;
@@ -12,11 +12,11 @@ import com.thedroide.sc18.strategies.SmartHeuristic;
  * Represents an abstract ai player delegating to
  * a {@link HUIHeuristic} that can evaluate a given game state.
  */
-public class HUIAutoPlay extends TemplatePlayer {
+public class HUIAlphaBetaPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 	private final HUIHeuristic heuristic = new SmartHeuristic();
 	
-	public HUIAutoPlay() {
+	public HUIAlphaBetaPlayer() {
 		super("HUIPlayer", 2, true);
 	}
 	

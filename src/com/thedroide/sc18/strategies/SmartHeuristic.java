@@ -1,9 +1,9 @@
 package com.thedroide.sc18.strategies;
 
 import com.antelmann.game.GameRuntimeException;
-import com.thedroide.sc18.bindings.HUIEnumPlayer;
-import com.thedroide.sc18.bindings.HUIGamePlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIEnumPlayer;
+import com.thedroide.sc18.core.HUIGamePlay;
+import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
 
 import sc.plugin2018.Action;
@@ -73,22 +73,6 @@ public class SmartHeuristic implements HUIHeuristic {
 		 */
 		
 		return (fieldsToGoal + 6) / 2;
-	}
-
-	@Override
-	public float quickHeuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
-		if (move.isDiscarded()) {
-			return BAD_HEURISTIC;
-		}
-		
-		// This method basically returns the field index of the player BEFORE
-		// the evaluated move. While that might not be the best solution, it
-		// provides a computationally inexpensive evaluation to sort game states
-		// in the tree.
-		
-		// TODO: Use this method somehow (in a similar fashion to orderMoves in GameUtilities.alphaBetaSearch())
-		
-		return player.getSCPlayer(gameBeforeMove).getFieldIndex();
 	}
 
 	@Override

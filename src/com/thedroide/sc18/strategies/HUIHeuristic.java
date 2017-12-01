@@ -1,8 +1,8 @@
 package com.thedroide.sc18.strategies;
 
-import com.thedroide.sc18.bindings.HUIEnumPlayer;
-import com.thedroide.sc18.bindings.HUIGamePlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIEnumPlayer;
+import com.thedroide.sc18.core.HUIGamePlay;
+import com.thedroide.sc18.core.HUIMove;
 
 /**
  * An API wrapper providing heuristics about
@@ -29,15 +29,4 @@ public interface HUIHeuristic {
 	 * @return A rating of this move
 	 */
 	float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
-	
-	/**
-	 * Provides a quick heuristic mainly used to pre-sort
-	 * moves before moving deeper into the tree.
-	 * 
-	 * @param gameBeforeMove - The game before the move
-	 * @param move - The move to be rated
-	 * @param player - The player who committed the move
-	 * @return A (preferrably) quick rating of this move.
-	 */
-	float quickHeuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
 }

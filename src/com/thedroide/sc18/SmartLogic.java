@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.antelmann.game.GameDriver;
-import com.thedroide.sc18.bindings.HUIEnumPlayer;
-import com.thedroide.sc18.bindings.HUIGamePlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIEnumPlayer;
+import com.thedroide.sc18.core.HUIGamePlay;
+import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.debug.GUILogger;
 import com.thedroide.sc18.strategies.ShallowStrategy;
 import com.thedroide.sc18.strategies.SimpleStrategy;
@@ -53,7 +53,7 @@ public class SmartLogic implements IGameHandler {
 	
 	private AIThread aiThread = null;
 	private HUIMove aiMove = null;
-	 
+	
 	/**
 	 * Creates a new AI-player that commits moves.
 	 * 

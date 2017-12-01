@@ -1,4 +1,4 @@
-package com.thedroide.sc18.bindings;
+package com.thedroide.sc18.core;
 
 import com.antelmann.game.Player;
 
@@ -10,8 +10,8 @@ import sc.shared.PlayerColor;
  * color and HUIPlayer.
  */
 public enum HUIEnumPlayer {
-	RED(0, new HUIAutoPlay()),
-	BLUE(1, new HUIAutoPlay());
+	RED(0, new HUIAlphaBetaPlayer()),
+	BLUE(1, new HUIAlphaBetaPlayer());
 	
 	private final int id;
 	private final Player player;

@@ -1,7 +1,7 @@
 package com.thedroide.sc18;
 
 import com.antelmann.game.AutoPlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIMove;
 
 /**
  * A thread (or more precisely a {@link Runnable}) on which

@@ -3,8 +3,8 @@ package com.thedroide.sc18.strategies;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.thedroide.sc18.bindings.HUIGamePlay;
-import com.thedroide.sc18.bindings.HUIMove;
+import com.thedroide.sc18.core.HUIGamePlay;
+import com.thedroide.sc18.core.HUIMove;
 
 import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.Action;

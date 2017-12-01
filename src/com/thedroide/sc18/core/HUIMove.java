@@ -1,4 +1,4 @@
-package com.thedroide.sc18.bindings;
+package com.thedroide.sc18.core;
 
 import java.util.Iterator;
 
