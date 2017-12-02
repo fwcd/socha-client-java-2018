@@ -9,7 +9,6 @@ import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
 import sc.framework.plugins.SimplePlayer;
-import sc.player2018.logic.SimpleLogic;
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
 import sc.shared.SharedConfiguration;
@@ -26,7 +25,7 @@ public class SochaClientMain extends AbstractClient {
 		super(host, port);
 		
 		// Choose strategy
-		IGameHandler logic = LogicFactory.SMART.createInstance(this);
+		IGameHandler logic = LogicFactory.getDefault().createInstance(this);
 
 		setHandler(logic);
 
@@ -76,8 +75,6 @@ public class SochaClientMain extends AbstractClient {
 			new SochaClientMain(host, port, reservation, strategy);
 		} catch (Exception e) {
 			LOGGER.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
-			// System.err
-			// .println("Beim Starten den Clients ist ein Fehler aufgetreten:");
 			e.printStackTrace();
 		}
 
