@@ -16,7 +16,7 @@ Package structure:
             * **core** - The main implementations used by the Game-API
             * **debug** - Useful tools for debugging, mainly a custom logger window and a tree plotter
             * **strategies** - Contains the main game logic (including heuristics and strategies)
-            * **utils** - General classes/data-structures
+        * **utils** - General classes/data-structures
 * **sc.player2018** - Necessary client code to interact with the game and a very simple demo logic
 
 ## Setting up Eclipse for development
