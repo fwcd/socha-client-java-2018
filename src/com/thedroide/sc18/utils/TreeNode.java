@@ -7,6 +7,8 @@ import java.util.List;
  * A generic tree node used for plotting.
  */
 public interface TreeNode {
+	boolean isLeaf();
+	
 	/**
 	 * Fetches the children of this node.
 	 * 

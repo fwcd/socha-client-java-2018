@@ -67,6 +67,15 @@ public class SimpleLogic implements IGameHandler {
 	public void onRequestAction() {
 		long startTime = System.nanoTime();
 		LOG.info("Es wurde ein Zug angefordert.");
+		Move move = chooseMove();
+		move.orderActions();
+		LOG.info("Sende zug {}", move);
+		long nowTime = System.nanoTime();
+		sendAction(move);
+		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
+	}
+
+	private Move chooseMove() {
 		List<Move> possibleMove = gameState.getPossibleMoves(); // Mindestens ein element
 		List<Move> saladMoves = new ArrayList<>();
 		List<Move> winningMoves = new ArrayList<>();
@@ -122,24 +131,20 @@ public class SimpleLogic implements IGameHandler {
 				}
 			}
 		}
+
 		Move move;
+		
 		if (!winningMoves.isEmpty()) {
-			LOG.info("Sende Gewinnzug");
 			move = winningMoves.get(RANDOM.nextInt(winningMoves.size()));
 		} else if (!saladMoves.isEmpty()) {
-			// es gibt die Möglichkeit einen Salat zu essen
-			LOG.info("Sende Zug zum Salatessen");
 			move = saladMoves.get(RANDOM.nextInt(saladMoves.size()));
 		} else if (!selectedMoves.isEmpty()) {
 			move = selectedMoves.get(RANDOM.nextInt(selectedMoves.size()));
 		} else {
 			move = possibleMove.get(RANDOM.nextInt(possibleMove.size()));
 		}
-		move.orderActions();
-		LOG.info("Sende zug {}", move);
-		long nowTime = System.nanoTime();
-		sendAction(move);
-		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
+
+		return move;
 	}
 
 	/**

@@ -292,4 +292,9 @@ public class HUIGamePlay implements GamePlay, TreeNode {
 		return "R" + Integer.toString(getSCPlayer(HUIEnumPlayer.RED).getFieldIndex())
 				+ "|B" + Integer.toString(getSCPlayer(HUIEnumPlayer.BLUE).getFieldIndex());
 	}
+
+	@Override
+	public boolean isLeaf() {
+		return getWinner() != null;
+	}
 }

@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 public class TreePlotter {
 	private JFrame view;
 	private TreeNode treeRoot;
-	private int depth = 2; // The plotting depth of the tree
+	private int depth = Integer.MAX_VALUE; // The plotting depth of the tree
 	
 	/**
 	 * Constructs a new, empty TreePlotter.
@@ -92,7 +92,7 @@ public class TreePlotter {
 		g2d.setColor(node.getColor());
 		g2d.drawString(nodeDesc, topLeftX, topLeftY);
 		
-		if (incrementalDepth < depth) {
+		if (incrementalDepth < depth && !node.isLeaf()) {
 			int children = node.getChildren().size() - 1;
 			int step = (int) ((1D / (incrementalDepth + 1)) * 50D);
 			
