@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.antelmann.game.GameDriver;
-import com.thedroide.sc18.minmax.core.HUIEnumPlayer;
-import com.thedroide.sc18.minmax.core.HUIGamePlay;
-import com.thedroide.sc18.minmax.core.HUIMove;
+import com.thedroide.sc18.minmax.core.MinmaxEnumPlayer;
+import com.thedroide.sc18.minmax.core.MinmaxGamePlay;
+import com.thedroide.sc18.minmax.core.MinmaxMove;
 import com.thedroide.sc18.minmax.strategies.ShallowStrategy;
 import com.thedroide.sc18.minmax.strategies.SimpleStrategy;
 import com.thedroide.sc18.utils.GUILogger;
@@ -48,11 +48,11 @@ public class MinmaxLogic implements IGameHandler {
 	private int committedMoves = 0;
 	
 	private final ShallowStrategy shallowStrategy = new SimpleStrategy();
-	private final HUIGamePlay game = new HUIGamePlay();
-	private final GameDriver ai = new GameDriver(game, HUIEnumPlayer.getPlayers(), depth);
+	private final MinmaxGamePlay game = new MinmaxGamePlay();
+	private final GameDriver ai = new GameDriver(game, MinmaxEnumPlayer.getPlayers(), depth);
 	
 	private AIThread aiThread = null;
-	private HUIMove aiMove = null;
+	private MinmaxMove aiMove = null;
 	
 	/**
 	 * Creates a new AI-player that commits moves.

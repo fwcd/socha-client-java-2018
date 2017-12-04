@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.thedroide.sc18.mcts.choosers.MCTSMoveChooser;
-import com.thedroide.sc18.mcts.choosers.SimpleMoveChooser;
+import com.thedroide.sc18.choosers.MoveChooser;
+import com.thedroide.sc18.choosers.SimpleMoveChooser;
 import com.thedroide.sc18.utils.TreeNode;
 
 import sc.plugin2018.GameState;
@@ -26,7 +26,7 @@ public class MCTSGamePlay implements Comparable<MCTSGamePlay>, TreeNode {
 	private static final Random RANDOM = ThreadLocalRandom.current();
 	private static final float EPSILON = 1e-6F;
 	
-	private final MCTSMoveChooser moveChooser = new SimpleMoveChooser();
+	private final MoveChooser moveChooser = new SimpleMoveChooser();
 	private final PlayerColor ourPlayerColor;
 	private final MCTSGamePlay parent;
 	private final Move move;
@@ -142,7 +142,7 @@ public class MCTSGamePlay implements Comparable<MCTSGamePlay>, TreeNode {
 			while (!simulation.getRedPlayer().inGoal()
 					&& !simulation.getBluePlayer().inGoal()
 					&& i < MAX_SIMULATION_DEPTH) {
-				moveChooser.chooseMove(simulation, simulation.getCurrentPlayer()).perform(simulation);
+				moveChooser.chooseMove(simulation).perform(simulation);
 				
 				i++;
 			}

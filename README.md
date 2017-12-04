@@ -10,6 +10,7 @@ Package structure:
 * **com.thedroide** - Contains my own code
     * **clienttester** - Contains a seperate, small application for batch tests of clients
     * **sc18** - Contains game ai logic
+        * **choosers** - Simple move choosers
         * **mcts** - An experimental monte-carlo-tree-search
         * **minmax** - A smart logic centered around minimax-alpha-beta and heuristics
             * **algorithmics** - Useful interfaces for work with algorithms

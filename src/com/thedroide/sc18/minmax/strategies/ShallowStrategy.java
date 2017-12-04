@@ -1,7 +1,7 @@
 package com.thedroide.sc18.minmax.strategies;
 
-import com.thedroide.sc18.minmax.core.HUIGamePlay;
-import com.thedroide.sc18.minmax.core.HUIMove;
+import com.thedroide.sc18.minmax.core.MinmaxGamePlay;
+import com.thedroide.sc18.minmax.core.MinmaxMove;
 
 /**
  * <b>Quickly</b> calculates a move from a game state (as a last
@@ -20,5 +20,5 @@ public interface ShallowStrategy {
 	 * @param game - The state (before any move)
 	 * @return A good move
 	 */
-	HUIMove bestMove(HUIGamePlay game);
+	MinmaxMove bestMove(MinmaxGamePlay game);
 }

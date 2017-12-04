@@ -1,9 +1,9 @@
 package com.thedroide.sc18.minmax.strategies;
 
 import com.antelmann.game.GameRuntimeException;
-import com.thedroide.sc18.minmax.core.HUIEnumPlayer;
-import com.thedroide.sc18.minmax.core.HUIGamePlay;
-import com.thedroide.sc18.minmax.core.HUIMove;
+import com.thedroide.sc18.minmax.core.MinmaxEnumPlayer;
+import com.thedroide.sc18.minmax.core.MinmaxGamePlay;
+import com.thedroide.sc18.minmax.core.MinmaxMove;
 import com.thedroide.sc18.utils.GUILogger;
 
 import sc.plugin2018.Action;
@@ -25,13 +25,13 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int fieldIndexWeight = 2;
 	
 	@Override
-	public float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+	public float heuristic(MinmaxGamePlay gameBeforeMove, MinmaxMove move, MinmaxEnumPlayer player) {
 		if (move.isDiscarded()) {
 			return BAD_HEURISTIC;
 		}
 		
 		try {
-			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move);
+			MinmaxGamePlay gameAfterMove = (MinmaxGamePlay) gameBeforeMove.spawnChild(move);
 			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
 			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove);
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
@@ -76,16 +76,16 @@ public class SmartHeuristic implements HUIHeuristic {
 	}
 
 	@Override
-	public boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player) {
+	public boolean pruneMove(MinmaxGamePlay gameBeforeMove, MinmaxMove move, MinmaxEnumPlayer player) {
 		try {
-			HUIGamePlay gameAfterMove = (HUIGamePlay) gameBeforeMove.spawnChild(move); // TODO: Performance optimizations here??
+			MinmaxGamePlay gameAfterMove = (MinmaxGamePlay) gameBeforeMove.spawnChild(move); // TODO: Performance optimizations here??
 			
 			if (gameAfterMove.getWinner() != null) {
 				GUILogger.println(
 						"[Info]\tFound winning move: "
 						+ move
 						+ " by "
-						+ HUIEnumPlayer.of(gameAfterMove.getWinner())
+						+ MinmaxEnumPlayer.of(gameAfterMove.getWinner())
 				);
 				return true;
 			}

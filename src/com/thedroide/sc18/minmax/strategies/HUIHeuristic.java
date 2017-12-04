@@ -1,8 +1,8 @@
 package com.thedroide.sc18.minmax.strategies;
 
-import com.thedroide.sc18.minmax.core.HUIEnumPlayer;
-import com.thedroide.sc18.minmax.core.HUIGamePlay;
-import com.thedroide.sc18.minmax.core.HUIMove;
+import com.thedroide.sc18.minmax.core.MinmaxEnumPlayer;
+import com.thedroide.sc18.minmax.core.MinmaxGamePlay;
+import com.thedroide.sc18.minmax.core.MinmaxMove;
 
 /**
  * An API wrapper providing heuristics about
@@ -18,7 +18,7 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return Whether the move should be pruned
 	 */
-	boolean pruneMove(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
+	boolean pruneMove(MinmaxGamePlay gameBeforeMove, MinmaxMove move, MinmaxEnumPlayer player);
 	
 	/**
 	 * Rates a move on the associated game board.
@@ -28,5 +28,5 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return A rating of this move
 	 */
-	float heuristic(HUIGamePlay gameBeforeMove, HUIMove move, HUIEnumPlayer player);
+	float heuristic(MinmaxGamePlay gameBeforeMove, MinmaxMove move, MinmaxEnumPlayer player);
 }

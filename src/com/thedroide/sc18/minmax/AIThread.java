@@ -1,7 +1,7 @@
 package com.thedroide.sc18.minmax;
 
 import com.antelmann.game.AutoPlay;
-import com.thedroide.sc18.minmax.core.HUIMove;
+import com.thedroide.sc18.minmax.core.MinmaxMove;
 
 /**
  * A thread (or more precisely a {@link Runnable}) on which
@@ -13,7 +13,7 @@ public class AIThread implements Runnable {
 	private AutoPlay ai;
 
 	private boolean discarded = false;
-	private HUIMove move = null;
+	private MinmaxMove move = null;
 	
 	public AIThread(AutoPlay ai) {
 		this.ai = ai;
@@ -42,7 +42,7 @@ public class AIThread implements Runnable {
 	
 	@Override
 	public void run() {
-		HUIMove foundMove = (HUIMove) ai.autoMove();
+		MinmaxMove foundMove = (MinmaxMove) ai.autoMove();
 		
 		if (!discarded) {
 			move = foundMove;
@@ -68,7 +68,7 @@ public class AIThread implements Runnable {
 	 * 
 	 * @return The move or null (if the AI didn't find a move in time)
 	 */
-	public HUIMove getNullableMove() {
+	public MinmaxMove getNullableMove() {
 		return move;
 	}
 }
