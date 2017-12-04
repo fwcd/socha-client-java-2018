@@ -22,7 +22,7 @@ import sc.shared.PlayerColor;
  */
 public class MCTSGamePlay implements Comparable<MCTSGamePlay>, TreeNode {
 	private static final int EXPLORATION_WEIGHT = 2;
-	private static final int MAX_SIMULATION_DEPTH = 100;
+	private static final int MAX_SIMULATION_DEPTH = 36;
 	private static final Random RANDOM = ThreadLocalRandom.current();
 	private static final float EPSILON = 1e-6F;
 	

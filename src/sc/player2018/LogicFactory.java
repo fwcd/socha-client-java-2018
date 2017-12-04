@@ -25,7 +25,7 @@ public enum LogicFactory {
 	 * Fetches the logic used. (This may be changed)
 	 */
 	public static LogicFactory getDefault() {
-		return MCTS; // FIXME: Temporary
+		return MINMAX;
 	}
 
 	/**
