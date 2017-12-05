@@ -34,14 +34,10 @@ public class HUIGameState implements GamePlay, TreeNode {
 	private List<HUIMove> legalMoves = null;
 	
 	/**
-	 * Constructs a new empty HUIGamePlay.<br><br>
-	 * 
-	 * This constructor should
-	 * always be used with caution as it might cause NullPointerExceptions
-	 * at unexpected places.
+	 * Constructs a new empty HUIGamePlay.
 	 */
 	public HUIGameState() {
-		
+		this(new GameState());
 	}
 	
 	/**
@@ -148,6 +144,10 @@ public class HUIGameState implements GamePlay, TreeNode {
 
 	@Override
 	public synchronized boolean makeMove(GameMove move) {
+		if (move == null) {
+			return false;
+		}
+		
 		try {
 			HUIMove huiMove = (HUIMove) move;
 			
@@ -304,5 +304,12 @@ public class HUIGameState implements GamePlay, TreeNode {
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Resets the entire game state to an empty board.
+	 */
+	public void reset() {
+		setState(new GameState());
 	}
 }

@@ -7,10 +7,11 @@ deals with creating an AI for a board game called "Hase und Igel".
 
 Package structure:
 
-* **com.thedroide** - Contains my own code
-    * **clienttester** - Contains a seperate, small application for batch tests of clients
-    * **sc18** - Contains game ai logic
-* **sc.player2018** - Necessary client code to interact with the game and a very simple demo logic
+* **src** - Client source code
+    * **com.thedroide.sc18** - Contains my game ai logic
+    * **sc.player2018** - Necessary client code to interact with the game and a very simple demo logic
+* **test** - Testing source code
+    * **com.thedroide.clientsimulator** - A tester that can perform mass-tests of game strategies
 
 The respective package-info.java files contain further information for each subpackage.
 

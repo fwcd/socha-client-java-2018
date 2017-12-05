@@ -11,7 +11,7 @@ import sc.plugin2018.IGameHandler;
  */
 public enum LogicFactory {
 	SIMPLE(SimpleLogic::new), // The SimpleClient-logic
-	MINMAX(MyLogic::new); // My game logic adapter
+	MY_LOGIC(MyLogic::new); // My game logic adapter
 	
 	private final LogicBuilder builder;
 	
@@ -20,10 +20,10 @@ public enum LogicFactory {
 	}
 	
 	/**
-	 * Fetches the logic used. (This may be changed)
+	 * Fetches the logic used.
 	 */
 	public static LogicFactory getDefault() {
-		return MINMAX;
+		return MY_LOGIC;
 	}
 
 	/**

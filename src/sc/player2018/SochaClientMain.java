@@ -45,8 +45,8 @@ public class SochaClientMain extends AbstractClient {
 		// you may use this code to enable debug output:
 		Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		((ch.qos.logback.classic.Logger) rootLogger).setLevel(ch.qos.logback.classic.Level.WARN);
-		Logger randomlogiclogger = LoggerFactory.getLogger(SimpleLogic.class);
-		((ch.qos.logback.classic.Logger) randomlogiclogger).setLevel(ch.qos.logback.classic.Level.WARN);
+		Logger simpleLogicLogger = LoggerFactory.getLogger(SimpleLogic.class);
+		((ch.qos.logback.classic.Logger) simpleLogicLogger).setLevel(ch.qos.logback.classic.Level.WARN);
 
 		// parameter definieren
 		CmdLineParser parser = new CmdLineParser();
