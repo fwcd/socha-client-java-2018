@@ -1,7 +1,7 @@
 package com.thedroide.sc18.choosers;
 
-import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
+import com.thedroide.sc18.core.HUIGameState;
+import com.thedroide.sc18.core.HUIMove;
 
 /**
  * An interface that provides a (simple)
@@ -9,5 +9,5 @@ import sc.plugin2018.Move;
  */
 @FunctionalInterface
 public interface MoveChooser {
-	Move chooseMove(GameState state);
+	HUIMove chooseMove(HUIGameState state);
 }

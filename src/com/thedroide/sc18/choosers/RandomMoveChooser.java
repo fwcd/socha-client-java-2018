@@ -1,11 +1,10 @@
 package com.thedroide.sc18.choosers;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import sc.plugin2018.GameState;
-import sc.plugin2018.Move;
+import com.thedroide.sc18.core.HUIGameState;
+import com.thedroide.sc18.core.HUIMove;
 
 /**
  * A move chooser that picks it's moves completely randomly. This
@@ -16,8 +15,8 @@ public class RandomMoveChooser implements MoveChooser {
 	private static final Random RANDOM = ThreadLocalRandom.current();
 	
 	@Override
-	public Move chooseMove(GameState state) {
-		List<Move> moves = state.getPossibleMoves();
-		return moves.get(RANDOM.nextInt(moves.size()));
+	public HUIMove chooseMove(HUIGameState state) {
+		HUIMove[] moves = state.getLegalMoves();
+		return moves[RANDOM.nextInt(moves.length)];
 	}
 }

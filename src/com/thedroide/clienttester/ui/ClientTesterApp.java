@@ -1,6 +1,7 @@
 package com.thedroide.clienttester.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -18,6 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.thedroide.clienttester.core.ClientJAR;
@@ -54,7 +56,7 @@ public class ClientTesterApp {
 	public ClientTesterApp(String title, int width, int height) {
 		view = new JFrame(title);
 		view.setSize(width, height);
-		view.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		view.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		view.addWindowListener(new WindowAdapter() {
 
 			@Override
@@ -75,7 +77,7 @@ public class ClientTesterApp {
 		loadersPane.setLayout(new BoxLayout(loadersPane, BoxLayout.Y_AXIS));
 		
 		titleLabel = new JLabel("Client Tester");
-		titleLabel.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		titleLabel.setFont(new Font(titleLabel.getFont().getFontName(), Font.BOLD, 24)); // Change font size
 		loadersPane.add(titleLabel);
 		

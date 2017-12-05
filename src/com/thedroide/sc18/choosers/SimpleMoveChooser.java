@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.thedroide.sc18.core.HUIGameState;
+import com.thedroide.sc18.core.HUIMove;
+
 import sc.player2018.SimpleLogic;
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
@@ -14,7 +17,6 @@ import sc.plugin2018.CardType;
 import sc.plugin2018.ExchangeCarrots;
 import sc.plugin2018.FallBack;
 import sc.plugin2018.FieldType;
-import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
@@ -30,33 +32,34 @@ public class SimpleMoveChooser implements MoveChooser {
 	private static final Random RANDOM = ThreadLocalRandom.current();
 	
 	@Override
-	public Move chooseMove(GameState state) {
-		List<Move> possibleMoves = state.getPossibleMoves();
-		List<Move> saladMoves = new ArrayList<>();
-		List<Move> selectedMoves = new ArrayList<>();
+	public HUIMove chooseMove(HUIGameState state) {
+		List<HUIMove> possibleMoves = state.getLegalMovesList();
+		List<HUIMove> saladMoves = new ArrayList<>();
+		List<HUIMove> selectedMoves = new ArrayList<>();
 
 		Board board = state.getBoard();
-		Player player = state.getCurrentPlayer();
+		Player player = state.nextHUIEnumPlayer().getSCPlayer(state);
 		int index = player.getFieldIndex();
 		
-		for (Move move : possibleMoves) {
+		for (HUIMove huiMove : possibleMoves) {
+			Move move = huiMove.getSCMove();
 			for (Action action : move.getActions()) {
 				if (action instanceof Advance) {
 					Advance advance = (Advance) action;
 					if (advance.getDistance() + index == Constants.NUM_FIELDS - 1) {
 						// Return winning move
-						return move;
+						return huiMove;
 					} else if (board.getTypeAt(advance.getDistance() + index) == FieldType.SALAD) {
 						// Remember salad-move
-						saladMoves.add(move);
+						saladMoves.add(huiMove);
 					} else {
 						// Otherwise advance if possible
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				} else if (action instanceof Card) {
 					if (((Card) action).getType() == CardType.EAT_SALAD) {
 						// Remember salad-move
-						saladMoves.add(move);
+						saladMoves.add(huiMove);
 					}
 				} else if (action instanceof ExchangeCarrots) {
 					ExchangeCarrots exchangeCarrots = (ExchangeCarrots) action;
@@ -66,22 +69,22 @@ public class SimpleMoveChooser implements MoveChooser {
 							&& !(player.getLastNonSkipAction() instanceof ExchangeCarrots)) {
 						// Pick up carrots only when there are too few, the player isn't near the goal
 						// and not two times in a row.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					} else if (exchangeCarrots.getValue() == -10
 							&& player.getCarrots() > 30
 							&& index >= 40) {
 						// Drop carrots only near the goal.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				} else if (action instanceof FallBack) {
 					if (index > 56 // Last salad field
 							&& player.getSalads() > 0) {
 						// Fall back only at the end when we need to
 						// drop salads.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					} else if (index <= 56 && index - board.getPreviousFieldByType(FieldType.HEDGEHOG, index) < 5) {
 						// Be cautious when falling back.
-						selectedMoves.add(move);
+						selectedMoves.add(huiMove);
 					}
 				}
 			}
@@ -96,7 +99,7 @@ public class SimpleMoveChooser implements MoveChooser {
 		}
 	}
 	
-	private Move chooseBest(List<Move> moves) {
+	private HUIMove chooseBest(List<HUIMove> moves) {
 		return moves.get(RANDOM.nextInt(moves.size()));
 	}
 }

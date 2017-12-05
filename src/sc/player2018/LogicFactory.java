@@ -1,7 +1,6 @@
 package sc.player2018;
 
-import com.thedroide.sc18.mcts.MCTSLogic;
-import com.thedroide.sc18.minmax.MinmaxLogic;
+import com.thedroide.sc18.core.MyLogic;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
@@ -12,8 +11,7 @@ import sc.plugin2018.IGameHandler;
  */
 public enum LogicFactory {
 	SIMPLE(SimpleLogic::new), // The SimpleClient-logic
-	MINMAX(MinmaxLogic::new), // A smart minimax-alpha-beta approach
-	MCTS(MCTSLogic::new); // A monte-carlo-tree-search
+	MINMAX(MyLogic::new); // My game logic adapter
 	
 	private final LogicBuilder builder;
 	
