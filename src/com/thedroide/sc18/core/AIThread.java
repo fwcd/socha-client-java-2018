@@ -41,7 +41,7 @@ public class AIThread implements Runnable {
 	
 	@Override
 	public void run() {
-		HUIMove foundMove = (HUIMove) ai.autoMove();
+		HUIMove foundMove = (HUIMove) ai.hint(ai.getGame().nextPlayer());
 		
 		if (!discarded) {
 			move = foundMove;

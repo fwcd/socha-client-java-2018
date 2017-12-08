@@ -5,14 +5,13 @@ import java.util.NoSuchElementException;
 
 import com.antelmann.game.AutoPlay;
 import com.antelmann.game.GameDriver;
-import com.antelmann.game.GameMove;
 import com.antelmann.game.Player;
 import com.thedroide.sc18.core.HUIGameState;
 
 import sc.plugin2018.GameState;
 
 public class ClientSimulator {
-	private static final int TURNS = 62;
+	private static final int TURNS = 60;
 	
 	private final VirtualPlayer p1;
 	private final VirtualPlayer p2;
@@ -55,13 +54,8 @@ public class ClientSimulator {
 	private void simulate() {
 		int i = 0;
 		while (i < TURNS && game.getWinner() == null) {
-			GameMove move = autoPlay.autoMove();
-			
-			if (move != null) {
-				game.makeMove(move);
-				switchTurns();
-			}
-			
+			autoPlay.autoMove();
+			switchTurns();
 			i++;
 		}
 	}

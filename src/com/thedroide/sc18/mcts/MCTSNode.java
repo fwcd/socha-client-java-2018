@@ -137,7 +137,7 @@ public class MCTSNode implements Comparable<MCTSNode>, TreeNode {
 		}
 		
 		int i = 0;
-		while (simulation.getWinner() == null && i < MAX_SIMULATION_DEPTH) {
+		while (simulation.getWinner() == null && i < MAX_SIMULATION_DEPTH && simulation.getLegalMoves().length > 0) {
 			simulation.makeMove(moveChooser.chooseMove(simulation));
 			i++;
 		}

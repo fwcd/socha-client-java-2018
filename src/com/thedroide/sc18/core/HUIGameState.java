@@ -18,6 +18,7 @@ import sc.plugin2018.Board;
 import sc.plugin2018.Field;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Player;
+import sc.plugin2018.util.Constants;
 import sc.shared.InvalidMoveException;
 
 /**
@@ -311,5 +312,23 @@ public class HUIGameState implements GamePlay, TreeNode {
 	 */
 	public void reset() {
 		setState(new GameState());
+	}
+	
+	public String getASCII() {
+		String s = "";
+		int redField = getSCPlayer(HUIPlayerColor.RED).getFieldIndex();
+		int blueField = getSCPlayer(HUIPlayerColor.BLUE).getFieldIndex();
+		
+		for (int i=0; i<Constants.NUM_FIELDS; i++) {
+			if (i == redField) {
+				s += "R";
+			} else if (i == blueField) {
+				s += "B";
+			} else {
+				s += "-";
+			}
+		}
+		
+		return s;
 	}
 }
