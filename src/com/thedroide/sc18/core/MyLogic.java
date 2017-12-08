@@ -1,8 +1,17 @@
 package com.thedroide.sc18.core;
 
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.antelmann.game.AutoPlay;
 import com.antelmann.game.GameDriver;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
@@ -44,7 +53,7 @@ public class MyLogic implements IGameHandler {
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private final HUIGameState game = new HUIGameState();
-	private final GameDriver ai = new GameDriver(game, new com.antelmann.game.Player[] {
+	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
 			new MinimaxPlayer(),
 			new MinimaxPlayer()
 	}, depth);
@@ -52,8 +61,8 @@ public class MyLogic implements IGameHandler {
 	private AbstractClient client;
 	private Player currentPlayer;
 	
-	private AIThread aiThread = null;
-	private HUIMove aiMove = null;
+	private final ExecutorService threadPool = Executors.newCachedThreadPool();
+	private Future<HUIMove> futureMove = null;
 	
 	/**
 	 * Creates a new AI-player that commits moves.
@@ -101,27 +110,27 @@ public class MyLogic implements IGameHandler {
 		
 		// Picks the best move from the AI
 		
-		if (aiThread != null) {
-			aiThread.discard(); // Discard old thread
+		if (futureMove != null && !futureMove.isDone()) {
+			// TODO: Implement proper interruption and change this to true
+			futureMove.cancel(false); // Discard old thread
 		}
 		
-		aiThread = new AIThread(ai);
-		aiThread.start();
+		futureMove = threadPool.submit(() -> (HUIMove) ai.hint(ai.getGame().nextPlayer()));
+		Optional<HUIMove> aiMove;
 		
-		if (aiThread.join(hardMaxTime)) {
-			aiMove = aiThread.getNullableMove();
-		} else {
-			aiMove = null;
+		try {
+			aiMove = Optional.ofNullable(futureMove.get(hardMaxTime, TimeUnit.MILLISECONDS));
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			aiMove = Optional.empty();
 		}
+
+		// Chooses the ai move if present and otherwise uses a shallow strategy to quickly determine a move
 		
-		if (aiMove == null) {
-			// This is a "Killswitch" to handle the case where the AI doesn't return in time
-			aiMove = shallowStrategy.chooseMove(game);
-		}
+		HUIMove move = aiMove.orElse(shallowStrategy.chooseMove(game));
 		
 		// Some boilerplate required to send the move
 		
-		Move scMove = aiMove.getSCMove();
+		Move scMove = move.getSCMove();
 		scMove.orderActions();
 		sendAction(scMove);
 		
@@ -138,7 +147,7 @@ public class MyLogic implements IGameHandler {
 			};
 		}
 		
-		GUILogger.println("[Committed]\t" + aiMove + " in " + Integer.toString(responseTime) + "ms");
+		GUILogger.println("[Committed]\t" + move.toString() + " in " + Integer.toString(responseTime) + "ms");
 	}
 	
 	/**
