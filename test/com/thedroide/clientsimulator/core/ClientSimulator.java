@@ -2,6 +2,8 @@ package com.thedroide.clientsimulator.core;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.antelmann.game.AutoPlay;
 import com.antelmann.game.GameDriver;
@@ -15,48 +17,49 @@ public class ClientSimulator {
 	
 	private final VirtualPlayer p1;
 	private final VirtualPlayer p2;
-	private final AutoPlay autoPlay;
-	private final HUIGameState game;
 
-	private VirtualPlayer current;
+	private int gameRounds = 5;
+	private int threadCount = 1;
+	private ExecutorService pool = Executors.newSingleThreadExecutor();
+
+	private long softMaxTime = Long.MAX_VALUE;
+	private int depth = 2;
 	
-	public ClientSimulator(Player strategy1, Player strategy2, int depth, long softMaxTime) {
+	public ClientSimulator(Player strategy1, Player strategy2) {
 		GameState state = new GameState();
-		game = new HUIGameState(state);
 		
 		p1 = new VirtualPlayer(strategy1);
 		p1.setColor(state.getStartPlayerColor());
 		p2 = new VirtualPlayer(strategy2);
 		p2.setColor(state.getStartPlayerColor().opponent());
-		
-		current = p1;
-		
-		autoPlay = new GameDriver(game, new Player[] {strategy1, strategy2}, depth);
-		setSoftMaxTime(softMaxTime);
 	}
 	
-	public void setDepth(int depth) {
-		autoPlay.setLevel(depth);
+	public ClientSimulator setDepth(int depth) {
+		this.depth = depth;
+		return this;
 	}
 	
-	private void setSoftMaxTime(long ms) {
-		autoPlay.setResponseTime(ms);
+	public ClientSimulator setSoftMaxTime(long ms) {
+		softMaxTime = ms;
+		return this;
 	}
 	
-	private void switchTurns() {
+	public ClientSimulator setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
+		pool = Executors.newFixedThreadPool(threadCount);
+		return this;
+	}
+	
+	public ClientSimulator setGameRounds(int rounds) {
+		gameRounds = rounds;
+		return this;
+	}
+	
+	private VirtualPlayer opponentOf(VirtualPlayer current) {
 		if (current.equals(p1)) {
-			current = p2;
+			return p2;
 		} else {
-			current = p1;
-		}
-	}
-	
-	private void simulate() {
-		int i = 0;
-		while (i < TURNS && game.getWinner() == null) {
-			autoPlay.autoMove();
-			switchTurns();
-			i++;
+			return p1;
 		}
 	}
 	
@@ -70,7 +73,7 @@ public class ClientSimulator {
 		}
 	}
 	
-	private VirtualPlayer getWinner() {
+	private VirtualPlayer getWinner(HUIGameState game) {
 		int field1 = p1.getHUIPlayerColor().getSCPlayer(game).getFieldIndex();
 		int field2 = p2.getHUIPlayerColor().getSCPlayer(game).getFieldIndex();
 		
@@ -83,11 +86,11 @@ public class ClientSimulator {
 		}
 	}
 	
-	private void updateScores() {
+	private void updateScores(AutoPlay autoPlay, HUIGameState game) {
 		int[] winners = game.getWinner();
 		
 		if (winners == null) {
-			getWinner().incrementScore();
+			getWinner(game).incrementScore();
 		} else {
 			Arrays.stream(winners)
 					.mapToObj(autoPlay::getPlayer)
@@ -96,22 +99,42 @@ public class ClientSimulator {
 		}
 	}
 	
-	public void run(int gameRounds) {
+	public void start() {
 		System.out.println(" ==== Client Simulator ==== ");
+		System.out.println(" ~~ [" + Integer.toString(gameRounds) + " rounds] - [" + Integer.toString(threadCount) + " threads] ~~");
 		System.out.println(" ~~ [" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
 		System.out.println();
 		
 		for (int i=0; i<gameRounds; i++) {
-			simulate();
-			updateScores();
-			
-			System.out.println(
-					Integer.toString(p1.getScore())
-					+ "\t:\t"
-					+ Integer.toString(p2.getScore())
-			);
-			
-			game.reset();
+			pool.execute(this::run);
 		}
+		
+		pool.shutdown();
+	}
+	
+	private void run() {
+		VirtualPlayer current = p1;
+		HUIGameState game = new HUIGameState();
+		AutoPlay autoPlay = new GameDriver(game, new Player[] {p1.getAI(), p2.getAI()}, depth);
+		
+		autoPlay.setResponseTime(softMaxTime);
+		
+		int t = 0;
+		while (t < TURNS && game.getWinner() == null) {
+			autoPlay.autoMove();
+			current = opponentOf(current);
+			t++;
+		}
+		
+		updateScores(autoPlay, game);
+		
+		System.out.println(
+				Integer.toString(p1.getScore())
+				+ "\t:\t"
+				+ Integer.toString(p2.getScore())
+				+ "\t[Thread "
+				+ Integer.toHexString(Thread.currentThread().hashCode())
+				+ "]"
+		);
 	}
 }

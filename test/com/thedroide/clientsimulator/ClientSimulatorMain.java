@@ -12,9 +12,12 @@ public class ClientSimulatorMain {
 	public static void main(String[] args) {
 		new ClientSimulator(
 				new MCTSPlayer(),
-				new MinimaxPlayer(),
-				4, // Depth
-				2000 // Soft maximum time
-		).run(50); // Game rounds
+				new MinimaxPlayer()
+		)
+				.setDepth(4)
+				.setGameRounds(2000)
+				.setSoftMaxTime(2000)
+				.setThreadCount(4)
+				.start();
 	}
 }

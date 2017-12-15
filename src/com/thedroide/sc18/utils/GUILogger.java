@@ -17,7 +17,7 @@ import javax.swing.text.DefaultCaret;
  * console or debugging environment.
  */
 public class GUILogger {
-	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
+	private static final boolean ENABLED = false; // When disabling permanently, remove all log() calls to increase performance
 	private static final StringBuilder QUEUE = new StringBuilder();
 	private static final PrintWriter WRITER = new CustomPrintWriter(GUILogger::println);
 	private static GUILogger instance = null;

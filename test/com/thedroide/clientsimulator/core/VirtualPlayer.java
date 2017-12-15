@@ -1,6 +1,7 @@
 package com.thedroide.clientsimulator.core;
 
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.antelmann.game.Player;
 import com.thedroide.sc18.core.HUIPlayerColor;
@@ -11,7 +12,7 @@ public class VirtualPlayer {
 	private final String name;
 	private final Player ai;
 	private PlayerColor color = null;
-	private int score = 0;
+	private AtomicInteger score = new AtomicInteger(0);
 	
 	public VirtualPlayer(Player ai) {
 		this.ai = ai;
@@ -35,11 +36,11 @@ public class VirtualPlayer {
 	}
 	
 	public void incrementScore() {
-		score++;
+		score.incrementAndGet();
 	}
 	
 	public int getScore() {
-		return score;
+		return score.get();
 	}
 	
 	public Player getAI() {
