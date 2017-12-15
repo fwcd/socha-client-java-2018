@@ -50,4 +50,8 @@ public class VirtualPlayer {
 	public String getName() {
 		return name;
 	}
+
+	public void resetScore() {
+		score.set(0);
+	}
 }

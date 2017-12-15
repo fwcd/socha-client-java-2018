@@ -12,8 +12,9 @@ import com.thedroide.sc18.core.HUIGameState;
 
 import sc.plugin2018.GameState;
 
-public class ClientSimulator {
+public class ClientSimulator implements Runnable {
 	private static final int TURNS = 60;
+	private boolean muted = true;
 	
 	private final VirtualPlayer p1;
 	private final VirtualPlayer p2;
@@ -32,6 +33,17 @@ public class ClientSimulator {
 		p1.setColor(state.getStartPlayerColor());
 		p2 = new VirtualPlayer(strategy2);
 		p2.setColor(state.getStartPlayerColor().opponent());
+	}
+	
+	/**
+	 * Sets whether this simulator should
+	 * log to the console or not.
+	 * 
+	 * @param muted - Whether this simulator should be "muted"
+	 */
+	public ClientSimulator setMuted(boolean muted) {
+		this.muted = muted;
+		return this;
 	}
 	
 	public ClientSimulator setDepth(int depth) {
@@ -55,6 +67,14 @@ public class ClientSimulator {
 		return this;
 	}
 	
+	public VirtualPlayer getPlayer1() {
+		return p1;
+	}
+	
+	public VirtualPlayer getPlayer2() {
+		return p2;
+	}
+	
 	private VirtualPlayer opponentOf(VirtualPlayer current) {
 		if (current.equals(p1)) {
 			return p2;
@@ -71,6 +91,11 @@ public class ClientSimulator {
 		} else {
 			throw new NoSuchElementException("No such virtual player available!");
 		}
+	}
+	
+	public void resetScores() {
+		p1.resetScore();
+		p2.resetScore();
 	}
 	
 	private VirtualPlayer getWinner(HUIGameState game) {
@@ -99,20 +124,34 @@ public class ClientSimulator {
 		}
 	}
 	
+	/**
+	 * Starts this client simulator using the given number of
+	 * threads.
+	 */
 	public void start() {
-		System.out.println(" ==== Client Simulator ==== ");
-		System.out.println(" ~~ [" + Integer.toString(gameRounds) + " rounds] - [" + Integer.toString(threadCount) + " threads] ~~");
-		System.out.println(" ~~ [" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
-		System.out.println();
+		println(" ==== Client Simulator ==== ");
+		println(" ~~ [" + Integer.toString(gameRounds) + " rounds] - [" + Integer.toString(threadCount) + " threads] ~~");
+		println(" ~~ [" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
+		println("");
 		
 		for (int i=0; i<gameRounds; i++) {
-			pool.execute(this::run);
+			pool.execute(this);
 		}
 		
 		pool.shutdown();
 	}
+
+	private void println(String str) {
+		if (!muted) {
+			System.out.println(str);
+		}
+	}
 	
-	private void run() {
+	/**
+	 * Executes this client simulator once in the current thread.
+	 */
+	@Override
+	public void run() {
 		VirtualPlayer current = p1;
 		HUIGameState game = new HUIGameState();
 		AutoPlay autoPlay = new GameDriver(game, new Player[] {p1.getAI(), p2.getAI()}, depth);
@@ -128,7 +167,7 @@ public class ClientSimulator {
 		
 		updateScores(autoPlay, game);
 		
-		System.out.println(
+		println(
 				Integer.toString(p1.getScore())
 				+ "\t:\t"
 				+ Integer.toString(p2.getScore())
