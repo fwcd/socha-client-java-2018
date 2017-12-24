@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.antelmann.game.AutoPlay;
 import com.antelmann.game.GameDriver;
+import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
-import com.thedroide.sc18.minimax.MinimaxPlayer;
 import com.thedroide.sc18.utils.GUILogger;
 
 import sc.plugin2018.AbstractClient;
@@ -54,8 +54,8 @@ public class MyLogic implements IGameHandler {
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private final HUIGameState game = new HUIGameState();
 	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
-			new MinimaxPlayer(),
-			new MinimaxPlayer()
+			new AlphaBetaPlayer(),
+			new AlphaBetaPlayer()
 	}, depth);
 	
 	private AbstractClient client;

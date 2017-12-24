@@ -81,12 +81,6 @@ public class SmartHeuristic implements HUIHeuristic {
 			HUIGameState gameAfterMove = gameBeforeMove.spawnChild(move); // TODO: Performance optimizations here??
 			
 			if (gameAfterMove.getWinner() != null) {
-				GUILogger.println(
-						"[Info]\tFound winning move: "
-						+ move
-						+ " by "
-						+ HUIPlayerColor.of(gameAfterMove.getWinner())
-				);
 				return true;
 			}
 			

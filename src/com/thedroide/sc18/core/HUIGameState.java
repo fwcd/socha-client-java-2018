@@ -118,7 +118,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 				.filter(huiMove -> !huiMove.isSkip())
 				.collect(Collectors.toList());
 	}
-	
+
 	/**
 	 * Fetches information about a given player.
 	 * 

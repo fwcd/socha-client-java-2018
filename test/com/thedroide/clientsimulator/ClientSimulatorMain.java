@@ -1,11 +1,11 @@
 package com.thedroide.clientsimulator;
 
 import com.thedroide.clientsimulator.core.ClientBench;
+import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.BasicPlayer;
 import com.thedroide.sc18.choosers.RandomMoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
 import com.thedroide.sc18.mcts.MCTSPlayer;
-import com.thedroide.sc18.minimax.MinimaxPlayer;
 
 /**
  * A basic client simulator that builds upon the abstractions of the
@@ -17,7 +17,7 @@ public class ClientSimulatorMain {
 				.add(new BasicPlayer(new RandomMoveChooser()))
 				.add(new BasicPlayer(new SimpleMoveChooser()))
 				.add(new MCTSPlayer())
-				.add(new MinimaxPlayer())
+				.add(new AlphaBetaPlayer())
 				.setDepth(4)
 				.setGameRounds(800)
 				.setSoftMaxTime(2000)

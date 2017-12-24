@@ -1,4 +1,4 @@
-package com.thedroide.sc18.minimax;
+package com.thedroide.sc18.alphabeta;
 
 import com.antelmann.game.CannotPlayGameException;
 import com.antelmann.game.GameMove;
@@ -15,11 +15,11 @@ import com.thedroide.sc18.heuristics.SmartHeuristic;
  * Represents a minimax-alpha-beta player delegating to
  * a {@link HUIHeuristic} to evaluate a given game state.
  */
-public class MinimaxPlayer extends TemplatePlayer {
+public class AlphaBetaPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 	private final HUIHeuristic heuristic = new SmartHeuristic();
 	
-	public MinimaxPlayer() {
+	public AlphaBetaPlayer() {
 		super("MinimaxPlayer", 2, true);
 	}
 	
