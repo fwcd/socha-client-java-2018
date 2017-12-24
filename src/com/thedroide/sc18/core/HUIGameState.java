@@ -35,10 +35,10 @@ public class HUIGameState implements GamePlay, TreeNode {
 	private List<HUIMove> legalMoves = null;
 	
 	/**
-	 * Constructs a new empty HUIGamePlay.
+	 * Constructs a new (completely) empty HUIGamePlay.
 	 */
-	public HUIGameState() {
-		this(new GameState());
+	private HUIGameState() {
+		
 	}
 	
 	/**
@@ -254,7 +254,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	
 	@Override
 	public HUIGameState clone() throws CloneNotSupportedException {
-		HUIGameState clone = (HUIGameState) super.clone();
+		HUIGameState clone = new HUIGameState();
 		clone.state = state.clone();
 		clone.moveHistory = new ArrayList<>(moveHistory);
 

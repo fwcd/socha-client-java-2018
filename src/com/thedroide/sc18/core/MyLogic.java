@@ -52,7 +52,7 @@ public class MyLogic implements IGameHandler {
 	private int committedMoves = 0;
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
-	private final HUIGameState game = new HUIGameState();
+	private final HUIGameState game = new HUIGameState(new GameState());
 	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
 			new AlphaBetaPlayer(),
 			new AlphaBetaPlayer()

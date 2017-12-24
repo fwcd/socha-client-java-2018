@@ -131,7 +131,7 @@ public class ClientSimulator implements Runnable {
 	public void start() {
 		println(" ==== Client Simulator ==== ");
 		println(" ~~ [" + Integer.toString(gameRounds) + " rounds] - [" + Integer.toString(threadCount) + " threads] ~~");
-		println(" ~~ [" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
+		println(" ~~ï¿½[" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
 		println("");
 		
 		for (int i=0; i<gameRounds; i++) {
@@ -153,7 +153,7 @@ public class ClientSimulator implements Runnable {
 	@Override
 	public void run() {
 		VirtualPlayer current = p1;
-		HUIGameState game = new HUIGameState();
+		HUIGameState game = new HUIGameState(new GameState());
 		AutoPlay autoPlay = new GameDriver(game, new Player[] {p1.getAI(), p2.getAI()}, depth);
 		
 		autoPlay.setResponseTime(softMaxTime);
