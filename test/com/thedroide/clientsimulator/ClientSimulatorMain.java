@@ -12,6 +12,8 @@ import com.thedroide.sc18.mcts.MCTSPlayer;
  * Antelmann-Game-API.
  */
 public class ClientSimulatorMain {
+	// TODO: The results seem to be inaccurate
+	
 	public static void main(String[] args) {
 		new ClientBench()
 				.add(new BasicPlayer(new RandomMoveChooser()))

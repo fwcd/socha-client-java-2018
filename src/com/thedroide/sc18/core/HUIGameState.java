@@ -32,7 +32,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	
 	private GameState state;
 	private List<HUIMove> moveHistory = new ArrayList<>();
-	private List<HUIMove> legalMoves = null;
+	private List<HUIMove> legalMoves = Collections.emptyList();
 	
 	/**
 	 * Constructs a new (completely) empty HUIGamePlay.
@@ -256,6 +256,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	public HUIGameState clone() throws CloneNotSupportedException {
 		HUIGameState clone = new HUIGameState();
 		clone.state = state.clone();
+		clone.legalMoves = new ArrayList<>(legalMoves);
 		clone.moveHistory = new ArrayList<>(moveHistory);
 
 		return clone;
@@ -330,5 +331,20 @@ public class HUIGameState implements GamePlay, TreeNode {
 		}
 		
 		return s;
+	}
+
+	@Override
+	public int hashCode() {
+		return (state.getTurn()
+				+ state.getStartPlayerColor().hashCode()
+				+ state.getCurrentPlayerColor().hashCode()) * 31;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		HUIGameState other = (HUIGameState) obj;
+		return state.getTurn() == other.state.getTurn()
+				&& state.getStartPlayerColor().equals(other.state.getStartPlayerColor())
+				&& state.getCurrentPlayerColor().equals(other.state.getCurrentPlayerColor());
 	}
 }

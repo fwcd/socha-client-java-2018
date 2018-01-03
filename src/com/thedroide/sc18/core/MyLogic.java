@@ -53,9 +53,10 @@ public class MyLogic implements IGameHandler {
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private final HUIGameState game = new HUIGameState(new GameState());
+	private final GameCache cache = new GameCache(20);
 	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
-			new AlphaBetaPlayer(),
-			new AlphaBetaPlayer()
+			new AlphaBetaPlayer(cache),
+			new AlphaBetaPlayer(cache)
 	}, depth);
 	
 	private AbstractClient client;

@@ -11,22 +11,24 @@ import com.thedroide.sc18.core.HUIPlayerColor;
  */
 public interface HUIHeuristic {
 	/**
-	 * Decides if a move should be "cut off".
-	 * 
-	 * @param gameBeforeMove - The game state BEFORE the move
-	 * @param move - The move to be evaluated
-	 * @param player - The player who committed the move
-	 * @return Whether the move should be pruned
-	 */
-	boolean pruneMove(HUIGameState gameBeforeMove, HUIMove move, HUIPlayerColor player);
-	
-	/**
 	 * Rates a move on the associated game board.
 	 * 
 	 * @param gameBeforeMove - The game state BEFORE the move
+	 * @param gameAfterMove - The game state AFTER the move
 	 * @param move - The move to be rated
 	 * @param player - The player who committed the move
 	 * @return A rating of this move
 	 */
-	float heuristic(HUIGameState gameBeforeMove, HUIMove move, HUIPlayerColor player);
+	float heuristic(HUIGameState gameBeforeMove, HUIGameState gameAfterMove, HUIMove move, HUIPlayerColor player);
+	
+	/**
+	 * Decides whether a move should be "cut off".
+	 * 
+	 * @param gameBeforeMove - The game state BEFORE the move
+	 * @param gameAfterMove - The game state AFTER the move
+	 * @param move - The move to be evaluated
+	 * @param player - The player who committed the move
+	 * @return Whether the move should be pruned
+	 */
+	boolean pruneMove(HUIGameState gameBeforeMove, HUIGameState gameAfterMove,  HUIMove move, HUIPlayerColor player);
 }

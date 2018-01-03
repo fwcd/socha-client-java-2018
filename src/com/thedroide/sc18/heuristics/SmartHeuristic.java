@@ -25,15 +25,19 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int fieldIndexWeight = 2;
 	
 	@Override
-	public float heuristic(HUIGameState gameBeforeMove, HUIMove move, HUIPlayerColor player) {
+	public float heuristic(
+			HUIGameState gameBeforeMove,
+			HUIGameState gameAfterMove,
+			HUIMove move,
+			HUIPlayerColor player
+	) {
 		if (move.isDiscarded()) {
 			return BAD_HEURISTIC;
 		}
 		
 		try {
-			HUIGameState gameAfterMove = gameBeforeMove.spawnChild(move);
-			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
 			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove);
+			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
 			if (playerAfterMove.inGoal()) {
@@ -51,11 +55,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
 			int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
 			
-			float rating = saladRating + fieldRating + carrotRating;
-			
-//			GUILogger.log(player + ": " + rating + " results in the board " + gameAfterMove + " using " + move);
-			
-			return rating;
+			return saladRating + fieldRating + carrotRating;
 		} catch (GameRuntimeException e) {
 			GUILogger.println("[Warn]\t" + e.getMessage());
 			return BAD_HEURISTIC;
@@ -76,10 +76,13 @@ public class SmartHeuristic implements HUIHeuristic {
 	}
 
 	@Override
-	public boolean pruneMove(HUIGameState gameBeforeMove, HUIMove move, HUIPlayerColor player) {
+	public boolean pruneMove(
+			HUIGameState gameBeforeMove,
+			HUIGameState gameAfterMove,
+			HUIMove move,
+			HUIPlayerColor player
+	) {
 		try {
-			HUIGameState gameAfterMove = gameBeforeMove.spawnChild(move); // TODO: Performance optimizations here??
-			
 			if (gameAfterMove.getWinner() != null) {
 				return true;
 			}
