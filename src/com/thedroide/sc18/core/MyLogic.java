@@ -16,7 +16,7 @@ import com.antelmann.game.GameDriver;
 import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
-import com.thedroide.sc18.utils.GUILogger;
+import com.thedroide.sc18.utils.GUILog;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
@@ -53,10 +53,9 @@ public class MyLogic implements IGameHandler {
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private final HUIGameState game = new HUIGameState(new GameState());
-	private final GameCache cache = new GameCache(20);
 	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
-			new AlphaBetaPlayer(cache),
-			new AlphaBetaPlayer(cache)
+			new AlphaBetaPlayer(),
+			new AlphaBetaPlayer()
 	}, depth);
 	
 	private AbstractClient client;
@@ -81,9 +80,9 @@ public class MyLogic implements IGameHandler {
 	 */
 	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
-		GUILogger.println("  ======================  ");
-		GUILogger.println("    " + data.getWinners().get(0).getDisplayName().toString() + " WINS!");
-		GUILogger.println("  ======================  ");
+		GUILog.println("  ======================  ");
+		GUILog.println("    " + data.getWinners().get(0).getDisplayName().toString() + " WINS!");
+		GUILog.println("  ======================  ");
 		STD_LOG.info("Game ended.");
 	}
 	
@@ -96,7 +95,7 @@ public class MyLogic implements IGameHandler {
 		long startTime = System.currentTimeMillis();
 		STD_LOG.info("Move requested.");
 		
-		GUILogger.println(
+		GUILog.println(
 				"[Turn]\t"
 				+ game.nextHUIEnumPlayer().name()
 				+ " with board "
@@ -148,7 +147,7 @@ public class MyLogic implements IGameHandler {
 			};
 		}
 		
-		GUILogger.println("[Committed]\t" + move.toString() + " in " + Integer.toString(responseTime) + "ms");
+		GUILog.println("[Committed]\t" + move.toString() + " in " + Integer.toString(responseTime) + "ms");
 	}
 	
 	/**

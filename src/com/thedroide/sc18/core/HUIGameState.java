@@ -11,7 +11,7 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
-import com.thedroide.sc18.utils.GUILogger;
+import com.thedroide.sc18.utils.GUILog;
 import com.thedroide.sc18.utils.TreeNode;
 
 import sc.plugin2018.Board;
@@ -57,7 +57,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 			this.state = state.clone();
 			updateLegalMoves();
 		} catch (CloneNotSupportedException e) {
-			GUILogger.printStack(e);
+			GUILog.printStack(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -241,7 +241,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 			child.makeMove(move);
 			return child;
 		} catch (CloneNotSupportedException e) {
-			GUILogger.printStack(e);
+			GUILog.printStack(e);
 			throw new GameRuntimeException("Game state couldn't be cloned.", e);
 		}
 	}

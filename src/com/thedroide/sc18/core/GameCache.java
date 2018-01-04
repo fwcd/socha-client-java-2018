@@ -1,9 +1,11 @@
 package com.thedroide.sc18.core;
 
-import com.thedroide.sc18.utils.GUILogger;
+import java.util.function.Supplier;
+
 import com.thedroide.sc18.utils.LinkedCacheMap;
 import com.thedroide.sc18.utils.MapTable;
 import com.thedroide.sc18.utils.Table;
+import com.thedroide.sc18.utils.WIP;
 
 /**
  * A cache that saves child game state nodes to avoid unnecessary object creation.
@@ -19,9 +21,8 @@ import com.thedroide.sc18.utils.Table;
  * the state of retrieved nodes might result in unexpected behavior and thus should
  * be avoided.</b>
  */
+@WIP
 public class GameCache {
-	private int recycled = 0;
-	private int total = 0;
 	private final Table<HUIGameState, HUIMove, HUIGameState> cache;
 	
 	/**
@@ -49,6 +50,17 @@ public class GameCache {
 		cache.put(gameBeforeMove , move, gameAfterMove);
 	}
 	
+	public HUIGameState getOrStoreChild(HUIGameState gameBeforeMove, HUIMove move, Supplier<HUIGameState> gameAfterMove) {
+		HUIGameState child = getChild(gameBeforeMove, move);
+		
+		if (child == null) {
+			child = gameAfterMove.get();
+			storeChild(gameBeforeMove, move, child);
+		}
+		
+		return child;
+	}
+	
 	/**
 	 * Retrieves a previously associated child node mapping given the game state
 	 * and the move. <b>The returned object should only be used in a <u>read-only</u>
@@ -60,15 +72,6 @@ public class GameCache {
 	 */
 	public HUIGameState getChild(HUIGameState gameBeforeMove, HUIMove move) {
 		// TODO: Synchronize?
-		
-		HUIGameState val = cache.get(gameBeforeMove, move);
-		
-		if (val != null) recycled++;
-		total++;
-		
-		GUILogger.println("Recycled " + recycled + " of " + total);
-		GUILogger.println(cache.size() + " mappings!");
-		
-		return val;
+		return cache.get(gameBeforeMove, move);
 	}
 }

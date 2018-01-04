@@ -4,7 +4,7 @@ import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
-import com.thedroide.sc18.utils.GUILogger;
+import com.thedroide.sc18.utils.GUILog;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.ExchangeCarrots;
@@ -57,7 +57,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return saladRating + fieldRating + carrotRating;
 		} catch (GameRuntimeException e) {
-			GUILogger.println("[Warn]\t" + e.getMessage());
+			GUILog.println("[Warn]\t" + e.getMessage());
 			return BAD_HEURISTIC;
 		}
 	}
@@ -89,7 +89,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return false;
 		} catch (Exception e) {
-			GUILogger.println("ERROR: " + e.getMessage());
+			GUILog.println("ERROR: " + e.getMessage());
 			return false;
 		}
 	}

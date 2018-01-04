@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
 <configuration>
 	<!--
-		In dieser Datei schalten wir die Debug-Logger (die die Ereignisse in
-		den internen Funktionen der Bibliothek protokollieren) aus bzw.
-		herunter.
+		In this file we're configurating the logging
+		level of our loggers. 
 	-->
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">

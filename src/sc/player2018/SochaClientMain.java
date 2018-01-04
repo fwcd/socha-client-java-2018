@@ -8,36 +8,15 @@ import org.slf4j.LoggerFactory;
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
-import sc.framework.plugins.SimplePlayer;
-import sc.plugin2018.AbstractClient;
-import sc.plugin2018.IGameHandler;
 import sc.shared.SharedConfiguration;
 
 /**
  * Hauptklasse des Clients, die ueber Konsolenargumente gesteuert werden kann.
  * Sie veranlasst eine Verbindung zum Spielserver und waehlt eine Strategie.
  */
-public class SochaClientMain extends AbstractClient {
+public class SochaClientMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SochaClientMain.class);
 	
-	public SochaClientMain(String host, int port, String reservation, String strategy) throws Exception {
-		// Launch client
-		super(host, port);
-		
-		// Choose strategy
-		IGameHandler logic = LogicFactory.getDefault().createInstance(this);
-
-		setHandler(logic);
-
-		// Join a game
-		if (reservation == null || reservation.isEmpty()) {
-			joinAnyGame();
-		} else {
-			joinPreparedGame(reservation);
-		}
-
-	}
-
 	public static void main(String[] args) throws IllegalOptionValueException, UnknownOptionException, IOException {
 		System.setProperty("file.encoding", "UTF-8");
 
@@ -72,7 +51,7 @@ public class SochaClientMain extends AbstractClient {
 
 		// einen neuen client erzeugen
 		try {
-			new SochaClientMain(host, port, reservation, strategy);
+			new SochaClient(host, port, reservation, strategy);
 		} catch (Exception e) {
 			LOGGER.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
 			e.printStackTrace();
@@ -93,16 +72,5 @@ public class SochaClientMain extends AbstractClient {
 		System.out.println("Beispiel: \n"
 				+ "java -jar sochaclient.jar --host 127.0.0.1 --port 10500 --reservation MQ --strategy RANDOM");
 		System.out.println();
-	}
-
-	@Override
-	public void onGamePaused(String roomId, SimplePlayer nextPlayer) {
-		
-	}
-
-	@Override
-	public void onGameObserved(String roomId) {
-		// is called when a observation request is acknowledged by the server
-		// this is a newly added method, I am not sure if it fits into the architecture
 	}
 }

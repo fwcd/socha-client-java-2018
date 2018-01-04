@@ -5,7 +5,6 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.TemplatePlayer;
-import com.thedroide.sc18.core.GameCache;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
@@ -19,15 +18,9 @@ import com.thedroide.sc18.heuristics.SmartHeuristic;
 public class AlphaBetaPlayer extends TemplatePlayer {
 	private static final long serialVersionUID = -2746100695353269130L;
 	private final HUIHeuristic heuristic = new SmartHeuristic();
-	private GameCache cache = null; // Nullable
 	
 	public AlphaBetaPlayer() {
 		super("AlphaBetaPlayer", 2, true);
-	}
-	
-	public AlphaBetaPlayer(GameCache cache) {
-		this();
-		this.cache  = cache;
 	}
 	
 	/**
@@ -40,21 +33,7 @@ public class AlphaBetaPlayer extends TemplatePlayer {
 	}
 
 	private HUIGameState getChild(HUIGameState state, HUIMove move) {
-		HUIGameState child = null;
-		
-		if (cache != null) {
-			child = cache.getChild(state, move);
-		}
-		
-		if (child == null) {
-			child = state.spawnChild(move);
-			
-			if (cache != null) {
-				cache.storeChild(state, move, child);
-			}
-		}
-		
-		return child;
+		return state.spawnChild(move);
 	}
 	
 	/**
