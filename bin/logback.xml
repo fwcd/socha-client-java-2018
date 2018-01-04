@@ -3,7 +3,7 @@
 <configuration>
 	<!--
 		In this file we're configurating the logging
-		level of our loggers. 
+		levels of our loggers. 
 	-->
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -13,7 +13,7 @@
 	</appender>
 	
 	<logger name="sc" level="ERROR" />
-	<logger name="sc.player2017.logic.RandomLogic" level="DEBUG" />
+	<logger name="ownlog" level="DEBUG" />
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
 	</root>

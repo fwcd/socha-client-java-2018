@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
-import com.thedroide.sc18.utils.GUILog;
 import com.thedroide.sc18.utils.TreeNode;
 
 import sc.plugin2018.Board;
@@ -28,6 +30,7 @@ import sc.shared.InvalidMoveException;
  * to interact with the "Hase und Igel"-game.
  */
 public class HUIGameState implements GamePlay, TreeNode {
+	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private static final long serialVersionUID = -6693551955267419333L;
 	
 	private GameState state;
@@ -57,7 +60,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 			this.state = state.clone();
 			updateLegalMoves();
 		} catch (CloneNotSupportedException e) {
-			GUILog.printStack(e);
+			LOG.error("Could not clone game state: ", e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -241,7 +244,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 			child.makeMove(move);
 			return child;
 		} catch (CloneNotSupportedException e) {
-			GUILog.printStack(e);
+			LOG.error("Could not clone game state while spawning child: ", e);
 			throw new GameRuntimeException("Game state couldn't be cloned.", e);
 		}
 	}

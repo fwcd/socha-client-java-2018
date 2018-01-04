@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import jargs.gnu.CmdLineParser;
 import jargs.gnu.CmdLineParser.IllegalOptionValueException;
 import jargs.gnu.CmdLineParser.UnknownOptionException;
@@ -15,7 +16,7 @@ import sc.shared.SharedConfiguration;
  * Sie veranlasst eine Verbindung zum Spielserver und waehlt eine Strategie.
  */
 public class SochaClientMain {
-	private static final Logger LOGGER = LoggerFactory.getLogger(SochaClientMain.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SochaClientMain.class);
 	
 	public static void main(String[] args) throws IllegalOptionValueException, UnknownOptionException, IOException {
 		System.setProperty("file.encoding", "UTF-8");
@@ -23,9 +24,10 @@ public class SochaClientMain {
 		// XXX only for testing
 		// you may use this code to enable debug output:
 		Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		((ch.qos.logback.classic.Logger) rootLogger).setLevel(ch.qos.logback.classic.Level.WARN);
+		
+		((ch.qos.logback.classic.Logger) rootLogger).setLevel(Level.WARN);
 		Logger simpleLogicLogger = LoggerFactory.getLogger(SimpleLogic.class);
-		((ch.qos.logback.classic.Logger) simpleLogicLogger).setLevel(ch.qos.logback.classic.Level.WARN);
+		((ch.qos.logback.classic.Logger) simpleLogicLogger).setLevel(Level.WARN);
 
 		// parameter definieren
 		CmdLineParser parser = new CmdLineParser();
@@ -53,8 +55,7 @@ public class SochaClientMain {
 		try {
 			new SochaClient(host, port, reservation, strategy);
 		} catch (Exception e) {
-			LOGGER.error("Beim Starten den Clients ist ein Fehler aufgetreten:");
-			e.printStackTrace();
+			LOG.error("Beim Starten den Clients ist ein Fehler aufgetreten: ", e);
 		}
 
 	}

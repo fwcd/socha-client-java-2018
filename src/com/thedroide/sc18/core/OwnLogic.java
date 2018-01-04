@@ -16,7 +16,6 @@ import com.antelmann.game.GameDriver;
 import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
-import com.thedroide.sc18.utils.GUILog;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
@@ -32,8 +31,8 @@ import sc.shared.PlayerColor;
  * A "smart" logic combining the best of alpha-beta tree search,
  * game heuristics and simple (shallow) logic.
  */
-public class MyLogic implements IGameHandler {
-	private static final Logger STD_LOG = LoggerFactory.getLogger(MyLogic.class);
+public class OwnLogic implements IGameHandler {
+	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
 	// === Parameters that may be tweaked and tested: ==
 	
@@ -69,9 +68,8 @@ public class MyLogic implements IGameHandler {
 	 * 
 	 * @param SochaClientMain - The client itself
 	 */
-	public MyLogic(AbstractClient client) {
+	public OwnLogic(AbstractClient client) {
 		this.client = client;
-		
 		ai.setResponseTime(stdMaxTime);
 	}
 	
@@ -80,10 +78,7 @@ public class MyLogic implements IGameHandler {
 	 */
 	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
-		GUILog.println("  ======================  ");
-		GUILog.println("    " + data.getWinners().get(0).getDisplayName().toString() + " WINS!");
-		GUILog.println("  ======================  ");
-		STD_LOG.info("Game ended.");
+		LOG.info(" ==== Game ended, WINNER: {} ==== ", data.getWinners().get(0).getDisplayName());
 	}
 	
 	/**
@@ -93,16 +88,8 @@ public class MyLogic implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		long startTime = System.currentTimeMillis();
-		STD_LOG.info("Move requested.");
 		
-		GUILog.println(
-				"[Turn]\t"
-				+ game.nextHUIEnumPlayer().name()
-				+ " with board "
-				+ game.toString()
-				+ " and tree depth "
-				+ Integer.toString(depth)
-		);
+		LOG.debug("Move requested: {} at tree depth {}", game, depth);
 		
 		if (!dynamicSearchDepth && committedMoves == 1) {
 			setDepth(maxSearchDepth);
@@ -111,7 +98,7 @@ public class MyLogic implements IGameHandler {
 		// Picks the best move from the AI
 		
 		if (futureMove != null && !futureMove.isDone()) {
-			// TODO: Implement proper interruption and change this to true
+			// FIXME: Implement proper interruption and change this to true
 			futureMove.cancel(false); // Discard old thread
 		}
 		
@@ -120,13 +107,15 @@ public class MyLogic implements IGameHandler {
 		
 		try {
 			aiMove = Optional.ofNullable(futureMove.get(hardMaxTime, TimeUnit.MILLISECONDS));
+			LOG.trace("Hopefully found a good move: {}", aiMove);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			LOG.warn("Reached hard timeout, will use shallow strategy to determine possibly worse move.");
 			aiMove = Optional.empty();
 		}
 
 		// Chooses the ai move if present and otherwise uses a shallow strategy to quickly determine a move
 		
-		HUIMove move = aiMove.orElse(shallowStrategy.chooseMove(game));
+		HUIMove move = aiMove.orElseGet(() -> shallowStrategy.chooseMove(game));
 		
 		// Some boilerplate required to send the move
 		
@@ -147,7 +136,7 @@ public class MyLogic implements IGameHandler {
 			};
 		}
 		
-		GUILog.println("[Committed]\t" + move.toString() + " in " + Integer.toString(responseTime) + "ms");
+		LOG.info("Committed {} in {} ms", move.toString(), responseTime);
 	}
 	
 	/**
@@ -167,7 +156,7 @@ public class MyLogic implements IGameHandler {
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
-		STD_LOG.info("Switching turns: " + player.getPlayerColor());
+		LOG.trace("Switching turns: {}", player.getPlayerColor());
 	}
 
 	/**
@@ -182,8 +171,8 @@ public class MyLogic implements IGameHandler {
 		
 		game.setState(gameState);
 		
-		STD_LOG.info("New move: {}", gameState.getTurn());
-		STD_LOG.info("Player: {}", currentPlayer.getPlayerColor());
+		LOG.trace("New move: {}", gameState.getTurn());
+		LOG.trace("Player: {}", currentPlayer.getPlayerColor());
 	}
 
 	/**
@@ -193,5 +182,6 @@ public class MyLogic implements IGameHandler {
 	@Override
 	public void sendAction(Move move) {
 		client.sendMove(move);
+		LOG.trace("Sending move to server {}", move);
 	}
 }

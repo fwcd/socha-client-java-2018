@@ -1,10 +1,12 @@
 package com.thedroide.sc18.heuristics;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
-import com.thedroide.sc18.utils.GUILog;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.ExchangeCarrots;
@@ -17,6 +19,7 @@ import sc.plugin2018.Player;
  * on player statistics.
  */
 public class SmartHeuristic implements HUIHeuristic {
+	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private static final float GOOD_HEURISTIC = Float.POSITIVE_INFINITY;
 	private static final float BAD_HEURISTIC = Float.NEGATIVE_INFINITY;
 	
@@ -57,7 +60,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return saladRating + fieldRating + carrotRating;
 		} catch (GameRuntimeException e) {
-			GUILog.println("[Warn]\t" + e.getMessage());
+			LOG.warn("Exception while calculating heuristic: ", e);
 			return BAD_HEURISTIC;
 		}
 	}
@@ -89,7 +92,7 @@ public class SmartHeuristic implements HUIHeuristic {
 			
 			return false;
 		} catch (Exception e) {
-			GUILog.println("ERROR: " + e.getMessage());
+			LOG.warn("Exception while pruning move: ", e);
 			return false;
 		}
 	}

@@ -15,11 +15,14 @@ import javax.swing.text.DefaultCaret;
  * launching this application through the provided
  * Software Challenge Server in absence of a proper
  * console or debugging environment.
+ * 
+ * @deprecated Use the LoggerFactory.getLogger("ownlog") for logging instead.
  */
+@Deprecated
 public class GUILog {
-	private static final boolean ENABLED = true; // When disabling permanently, remove all log() calls to increase performance
-	private static final StringBuilder QUEUE = new StringBuilder();
-	private static final PrintWriter WRITER = new CustomPrintWriter(GUILog::println);
+	private static final boolean ENABLED = false; // When disabling permanently, remove all log() calls to increase performance
+	private static final StringBuilder QUEUE;
+	private static final PrintWriter WRITER;
 	private static GUILog instance = null;
 	
 	private final JFrame view;
@@ -28,13 +31,18 @@ public class GUILog {
 	
 	static {
 		// Seperate init thread to speed up startup of the client
-		new Thread(() -> {
-			if (ENABLED) {
+		if (ENABLED) {
+			QUEUE = new StringBuilder();
+			WRITER = new CustomPrintWriter(GUILog::println);
+			new Thread(() -> {
 				GUILog logger = new GUILog();
 				logger.writeln(QUEUE.toString());
 				instance = logger;
-			}
-		}, "GUILogger initializer").start();
+			}, "GUILogger initializer").start();
+		} else {
+			QUEUE = null;
+			WRITER = null;
+		}
 	}
 	
 	/**
