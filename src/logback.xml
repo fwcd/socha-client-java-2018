@@ -12,9 +12,9 @@
 		</layout>
 	</appender>
 	
-	<logger name="sc" level="ERROR" />
-	<logger name="ownlog" level="DEBUG" />
-	<root level="DEBUG">
+	<logger name="sc" level="INFO" />
+	<logger name="ownlog" level="INFO" /> <!-- Enable DEBUG logging when needed -->
+	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

@@ -1,14 +1,9 @@
 package sc.player2018;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
 import jargs.gnu.CmdLineParser;
-import jargs.gnu.CmdLineParser.IllegalOptionValueException;
-import jargs.gnu.CmdLineParser.UnknownOptionException;
 import sc.shared.SharedConfiguration;
 
 /**
@@ -18,18 +13,10 @@ import sc.shared.SharedConfiguration;
 public class SochaClientMain {
 	private static final Logger LOG = LoggerFactory.getLogger(SochaClientMain.class);
 	
-	public static void main(String[] args) throws IllegalOptionValueException, UnknownOptionException, IOException {
+	public static void main(String[] args) {
 		System.setProperty("file.encoding", "UTF-8");
 
-		// XXX only for testing
-		// you may use this code to enable debug output:
-		Logger rootLogger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-		
-		((ch.qos.logback.classic.Logger) rootLogger).setLevel(Level.WARN);
-		Logger simpleLogicLogger = LoggerFactory.getLogger(SimpleLogic.class);
-		((ch.qos.logback.classic.Logger) simpleLogicLogger).setLevel(Level.WARN);
-
-		// parameter definieren
+		// Define parameters
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option hostOption = parser.addStringOption('h', "host");
 		CmdLineParser.Option portOption = parser.addIntegerOption('p', "port");
@@ -37,27 +24,26 @@ public class SochaClientMain {
 		CmdLineParser.Option reservationOption = parser.addStringOption('r', "reservation");
 
 		try {
-			// Parameter auslesen
+			// Parse parameters
 			parser.parse(args);
-		} catch (CmdLineParser.OptionException e) { // Bei Fehler die Hilfe
-			// anzeigen
+		} catch (CmdLineParser.OptionException e) {
+			// Show help if parser fails
 			showHelp(e.getMessage());
 			System.exit(2);
 		}
 
-		// Parameter laden
+		// Store parameters
 		String host = (String) parser.getOptionValue(hostOption, "localhost");
 		int port = (Integer) parser.getOptionValue(portOption, SharedConfiguration.DEFAULT_PORT);
 		String reservation = (String) parser.getOptionValue(reservationOption, "");
 		String strategy = (String) parser.getOptionValue(strategyOption, "");
 
-		// einen neuen client erzeugen
+		// Create a new client
 		try {
 			new SochaClient(host, port, reservation, strategy);
 		} catch (Exception e) {
 			LOG.error("Beim Starten den Clients ist ein Fehler aufgetreten: ", e);
 		}
-
 	}
 
 	private static void showHelp(String errorMsg) {

@@ -29,7 +29,7 @@ public enum LogicFactory {
 	/**
 	 * Creates and returns a new logic instance.
 	 */
-	public IGameHandler createInstance(AbstractClient client) throws Exception {
+	public IGameHandler createInstance(AbstractClient client) {
 		return builder.build(client);
 	}
 }

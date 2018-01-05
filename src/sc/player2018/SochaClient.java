@@ -1,16 +1,23 @@
 package sc.player2018;
 
+import java.io.IOException;
+
 import sc.framework.plugins.SimplePlayer;
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
 
 public class SochaClient extends AbstractClient {
-	public SochaClient(String host, int port, String reservation, String strategy) throws Exception {
+	public SochaClient(String host, int port, String reservation, String strategy) throws IOException {
 		// Launch client
 		super(host, port);
 		
 		// Choose strategy
-		IGameHandler logic = LogicFactory.getDefault().createInstance(this);
+		IGameHandler logic;
+		if (strategy == null || strategy.isEmpty()) {
+			logic = LogicFactory.getDefault().createInstance(this);
+		} else {
+			logic = LogicFactory.valueOf(strategy).createInstance(this);
+		}
 
 		setHandler(logic);
 
