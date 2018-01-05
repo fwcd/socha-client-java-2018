@@ -11,8 +11,6 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.antelmann.game.AutoPlay;
-import com.antelmann.game.GameDriver;
 import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
@@ -51,11 +49,11 @@ public class OwnLogic implements IGameHandler {
 	private int committedMoves = 0;
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
-	private final HUIGameState game = new HUIGameState(new GameState());
-	private final AutoPlay ai = new GameDriver(game, new com.antelmann.game.Player[] {
+	private HUIGameState game = new HUIGameState(new GameState());
+	private final HUIDriver ai = new HUIDriver(game,depth,
 			new AlphaBetaPlayer(),
 			new AlphaBetaPlayer()
-	}, depth);
+	);
 	
 	private AbstractClient client;
 	private Player currentPlayer;
@@ -98,7 +96,10 @@ public class OwnLogic implements IGameHandler {
 		// Picks the best move from the AI
 		
 		if (futureMove != null && !futureMove.isDone()) {
-			// FIXME: Implement proper interruption and change this to true
+			// TODO: Implement proper interruption and change this to true
+			// This might require major rewrites of TemplatePlayer or GameUtilities.alphaBetaSearch(...) though
+			// and is not very urgent (as it would only help reusing old threads).
+			
 			futureMove.cancel(false); // Discard old thread
 		}
 		
@@ -166,10 +167,10 @@ public class OwnLogic implements IGameHandler {
 	@Override
 	public void onUpdate(GameState gameState) {
 		currentPlayer = gameState.getCurrentPlayer();
+		game = new HUIGameState(gameState);
+		ai.setGame(game);
 
 		// TODO: Let the GameDriver calculate silently while the opponent moves (multithreading?)
-		
-		game.setState(gameState);
 		
 		LOG.trace("New move: {}", gameState.getTurn());
 		LOG.trace("Player: {}", currentPlayer.getPlayerColor());

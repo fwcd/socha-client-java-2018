@@ -128,17 +128,11 @@ public class MCTSNode implements Comparable<MCTSNode>, TreeNode {
 	 * @return 1: Win for our player - 0: Not determined - -1: Win for opponent
 	 */
 	private int simulate() {
-		HUIGameState simulation;
-		
-		try {
-			simulation = stateAfterMove.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
+		HUIGameState simulation = stateAfterMove.clone();
 		
 		int i = 0;
 		while (simulation.getWinner() == null && i < MAX_SIMULATION_DEPTH && simulation.getLegalMoves().length > 0) {
-			simulation.makeMove(moveChooser.chooseMove(simulation));
+			simulation = simulation.spawnChild(moveChooser.chooseMove(simulation));
 			i++;
 		}
 		
@@ -171,11 +165,8 @@ public class MCTSNode implements Comparable<MCTSNode>, TreeNode {
 			exploredChilds = new ArrayList<>();
 			
 			for (HUIMove move : stateAfterMove.getLegalMoves()) {
-				try {
-					HUIGameState newState = stateAfterMove.clone();
-					newState.makeMove(move);
-					exploredChilds.add(new MCTSNode(this, move, newState));
-				} catch (CloneNotSupportedException e) {}
+				HUIGameState newState = stateAfterMove.spawnChild(move);
+				exploredChilds.add(new MCTSNode(this, move, newState));
 			}
 		}
 	}

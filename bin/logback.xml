@@ -13,7 +13,9 @@
 	</appender>
 	
 	<logger name="sc" level="INFO" />
-	<logger name="ownlog" level="INFO" /> <!-- Enable DEBUG logging when needed -->
+	<logger name="ownlog" level="DEBUG" /> <!-- Enable DEBUG logging when needed -->
+	<logger name ="sc.plugin2018.GameState" level="ERROR" />
+	<logger name="sc.networking.clients.XStreamClient" level="ERROR" />
 	<root level="INFO">
 		<appender-ref ref="STDOUT" />
 	</root>

@@ -50,19 +50,23 @@ public class SmartHeuristic implements HUIHeuristic {
 				return BAD_HEURISTIC;
 			}
 			
-			int salads = playerAfterMove.getSalads();
-			int carrots = playerAfterMove.getCarrots();
-			int fieldIndex = playerAfterMove.getFieldIndex(); // Maximum field index is 64
-			
-			int saladRating = -(salads * saladWeight); // Less salads: better
-			int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-			int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
-			
-			return saladRating + fieldRating + carrotRating;
+			return rate(playerAfterMove);
 		} catch (GameRuntimeException e) {
 			LOG.warn("Exception while calculating heuristic: ", e);
 			return BAD_HEURISTIC;
 		}
+	}
+
+	private float rate(Player player) {
+		int salads = player.getSalads();
+		int carrots = player.getCarrots();
+		int fieldIndex = player.getFieldIndex(); // Maximum field index is 64
+		
+		int saladRating = -(salads * saladWeight); // Less salads: better
+		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
+		int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
+		
+		return saladRating + fieldRating + carrotRating;
 	}
 	
 	private int carrotOptimum(int fieldIndex) {

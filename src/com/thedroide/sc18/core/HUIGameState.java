@@ -2,7 +2,6 @@ package com.thedroide.sc18.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -14,6 +13,7 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
+import com.thedroide.sc18.utils.NotImplemented;
 import com.thedroide.sc18.utils.TreeNode;
 
 import sc.plugin2018.Board;
@@ -24,7 +24,9 @@ import sc.plugin2018.util.Constants;
 import sc.shared.InvalidMoveException;
 
 /**
- * Represents a (mutable) state of the game.<br><br>
+ * Represents an immutable state of the game. (Technically
+ * speaking, legal moves can still be rearranged through
+ * sortLegalMoves(...) but that doesn't matter)<br><br>
  * 
  * Provides the foundation for the Game-API
  * to interact with the "Hase und Igel"-game.
@@ -34,14 +36,12 @@ public class HUIGameState implements GamePlay, TreeNode {
 	private static final long serialVersionUID = -6693551955267419333L;
 	
 	private GameState state;
-	private List<HUIMove> moveHistory = new ArrayList<>();
 	private List<HUIMove> legalMoves = Collections.emptyList();
 	
 	/**
 	 * Constructs a new (completely) empty HUIGamePlay.
 	 */
 	private HUIGameState() {
-		
 	}
 	
 	/**
@@ -51,12 +51,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	 * @param state - The GameState used as a base
 	 */
 	public HUIGameState(GameState state) {
-		setState(state);
-	}
-	
-	public void setState(GameState state) {
 		try {
-			moveHistory.clear();
 			this.state = state.clone();
 			updateLegalMoves();
 		} catch (CloneNotSupportedException e) {
@@ -105,10 +100,6 @@ public class HUIGameState implements GamePlay, TreeNode {
 		}
 	}
 	
-	public synchronized void sortLegalMoves(Comparator<HUIMove> comparator) {
-		Collections.sort(legalMoves, comparator);
-	}
-	
 	/**
 	 * Updates the list of legal moves internally. <b>Should
 	 * be called whenever the field "state" is updated!!</b>
@@ -119,7 +110,10 @@ public class HUIGameState implements GamePlay, TreeNode {
 				.stream()
 				.map(scMove -> new HUIMove(nextHUIEnumPlayer(), scMove))
 				.filter(huiMove -> !huiMove.isSkip())
-				.collect(Collectors.toList());
+				.collect(Collectors.collectingAndThen(
+						Collectors.toList(),
+						Collections::unmodifiableList
+				));
 	}
 
 	/**
@@ -146,8 +140,51 @@ public class HUIGameState implements GamePlay, TreeNode {
 		return 2;
 	}
 
+	/**
+	 * Not supported due to immutability and thus always
+	 * returning false.
+	 */
 	@Override
+	@NotImplemented(intentionally = true)
+	@Deprecated
 	public synchronized boolean makeMove(GameMove move) {
+		LOG.debug("Tried to call unsupported method makeMove(...)!");
+		return false;
+	}
+	
+	/**
+	 * Not supported due to immutability and thus always
+	 * returning false.
+	 */
+	@Override
+	@NotImplemented(intentionally = true)
+	@Deprecated
+	public boolean undoLastMove() {
+		LOG.debug("Tried to call unsupported method undoLastMove()!");
+		return false;
+	}
+
+	/**
+	 * Not supported due to immutability and thus always
+	 * returning false.
+	 */
+	@Override
+	@NotImplemented(intentionally = true)
+	@Deprecated
+	public boolean redoMove() {
+		LOG.debug("Tried to call unsupported method redoMove()!");
+		return false;
+	}
+	
+	/**
+	 * Internal method that mutates this state to advance to
+	 * the next move. <b>Should ONLY be called during initialization
+	 * to guarantee immutability!!</b>
+	 * 
+	 * @param move - The move to be performed
+	 * @return Whether the move has been applied successfully
+	 */
+	private boolean perform(GameMove move) {
 		if (move == null) {
 			return false;
 		}
@@ -165,7 +202,6 @@ public class HUIGameState implements GamePlay, TreeNode {
 			}
 			
 			huiMove.getSCMove().perform(state);
-			moveHistory.add(huiMove);
 			updateLegalMoves();
 			return true;
 		} catch (InvalidMoveException e) {
@@ -183,7 +219,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	 * @return A read-only list containing the possible/legal moves
 	 */
 	public List<HUIMove> getLegalMovesList() {
-		return Collections.unmodifiableList(legalMoves);
+		return legalMoves;
 	}
 	
 	/**
@@ -205,48 +241,38 @@ public class HUIGameState implements GamePlay, TreeNode {
 		return legalMoves.contains(move);
 	}
 
+	/**
+	 * Unsupported due to performance.
+	 */
 	@Override
+	@NotImplemented(intentionally = false)
 	public HUIMove[] getMoveHistory() {
-		return moveHistory.toArray(new HUIMove[0]);
+		return new HUIMove[0];
 	}
 
 	@Override
+	@NotImplemented(intentionally = true)
 	public GameMove[] getRedoList() {
 		return new GameMove[0]; // Due to undo/redo not being supported
 	}
 	
-	@Override
-	public boolean undoLastMove() {
-		return false; // Not supported
-	}
-
-	@Override
-	public boolean redoMove() {
-		return false; // Not supported
-	}
-	
-	public boolean gameOver() {
+	public boolean isGameOver() {
 		return getLegalMoves().length == 0;
 	}
 
 	@Override
 	public double getResult(int playerRole) throws GameRuntimeException {
-		if (!gameOver()) {
+		if (!isGameOver()) {
             throw new GameRuntimeException(this, "The game is still in progress and thus doesn't have a result yet!");
         }
         return GameUtilities.checkForWin(this, new int[] {playerRole});
 	}
-
+	
 	@Override
 	public HUIGameState spawnChild(GameMove move) throws GameRuntimeException {
-		try {
-			HUIGameState child = clone();
-			child.makeMove(move);
-			return child;
-		} catch (CloneNotSupportedException e) {
-			LOG.error("Could not clone game state while spawning child: ", e);
-			throw new GameRuntimeException("Game state couldn't be cloned.", e);
-		}
+		HUIGameState child = clone();
+		child.perform(move);
+		return child;
 	}
 	
 	@Override
@@ -255,14 +281,24 @@ public class HUIGameState implements GamePlay, TreeNode {
 				+ " (" + state.getCurrentPlayerColor().toString() + "'s turn)";
 	}
 	
+	/**
+	 * Clones this game state. <b>Public access to this method is
+	 * almost always redundant, because HUIGameState instances
+	 * themselves already are immutable.</b>
+	 */
 	@Override
-	public HUIGameState clone() throws CloneNotSupportedException {
-		HUIGameState clone = new HUIGameState();
-		clone.state = state.clone();
-		clone.legalMoves = new ArrayList<>(legalMoves);
-		clone.moveHistory = new ArrayList<>(moveHistory);
+	public HUIGameState clone() {
+		try {
+			HUIGameState clone = new HUIGameState();
+			
+			clone.state = state.clone();
+			clone.legalMoves = new ArrayList<>(legalMoves);
 
-		return clone;
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			LOG.error("Could not clone game state: ", e);
+			throw new GameRuntimeException("Game state couldn't be cloned.", e);
+		}
 	}
 	
 	/**
@@ -301,21 +337,6 @@ public class HUIGameState implements GamePlay, TreeNode {
 	@Override
 	public boolean isLeaf() {
 		return getWinner() != null;
-	}
-
-	public GameState getSCState() {
-		try {
-			return state.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	/**
-	 * Resets the entire game state to an empty board.
-	 */
-	public void reset() {
-		setState(new GameState());
 	}
 	
 	public String getASCII() {
