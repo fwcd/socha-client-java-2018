@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
+import com.thedroide.sc18.alphabeta.IterativeDeepeningABPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
 
@@ -22,8 +22,6 @@ import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.shared.GameResult;
 import sc.shared.PlayerColor;
-
-// TODO: Clean up GUILogger calls before handing in the client
 
 /**
  * A "smart" logic combining the best of alpha-beta tree search,
@@ -37,6 +35,7 @@ public class OwnLogic implements IGameHandler {
 	private int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
 	private int maxSearchDepth = 12;
 	private boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
+	private boolean useIterativeDeepening = true; // Will ignore provided depths if enabled
 	
 	private int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
 	private int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
@@ -51,8 +50,8 @@ public class OwnLogic implements IGameHandler {
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private HUIGameState game = new HUIGameState(new GameState());
 	private final HUIDriver ai = new HUIDriver(game,depth,
-			new AlphaBetaPlayer(),
-			new AlphaBetaPlayer()
+			new IterativeDeepeningABPlayer(),
+			new IterativeDeepeningABPlayer()
 	);
 	
 	private AbstractClient client;
@@ -89,7 +88,9 @@ public class OwnLogic implements IGameHandler {
 		
 		LOG.debug("Move requested: {} at tree depth {}", game, depth);
 		
-		if (!dynamicSearchDepth && committedMoves == 1) {
+		if (useIterativeDeepening) {
+			setDepth(1);
+		} else if (!dynamicSearchDepth && committedMoves == 1) {
 			setDepth(maxSearchDepth);
 		}
 		
@@ -103,7 +104,7 @@ public class OwnLogic implements IGameHandler {
 			futureMove.cancel(false); // Discard old thread
 		}
 		
-		futureMove = threadPool.submit(() -> (HUIMove) ai.hint(ai.getGame().nextPlayer()));
+		futureMove = threadPool.submit(() -> ai.hint(ai.getGame().nextPlayer()));
 		Optional<HUIMove> aiMove;
 		
 		try {

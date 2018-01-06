@@ -54,7 +54,7 @@ public class HUIDriver implements AutoPlay {
 	 */
 	@Override
 	public synchronized GameMove autoMove() {
-		GameMove next = hint(game.nextPlayer());
+		HUIMove next = hint(game.nextPlayer());
 		game = game.spawnChild(next);
 		return next;
 	}
@@ -105,12 +105,12 @@ public class HUIDriver implements AutoPlay {
 	}
 
 	@Override
-	public GameMove hint(int playerRole) {
+	public HUIMove hint(int playerRole) {
 		synchronized (game) {
 			if (game.getLegalMovesList().size() == 0) {
 				return null;
 			} else {
-				return players[playerRole].selectMove(game, new int[] {playerRole}, level, responseTime);
+				return (HUIMove) players[playerRole].selectMove(game, new int[] {playerRole}, level, responseTime);
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public class HUIDriver implements AutoPlay {
 	}
 
 	@Override
-	public GameMove getRandomLegalMove() {
+	public HUIMove getRandomLegalMove() {
 		List<HUIMove> legalMoves = game.getLegalMovesList();
 		return legalMoves.get(ThreadLocalRandom.current().nextInt(legalMoves.size()));
 	}

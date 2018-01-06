@@ -13,6 +13,7 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.GameUtilities;
+import com.thedroide.sc18.cache.GameChildCache;
 import com.thedroide.sc18.utils.NotImplemented;
 import com.thedroide.sc18.utils.TreeNode;
 
@@ -25,8 +26,8 @@ import sc.shared.InvalidMoveException;
 
 /**
  * Represents an immutable state of the game. (Technically
- * speaking, legal moves can still be rearranged through
- * sortLegalMoves(...) but that doesn't matter)<br><br>
+ * speaking, legal moves can still be rearranged but that
+ * doesn't affect hashCode() or equals())<br><br>
  * 
  * Provides the foundation for the Game-API
  * to interact with the "Hase und Igel"-game.
@@ -34,6 +35,7 @@ import sc.shared.InvalidMoveException;
 public class HUIGameState implements GamePlay, TreeNode {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private static final long serialVersionUID = -6693551955267419333L;
+	private static final GameChildCache CACHE = new GameChildCache(200);
 	
 	private GameState state;
 	private List<HUIMove> legalMoves = Collections.emptyList();
@@ -58,6 +60,23 @@ public class HUIGameState implements GamePlay, TreeNode {
 			LOG.error("Could not clone game state: ", e);
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Rearranges the legal moves by pushing
+	 * the provided move to the start of the array (index 0). This
+	 * might increase performance of alpha-beta.
+	 * 
+	 * @param move - The (legal) move to be pushed to the beginning of the move list
+	 * @param i - The index of the given move in the legal moves list (for performance)
+	 * @throws IllegalArgumentException if the move is not legal or the index is wrong
+	 */
+	public void pushLegalMove(HUIMove move, int i) {
+		if (legalMoves.get(i).equals(move)) {
+			Collections.swap(legalMoves, 0, i);
+		}
+		
+		throw new IllegalArgumentException("Move " + move.toString() + " does not match legal move at" + Integer.toString(i));
 	}
 	
 	/**
@@ -261,7 +280,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	}
 
 	@Override
-	public double getResult(int playerRole) throws GameRuntimeException {
+	public double getResult(int playerRole) {
 		if (!isGameOver()) {
             throw new GameRuntimeException(this, "The game is still in progress and thus doesn't have a result yet!");
         }
@@ -269,7 +288,12 @@ public class HUIGameState implements GamePlay, TreeNode {
 	}
 	
 	@Override
-	public HUIGameState spawnChild(GameMove move) throws GameRuntimeException {
+	public HUIGameState spawnChild(GameMove move) {
+		HUIMove huiMove = (HUIMove) move;
+		return CACHE.getOrStoreChild(this, huiMove, () -> createChild(move));
+	}
+
+	private HUIGameState createChild(GameMove move) {
 		HUIGameState child = clone();
 		child.perform(move);
 		return child;
