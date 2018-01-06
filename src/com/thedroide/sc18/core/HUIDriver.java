@@ -106,21 +106,17 @@ public class HUIDriver implements AutoPlay {
 
 	@Override
 	public HUIMove hint(int playerRole) {
-		synchronized (game) {
-			if (game.getLegalMovesList().size() == 0) {
-				return null;
-			} else {
-				return (HUIMove) players[playerRole].selectMove(game, new int[] {playerRole}, level, responseTime);
-			}
+		if (game.getLegalMovesList().size() == 0) {
+			return null;
+		} else {
+			return (HUIMove) players[playerRole].selectMove(game, new int[] {playerRole}, level, responseTime);
 		}
 	}
 
 	@Override
 	public double evaluateMove(GameMove move) {
-		synchronized (game) {
-			int role = move.getPlayer();
-			return players[role].evaluate(game, move, new int[] {role}, level, responseTime);
-		}
+		int role = move.getPlayer();
+		return players[role].evaluate(game, move, new int[] {role}, level, responseTime);
 	}
 
 	@Override

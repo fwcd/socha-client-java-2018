@@ -166,9 +166,8 @@ public class HUIGameState implements GamePlay, TreeNode {
 	@Override
 	@NotImplemented(intentionally = true)
 	@Deprecated
-	public synchronized boolean makeMove(GameMove move) {
-		LOG.debug("Tried to call unsupported method makeMove(...)!");
-		return false;
+	public boolean makeMove(GameMove move) {
+		throw new UnsupportedOperationException("Tried to call unsupported method makeMove(...)!");
 	}
 	
 	/**

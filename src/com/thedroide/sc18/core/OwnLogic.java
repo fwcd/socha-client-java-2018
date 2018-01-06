@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
+import com.thedroide.sc18.alphabeta.IterativeDeepeningABPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
 
@@ -38,8 +38,8 @@ public class OwnLogic implements IGameHandler {
 	
 	private int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
 	private int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
-	private int stdMaxTime = 1500; // in ms - Standard time limit, causes AI to finish all current evaluations and return
-	private int hardMaxTime = 1800; // in ms - Hard move time limit, instantly returns a move (evaluator threads finish in background)
+	private int stdMaxTime = 1700; // in ms - Standard time limit, causes AI to finish all current evaluations and return
+	private int hardMaxTime = 1850; // in ms - Hard move time limit, instantly returns a move (evaluator threads finish in background)
 	
 	// == End of parameters ==
 	
@@ -49,8 +49,8 @@ public class OwnLogic implements IGameHandler {
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private HUIGameState game = new HUIGameState(new GameState());
 	private final HUIDriver ai = new HUIDriver(game, depth,
-			new AlphaBetaPlayer(),
-			new AlphaBetaPlayer()
+			new IterativeDeepeningABPlayer(),
+			new IterativeDeepeningABPlayer()
 	);
 	
 	private AbstractClient client;

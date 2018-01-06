@@ -6,8 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.antelmann.game.AutoPlay;
-import com.antelmann.game.GameDriver;
 import com.antelmann.game.Player;
+import com.thedroide.sc18.core.HUIDriver;
 import com.thedroide.sc18.core.HUIGameState;
 
 import sc.plugin2018.GameState;
@@ -154,13 +154,13 @@ public class ClientSimulator implements Runnable {
 	public void run() {
 		VirtualPlayer current = p1;
 		HUIGameState game = new HUIGameState(new GameState());
-		AutoPlay autoPlay = new GameDriver(game, new Player[] {p1.getAI(), p2.getAI()}, depth);
+		HUIDriver autoPlay = new HUIDriver(game, depth, p1.getAI(), p2.getAI());
 		
 		autoPlay.setResponseTime(softMaxTime);
 		
 		int t = 0;
 		while (t < TURNS && game.getWinner() == null) {
-			autoPlay.autoMove();
+			game = game.spawnChild(autoPlay.hint(game.nextPlayer()));
 			current = opponentOf(current);
 			t++;
 		}

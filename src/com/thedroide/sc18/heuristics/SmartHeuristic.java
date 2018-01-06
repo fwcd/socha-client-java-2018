@@ -20,15 +20,15 @@ import sc.plugin2018.Player;
  */
 public class SmartHeuristic implements HUIHeuristic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
-	private static final float GOOD_HEURISTIC = Float.POSITIVE_INFINITY;
-	private static final float BAD_HEURISTIC = Float.NEGATIVE_INFINITY;
+	private static final double GOOD_HEURISTIC = Double.POSITIVE_INFINITY;
+	private static final double BAD_HEURISTIC = Double.NEGATIVE_INFINITY;
 	
 	private final int carrotWeight = 1;
 	private final int saladWeight = 256;
-	private final int fieldIndexWeight = 2;
+	private final int fieldIndexWeight = 4;
 	
 	@Override
-	public float heuristic(
+	public double heuristic(
 			HUIGameState gameBeforeMove,
 			HUIGameState gameAfterMove,
 			HUIMove move,
@@ -57,7 +57,7 @@ public class SmartHeuristic implements HUIHeuristic {
 		}
 	}
 
-	private float rate(Player player) {
+	private double rate(Player player) {
 		int salads = player.getSalads();
 		int carrots = player.getCarrots();
 		int fieldIndex = player.getFieldIndex(); // Maximum field index is 64
@@ -90,7 +90,8 @@ public class SmartHeuristic implements HUIHeuristic {
 			HUIPlayerColor player
 	) {
 		try {
-			if (gameAfterMove.getWinner() != null) {
+			if (gameAfterMove.getWinner() != null
+					|| (move.isCarrotExchange() && player.getSCPlayer(gameBeforeMove).getLastNonSkipAction() instanceof ExchangeCarrots)) {
 				return true;
 			}
 			

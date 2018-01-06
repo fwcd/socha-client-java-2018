@@ -1,7 +1,11 @@
 package com.thedroide.sc18.core;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
@@ -16,6 +20,7 @@ import com.thedroide.sc18.heuristics.SmartHeuristic;
  * than {@link TemplatePlayer}.
  */
 public abstract class TreeSearchPlayer implements Player {
+	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private HUIHeuristic heuristic = new SmartHeuristic();
 	private boolean orderMoves = false;
 	
@@ -38,18 +43,28 @@ public abstract class TreeSearchPlayer implements Player {
 
 	@Override
 	public GameMove selectMove(GamePlay game, int[] role, int level, long ms) {
+		long finishTime = System.currentTimeMillis() + ms;
+		LOG.trace("TreeSearchPlayer selecting a move...");
 		HUIGameState huiGame = (HUIGameState) game;
 		
 		HUIMove bestMove = null;
 		double maxRating = Double.NEGATIVE_INFINITY;
 		
-		for (HUIMove move : new ArrayList<>(huiGame.getLegalMovesList())) {
-			// TODO: Parallelisation might be a good idea
-			double rating = evaluate(game, move, role, level, ms);
+		List<HUIMove> legalMoves = new ArrayList<>(huiGame.getLegalMovesList());
+		long branchMs = ms / legalMoves.size();
+		
+		for (HUIMove move : legalMoves) {
+			LOG.trace("Evaluate move {} with depth {}", move, level);
+			double rating = evaluate(game, move, role, level, branchMs);
 			
 			if (rating > maxRating) {
 				bestMove = move;
 				maxRating = rating;
+			}
+			
+			long remainingMs = finishTime - System.currentTimeMillis();
+			if (Thread.interrupted() || remainingMs <= 0) {
+				break; // Break loop if time has run out or the thread was interrupted
 			}
 		}
 		

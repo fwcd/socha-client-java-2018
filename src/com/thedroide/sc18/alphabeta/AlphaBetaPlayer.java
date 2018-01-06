@@ -16,6 +16,6 @@ public class AlphaBetaPlayer extends TreeSearchPlayer {
 
 	@Override
 	public double evaluate(GamePlay game, GameMove move, int[] role, int level, long ms) {
-		return GameUtilities.alphaBetaSearch(game, move, this, role, level, ms, doesOrderMoves());
+		return GameUtilities.alphaBetaSearch(game, move, this, role, level, System.currentTimeMillis() + ms, doesOrderMoves());
 	}
 }

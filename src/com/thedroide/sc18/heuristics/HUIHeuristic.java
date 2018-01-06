@@ -19,7 +19,7 @@ public interface HUIHeuristic {
 	 * @param player - The player who committed the move
 	 * @return A rating of this move
 	 */
-	float heuristic(HUIGameState gameBeforeMove, HUIGameState gameAfterMove, HUIMove move, HUIPlayerColor player);
+	double heuristic(HUIGameState gameBeforeMove, HUIGameState gameAfterMove, HUIMove move, HUIPlayerColor player);
 	
 	/**
 	 * Decides whether a move should be "cut off".

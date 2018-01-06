@@ -74,7 +74,7 @@ public class HUIMove implements GameMove, Iterable<Action> {
 	public int getFieldsDelta() {
 		int fieldsDelta = 0;
 		
-		for (Action action : move.getActions()) {
+		for (Action action : move.actions) {
 			if (action instanceof Advance) {
 				fieldsDelta += ((Advance) action).getDistance();
 			}
@@ -83,8 +83,18 @@ public class HUIMove implements GameMove, Iterable<Action> {
 		return fieldsDelta;
 	}
 	
+	public boolean isCarrotExchange() {
+		for (Action action : move.actions) {
+			if (action instanceof ExchangeCarrots) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public boolean isSkip() {
-		for (Action action : move.getActions()) {
+		for (Action action : move.actions) {
 			if (action instanceof Skip) {
 				return true;
 			}
