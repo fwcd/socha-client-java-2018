@@ -26,6 +26,7 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int carrotWeight = 1;
 	private final int saladWeight = 256;
 	private final int fieldIndexWeight = 4;
+	private final int turnWeight = 2;
 	
 	@Override
 	public double heuristic(
@@ -43,14 +44,17 @@ public class SmartHeuristic implements HUIHeuristic {
 			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
+			double playerRating;
+			
 			if (playerAfterMove.inGoal()) {
-				// Obviously a very good rating if the player reaches the goal:
-				return GOOD_HEURISTIC;
+				playerRating = GOOD_HEURISTIC; // Obviously a very good rating if the player reaches the goal
 			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
-				return BAD_HEURISTIC;
+				playerRating = BAD_HEURISTIC;
+			} else {
+				playerRating = rate(playerAfterMove);
 			}
 			
-			return rate(playerAfterMove);
+			return playerRating - (gameAfterMove.getTurn() * turnWeight); // TODO: Incorporating the turn here is experimental
 		} catch (GameRuntimeException e) {
 			LOG.warn("Exception while calculating heuristic: ", e);
 			return BAD_HEURISTIC;

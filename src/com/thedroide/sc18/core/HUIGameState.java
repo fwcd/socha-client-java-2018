@@ -62,6 +62,14 @@ public class HUIGameState implements GamePlay, TreeNode {
 		}
 	}
 	
+	public int getTurn() {
+		return state.getTurn();
+	}
+	
+	public int getRound() {
+		return state.getRound();
+	}
+	
 	/**
 	 * Rearranges the legal moves by pushing
 	 * the provided move to the start of the array (index 0). This
