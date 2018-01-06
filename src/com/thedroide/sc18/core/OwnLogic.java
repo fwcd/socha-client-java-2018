@@ -11,7 +11,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thedroide.sc18.alphabeta.IterativeDeepeningABPlayer;
+import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
 
@@ -35,7 +35,6 @@ public class OwnLogic implements IGameHandler {
 	private int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
 	private int maxSearchDepth = 12;
 	private boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
-	private boolean useIterativeDeepening = true; // Will ignore provided depths if enabled
 	
 	private int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
 	private int softMaxTime = 1200; // in ms - Soft time limit, causes dynamic search to decrease depth at next iteration
@@ -49,9 +48,9 @@ public class OwnLogic implements IGameHandler {
 	
 	private final MoveChooser shallowStrategy = new SimpleMoveChooser();
 	private HUIGameState game = new HUIGameState(new GameState());
-	private final HUIDriver ai = new HUIDriver(game,depth,
-			new IterativeDeepeningABPlayer(),
-			new IterativeDeepeningABPlayer()
+	private final HUIDriver ai = new HUIDriver(game, depth,
+			new AlphaBetaPlayer(),
+			new AlphaBetaPlayer()
 	);
 	
 	private AbstractClient client;
@@ -88,9 +87,7 @@ public class OwnLogic implements IGameHandler {
 		
 		LOG.debug("Move requested: {} at tree depth {}", game, depth);
 		
-		if (useIterativeDeepening) {
-			setDepth(1);
-		} else if (!dynamicSearchDepth && committedMoves == 1) {
+		if (!dynamicSearchDepth && committedMoves == 1) {
 			setDepth(maxSearchDepth);
 		}
 		
