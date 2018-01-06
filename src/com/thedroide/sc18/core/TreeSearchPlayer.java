@@ -3,6 +3,9 @@ package com.thedroide.sc18.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +24,14 @@ import com.thedroide.sc18.heuristics.SmartHeuristic;
  */
 public abstract class TreeSearchPlayer implements Player {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
+	
 	private HUIHeuristic heuristic = new SmartHeuristic();
 	private boolean orderMoves = false;
+	
+	private static class BestResult {
+		private volatile HUIMove bestMove = null;
+		private volatile double bestRating = Double.NEGATIVE_INFINITY;
+	}
 	
 	public void setHeuristic(HUIHeuristic heuristic) {
 		this.heuristic = Objects.requireNonNull(heuristic);
@@ -43,32 +52,36 @@ public abstract class TreeSearchPlayer implements Player {
 
 	@Override
 	public GameMove selectMove(GamePlay game, int[] role, int level, long ms) {
-		long finishTime = System.currentTimeMillis() + ms;
+		final long finishTime = System.currentTimeMillis() + ms;
 		LOG.trace("TreeSearchPlayer selecting a move...");
-		HUIGameState huiGame = (HUIGameState) game;
 		
-		HUIMove bestMove = null;
-		double maxRating = Double.NEGATIVE_INFINITY;
+		final BestResult result = new BestResult();
+		final List<HUIMove> legalMoves = new ArrayList<>(((HUIGameState) game).getLegalMovesList());
+		final ExecutorService threadPool = Executors.newFixedThreadPool(legalMoves.size());
 		
-		List<HUIMove> legalMoves = new ArrayList<>(huiGame.getLegalMovesList());
-		long branchMs = ms / legalMoves.size();
+		// TODO: Debug this entire method, results seems to be a little weird-ish...
 		
 		for (HUIMove move : legalMoves) {
-			LOG.trace("Evaluate move {} with depth {}", move, level);
-			double rating = evaluate(game, move, role, level, branchMs);
-			
-			if (rating > maxRating) {
-				bestMove = move;
-				maxRating = rating;
-			}
-			
-			long remainingMs = finishTime - System.currentTimeMillis();
-			if (Thread.interrupted() || remainingMs <= 0) {
-				break; // Break loop if time has run out or the thread was interrupted
-			}
+			LOG.trace("Evaluate move {}  with depth {}", move, level);
+			threadPool.execute(() -> {
+				double rating = evaluate(game, move, role, level, ms);
+				
+				if (!Thread.interrupted() && (rating > result.bestRating)) {
+					result.bestMove = move;
+					result.bestRating = rating;
+				}
+			});
 		}
 		
-		return bestMove;
+		threadPool.shutdown();
+		try {
+			threadPool.awaitTermination(finishTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			// TODO: Implement proper thread interruption so the unused threads won't run uselessly in the background
+			// Do nothing, just proceed to return.
+		}
+		
+		return result.bestMove;
 	}
 
 	@Override

@@ -17,7 +17,8 @@ import com.thedroide.sc18.core.TreeSearchPlayer;
 
 public class IterativeDeepeningABPlayer extends TreeSearchPlayer {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
-	private final ExecutorService threadPool = Executors.newCachedThreadPool();
+	
+	private final ExecutorService threadPool = Executors.newSingleThreadExecutor();
 	
 	@Override
 	public String getPlayerName() {
