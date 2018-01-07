@@ -15,7 +15,6 @@ import com.thedroide.sc18.utils.WIP;
 @WIP(usable = false)
 public class ClientSimulatorMain {
 	// FIXME: The implementation seems to be very buggy and does not produce correct results
-	// Use testclient instead!
 	
 	public static void main(String[] args) {
 		new ClientBench()
