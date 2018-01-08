@@ -7,15 +7,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/hui-plugin.jar"/>
-	<classpathentry kind="lib" path="lib/jargs.jar"/>
-	<classpathentry kind="lib" path="lib/processing-core.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.5.6.jar" sourcepath="C:/Users/Droide/AppData/Local/Temp/.org.sf.feeling.decompiler1515326129431/source/slf4j-api-1.5.6-sources-1515344655167.jar"/>
-	<classpathentry kind="lib" path="lib/software_challenge-sdk.jar"/>
-	<classpathentry kind="lib" path="lib/tkra-classfinder.jar"/>
-	<classpathentry kind="lib" path="lib/antelmann.jar" sourcepath="lib/antelmannSource.jar"/>
-	<classpathentry kind="lib" path="lib/game.jar" sourcepath="lib/game_src.jar"/>
-	<classpathentry kind="lib" path="lib/softwarechallenge-server.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>

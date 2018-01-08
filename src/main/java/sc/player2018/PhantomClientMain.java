@@ -10,8 +10,8 @@ import sc.shared.SharedConfiguration;
  * Hauptklasse des Clients, die ueber Konsolenargumente gesteuert werden kann.
  * Sie veranlasst eine Verbindung zum Spielserver und waehlt eine Strategie.
  */
-public class SochaClientMain {
-	private static final Logger LOG = LoggerFactory.getLogger(SochaClientMain.class);
+public class PhantomClientMain {
+	private static final Logger LOG = LoggerFactory.getLogger(PhantomClientMain.class);
 	
 	public static void main(String[] args) {
 		System.setProperty("file.encoding", "UTF-8");
@@ -40,7 +40,7 @@ public class SochaClientMain {
 
 		// Create a new client
 		try {
-			new SochaClient(host, port, reservation, strategy);
+			new PhantomClient(host, port, reservation, strategy);
 		} catch (Exception e) {
 			LOG.error("Beim Starten den Clients ist ein Fehler aufgetreten: ", e);
 		}
