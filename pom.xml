@@ -4,7 +4,6 @@
 	<groupId>com.thedroide.phantomclient</groupId>
 	<artifactId>phantomclient</artifactId>
 	<version>5.0</version>
-	<packaging>jar</packaging>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
@@ -33,6 +32,8 @@
 						<descriptorRefs>
 							<descriptorRef>jar-with-dependencies</descriptorRef>
 						</descriptorRefs>
+						<finalName>phantomclient-runnable</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
 					</configuration>
 				</plugin>
 			</plugins>

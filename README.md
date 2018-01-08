@@ -31,15 +31,17 @@ The respective package-info.java files contain further information for each subp
 * Add a new Run Configuration
     * Select Maven Build
     * Enter in the base directory field: ${project_loc:phantomclient}
-    * Enter in the goals field: package
+    * Enter in the goals field: clean assembly:assembly
 
 ## Running the client
 
 * [Download the Server here](http://www.software-challenge.de/downloads/).
   
 * Launch the previously created Run Configuration to create a Runnable JAR in the target directory
+    * Alternatively you could also run from the console: mvn clean assembly:assembly
+  
+* You should find the compiled JAR under the path target/phantomclient-runnable.jar
   
 * Launch the Server-GUI and load the compiled client as a computer-player.
   (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/),
-  which stupidly commits random legal moves while playing and thus is useful
-  for testing.)
+  which stupidly commits random legal moves while playing and thus is useful for testing.)
