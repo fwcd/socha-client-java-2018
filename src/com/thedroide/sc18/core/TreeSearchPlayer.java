@@ -15,6 +15,8 @@ import com.antelmann.game.GamePlay;
 import com.antelmann.game.Player;
 import com.antelmann.game.TemplatePlayer;
 import com.thedroide.sc18.heuristics.HUIHeuristic;
+import com.thedroide.sc18.heuristics.HUIPruner;
+import com.thedroide.sc18.heuristics.LightPruner;
 import com.thedroide.sc18.heuristics.SmartHeuristic;
 
 /**
@@ -26,11 +28,16 @@ public abstract class TreeSearchPlayer implements Player {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
 	private HUIHeuristic heuristic = new SmartHeuristic();
+	private HUIPruner pruner = new LightPruner();
 	private boolean orderMoves = false;
 	
 	private static class BestResult {
 		private volatile HUIMove bestMove = null;
 		private volatile double bestRating = Double.NEGATIVE_INFINITY;
+	}
+	
+	public void setPruner(HUIPruner pruner) {
+		this.pruner = pruner;
 	}
 	
 	public void setHeuristic(HUIHeuristic heuristic) {
@@ -96,7 +103,7 @@ public abstract class TreeSearchPlayer implements Player {
 
 	@Override
 	public boolean pruneMove(GamePlay game, GameMove move, int[] role) {
-		return heuristic.pruneMove(
+		return pruner.pruneMove(
 				(HUIGameState) game,
 				(HUIGameState) game.spawnChild(move),
 				(HUIMove) move,

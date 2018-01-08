@@ -73,10 +73,6 @@ public class SmartHeuristic implements HUIHeuristic {
 		return saladRating + fieldRating + carrotRating;
 	}
 	
-	private int square(int n) {
-		return n * n;
-	}
-	
 	private int carrotOptimum(int fieldIndex) {
 		int fieldsToGoal = 64 - fieldIndex;
 		
@@ -88,25 +84,5 @@ public class SmartHeuristic implements HUIHeuristic {
 		 */
 		
 		return (fieldsToGoal + 6) / 2;
-	}
-
-	@Override
-	public boolean pruneMove(
-			HUIGameState gameBeforeMove,
-			HUIGameState gameAfterMove,
-			HUIMove move,
-			HUIPlayerColor player
-	) {
-		try {
-			if (gameAfterMove.getWinner() != null
-					|| (move.isCarrotExchange() && gameBeforeMove.getSCPlayer(player).getLastNonSkipAction() instanceof ExchangeCarrots)) {
-				return true;
-			}
-			
-			return false;
-		} catch (Exception e) {
-			LOG.warn("Exception while pruning move: ", e);
-			return false;
-		}
 	}
 }
