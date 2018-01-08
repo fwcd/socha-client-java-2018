@@ -99,8 +99,8 @@ public class ClientSimulator implements Runnable {
 	}
 	
 	private VirtualPlayer getWinner(HUIGameState game) {
-		int field1 = p1.getHUIPlayerColor().getSCPlayer(game).getFieldIndex();
-		int field2 = p2.getHUIPlayerColor().getSCPlayer(game).getFieldIndex();
+		int field1 = game.getSCPlayer(p1.getHUIPlayerColor()).getFieldIndex();
+		int field2 = game.getSCPlayer(p2.getHUIPlayerColor()).getFieldIndex();
 		
 		if (field1 > field2) {
 			return p1;

@@ -67,17 +67,6 @@ public enum HUIPlayerColor {
 	}
 	
 	/**
-	 * A bridge method between {@link HUIPlayerColor} and
-	 * the associated {@link sc.plugin2018.Player} (Software Challenge API).
-	 * 
-	 * @param state - The current game state
-	 * @return The Player from the Software Challenge API
-	 */
-	public sc.plugin2018.Player getSCPlayer(HUIGameState state) {
-		return state.getSCPlayer(this);
-	}
-	
-	/**
 	 * Fetches the opponent of this {@link HUIPlayerColor}.
 	 * 
 	 * @return The opponent

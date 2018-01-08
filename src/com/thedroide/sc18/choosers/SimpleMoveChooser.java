@@ -38,7 +38,7 @@ public class SimpleMoveChooser implements MoveChooser {
 		List<HUIMove> selectedMoves = new ArrayList<>();
 
 		Board board = state.getBoard();
-		Player player = state.nextHUIEnumPlayer().getSCPlayer(state);
+		Player player = state.getSCPlayer(state.nextHUIEnumPlayer());
 		int index = player.getFieldIndex();
 		
 		for (HUIMove huiMove : possibleMoves) {

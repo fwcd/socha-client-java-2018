@@ -339,7 +339,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 	 * @param player - The HUIEnumPlayer
 	 * @return The Player from the Software Challenge API
 	 */
-	protected Player getSCPlayer(HUIPlayerColor player) {
+	public Player getSCPlayer(HUIPlayerColor player) {
 		switch (player) {
 		
 		case RED:

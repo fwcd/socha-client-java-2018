@@ -24,9 +24,9 @@ public class SmartHeuristic implements HUIHeuristic {
 	private static final double BAD_HEURISTIC = Double.NEGATIVE_INFINITY;
 	
 	private final int carrotWeight = 1;
-	private final int saladWeight = 256;
+	private final int saladWeight = 1024;
 	private final int fieldIndexWeight = 4;
-	private final int turnWeight = 2;
+	private final int turnWeight = 4;
 	
 	@Override
 	public double heuristic(
@@ -40,8 +40,8 @@ public class SmartHeuristic implements HUIHeuristic {
 		}
 		
 		try {
-			Player playerBeforeMove = player.getSCPlayer(gameBeforeMove);
-			Player playerAfterMove = player.getSCPlayer(gameAfterMove);
+			Player playerBeforeMove = gameBeforeMove.getSCPlayer(player);
+			Player playerAfterMove = gameAfterMove.getSCPlayer(player);
 			Action lastAction = playerBeforeMove.getLastNonSkipAction();
 			
 			double playerRating;
@@ -68,9 +68,13 @@ public class SmartHeuristic implements HUIHeuristic {
 		
 		int saladRating = -(salads * saladWeight); // Less salads: better
 		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-		int carrotRating = -Math.abs((carrots - carrotOptimum(fieldIndex)) * carrotWeight) / 4; // More or less carrots than optimum: worse
+		int carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * carrotWeight; // More or less carrots than optimum: worse
 		
 		return saladRating + fieldRating + carrotRating;
+	}
+	
+	private int square(int n) {
+		return n * n;
 	}
 	
 	private int carrotOptimum(int fieldIndex) {
@@ -95,7 +99,7 @@ public class SmartHeuristic implements HUIHeuristic {
 	) {
 		try {
 			if (gameAfterMove.getWinner() != null
-					|| (move.isCarrotExchange() && player.getSCPlayer(gameBeforeMove).getLastNonSkipAction() instanceof ExchangeCarrots)) {
+					|| (move.isCarrotExchange() && gameBeforeMove.getSCPlayer(player).getLastNonSkipAction() instanceof ExchangeCarrots)) {
 				return true;
 			}
 			

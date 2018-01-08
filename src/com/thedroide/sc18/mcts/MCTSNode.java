@@ -140,8 +140,8 @@ public class MCTSNode implements Comparable<MCTSNode>, TreeNode {
 	}
 	
 	private int winnerOf(HUIGameState state) {
-		Player red = HUIPlayerColor.RED.getSCPlayer(state);
-		Player blue = HUIPlayerColor.BLUE.getSCPlayer(state);
+		Player red = state.getSCPlayer(HUIPlayerColor.RED);
+		Player blue = state.getSCPlayer(HUIPlayerColor.BLUE);
 		
 		boolean redInGoal = red.inGoal();
 		boolean blueInGoal = blue.inGoal();
