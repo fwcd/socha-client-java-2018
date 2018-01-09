@@ -68,7 +68,7 @@ public class SmartHeuristic implements HUIHeuristic {
 		
 		int saladRating = -(salads * saladWeight); // Less salads: better
 		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-		int carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * carrotWeight; // More or less carrots than optimum: worse
+		int carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * fieldIndexWeight * carrotWeight; // More or less carrots than optimum: worse
 		
 		return saladRating + fieldRating + carrotRating;
 	}
