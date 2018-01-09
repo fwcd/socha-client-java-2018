@@ -1,11 +1,11 @@
-package com.thedroide.sc18.clientsimulator;
+package com.thedroide.sc18.test.clientsimulator;
 
 import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.alphabeta.IterativeDeepeningABPlayer;
 import com.thedroide.sc18.choosers.BasicPlayer;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
-import com.thedroide.sc18.clientsimulator.core.ClientBench;
 import com.thedroide.sc18.mcts.MCTSPlayer;
+import com.thedroide.sc18.test.clientsimulator.core.ClientBench;
 import com.thedroide.sc18.utils.WIP;
 
 /**

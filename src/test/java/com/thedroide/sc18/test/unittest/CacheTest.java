@@ -1,4 +1,4 @@
-package com.thedroide.sc18.unittest;
+package com.thedroide.sc18.test.unittest;
 
 import static org.junit.Assert.assertTrue;
 

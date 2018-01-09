@@ -11,7 +11,7 @@ Package structure (following the Maven conventions):
     * **com.thedroide.sc18** - Contains game ai logic
     * **sc.player2018** - Necessary client code to interact with the game and a very simple demo logic
 * **src/test/javatest** - Testing source code
-    * **com.thedroide.sc18**
+    * **com.thedroide.sc18.test**
         * **clientsimulator** - A tester that can perform mass-tests of game strategies
         * **unittest** - JUnit test files
 
