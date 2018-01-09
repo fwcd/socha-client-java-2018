@@ -1,1 +1,0 @@
-java -jar sochaclient.jar -Dlogback.configurationFile=logback.xml -Xms512M -Xmx1G "$@"

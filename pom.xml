@@ -4,6 +4,9 @@
 	<groupId>com.thedroide.phantomclient</groupId>
 	<artifactId>phantomclient</artifactId>
 	<version>5.0</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
@@ -52,6 +55,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>edu.brown.cs.burlap</groupId>
+			<artifactId>burlap</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>com.antelmann</groupId>
 			<artifactId>antelmann</artifactId>

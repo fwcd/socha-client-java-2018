@@ -6,7 +6,8 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	CacheTest.class
+	CacheTest.class,
+	NeuralTest.class
 })
 public class AllTests {
 }

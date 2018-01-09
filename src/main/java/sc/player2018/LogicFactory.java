@@ -1,6 +1,6 @@
 package sc.player2018;
 
-import com.thedroide.sc18.core.OwnLogic;
+import com.thedroide.sc18.core.PhantomLogic;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.IGameHandler;
@@ -11,7 +11,7 @@ import sc.plugin2018.IGameHandler;
  */
 public enum LogicFactory {
 	SIMPLE(SimpleLogic::new), // The SimpleClient-logic
-	MY_LOGIC(OwnLogic::new); // My game logic adapter
+	MY_LOGIC(PhantomLogic::new); // My game logic adapter
 	
 	private final LogicBuilder builder;
 	
