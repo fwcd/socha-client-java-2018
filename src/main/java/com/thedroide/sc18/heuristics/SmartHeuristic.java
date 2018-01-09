@@ -24,7 +24,7 @@ public class SmartHeuristic implements HUIHeuristic {
 	private static final double BAD_HEURISTIC = Double.NEGATIVE_INFINITY;
 	
 	private final int carrotWeight = 1;
-	private final int saladWeight = 1024;
+	private final int saladWeight = 16384;
 	private final int fieldIndexWeight = 4;
 	private final int turnWeight = 4;
 	
@@ -51,7 +51,11 @@ public class SmartHeuristic implements HUIHeuristic {
 			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
 				playerRating = BAD_HEURISTIC;
 			} else {
-				playerRating = rate(playerAfterMove);
+				playerRating = rate(
+						playerAfterMove.getSalads(),
+						playerAfterMove.getCarrots(),
+						playerAfterMove.getFieldIndex()
+				);
 			}
 			
 			return playerRating - (gameAfterMove.getTurn() * turnWeight); // TODO: Incorporating the turn here is experimental
@@ -60,20 +64,16 @@ public class SmartHeuristic implements HUIHeuristic {
 			return BAD_HEURISTIC;
 		}
 	}
-
-	private double rate(Player player) {
-		int salads = player.getSalads();
-		int carrots = player.getCarrots();
-		int fieldIndex = player.getFieldIndex(); // Maximum field index is 64
-		
+	
+	public double rate(int salads, int carrots, int fieldIndex) {
 		int saladRating = -(salads * saladWeight); // Less salads: better
 		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-		int carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * fieldIndexWeight * carrotWeight; // More or less carrots than optimum: worse
+		double carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * (carrotWeight + fieldIndex); // TODO: Improve this // More or less carrots than optimum: worse
 		
 		return saladRating + fieldRating + carrotRating;
 	}
 	
-	private int carrotOptimum(int fieldIndex) {
+	public int carrotOptimum(int fieldIndex) {
 		int fieldsToGoal = 64 - fieldIndex;
 		
 		/*
