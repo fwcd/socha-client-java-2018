@@ -24,6 +24,8 @@ public class LightPruner implements HUIPruner {
 	) {
 		try {
 			if (gameAfterMove.getWinner() != null
+					// TODO: Is excluding double-carrot exchanges actually a bad thing or does it impact performance unnecessarily?
+					// An idea might be to limit this to the end game (specifically targetting carrot-loops)
 					|| (move.isCarrotExchange() && gameBeforeMove.getSCPlayer(player).getLastNonSkipAction() instanceof ExchangeCarrots)) {
 				return true;
 			}
