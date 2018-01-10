@@ -3,15 +3,12 @@ package com.thedroide.sc18.heuristics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.antelmann.game.GameRuntimeException;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
 
-import sc.plugin2018.Action;
-import sc.plugin2018.ExchangeCarrots;
-import sc.plugin2018.FallBack;
 import sc.plugin2018.Player;
+import sc.plugin2018.util.Constants;
 
 /**
  * Provides a more-or-less good implementation
@@ -23,10 +20,12 @@ public class SmartHeuristic implements HUIHeuristic {
 	private static final double GOOD_HEURISTIC = Double.POSITIVE_INFINITY;
 	private static final double BAD_HEURISTIC = Double.NEGATIVE_INFINITY;
 	
-	private final int carrotWeight = 1;
-	private final int saladWeight = 16384;
-	private final int fieldIndexWeight = 4;
-	private final int turnWeight = 4;
+	// All weights should be (almost) equally effective to due normalization
+	
+	private final int carrotWeight = 2; // Higher values priorize carrot optimization
+	private final int saladWeight = 16384; // Higher values priorize salad reduction (which is ALWAYS a good thing)
+	private final int fieldIndexWeight = 2; // Higher values priorize advance
+	private final int turnWeight = 1; // Higher values priorize fast play
 	
 	@Override
 	public double heuristic(
@@ -35,21 +34,16 @@ public class SmartHeuristic implements HUIHeuristic {
 			HUIMove move,
 			HUIPlayerColor player
 	) {
-		if (move.isDiscarded()) {
-			return BAD_HEURISTIC;
-		}
-		
 		try {
-			Player playerBeforeMove = gameBeforeMove.getSCPlayer(player);
-			Player playerAfterMove = gameAfterMove.getSCPlayer(player);
-			Action lastAction = playerBeforeMove.getLastNonSkipAction();
+			if (move.isDiscarded()) {
+				return BAD_HEURISTIC;
+			}
 			
+			Player playerAfterMove = gameAfterMove.getSCPlayer(player);
 			double playerRating;
 			
 			if (playerAfterMove.inGoal()) {
 				playerRating = GOOD_HEURISTIC; // Obviously a very good rating if the player reaches the goal
-			} else if (lastAction instanceof ExchangeCarrots || lastAction instanceof FallBack) {
-				playerRating = BAD_HEURISTIC;
 			} else {
 				playerRating = rate(
 						playerAfterMove.getSalads(),
@@ -58,17 +52,30 @@ public class SmartHeuristic implements HUIHeuristic {
 				);
 			}
 			
-			return playerRating - (gameAfterMove.getTurn() * turnWeight); // TODO: Incorporating the turn here is experimental
-		} catch (GameRuntimeException e) {
+			// Value normalized from approximately [0 to 64] to the range [0 to 320] where higher is better
+			
+			int normTurn = 320 - (gameAfterMove.getTurn() * 5); // Higher turn = worse
+			
+			return playerRating - (normTurn * turnWeight);
+		} catch (Exception e) {
 			LOG.warn("Exception while calculating heuristic: ", e);
 			return BAD_HEURISTIC;
 		}
 	}
 	
 	public double rate(int salads, int carrots, int fieldIndex) {
-		int saladRating = -(salads * saladWeight); // Less salads: better
-		int fieldRating = fieldIndex * fieldIndexWeight; // Higher field: better
-		double carrotRating = -Math.abs(carrots - carrotOptimum(fieldIndex)) * (carrotWeight + fieldIndex); // TODO: Improve this // More or less carrots than optimum: worse
+		// Values that are normalized to the range [0 to 320] where higher is better
+		// (except for the carrots, which should be contained most of the time but are not bounded)
+		
+		int normSalads = (Constants.SALADS_TO_EAT - salads) * 64; // Less salads = better
+		int normFields = fieldIndex * 5; // Higher field = better
+		int normCarrots = -Math.abs(carrots - carrotOptimum(fieldIndex)) * 5; // More or less carrots than optimum = worse
+		
+		// Ratings using a weighted function
+		
+		int saladRating = normSalads * saladWeight;
+		int fieldRating = normFields * fieldIndexWeight;
+		int carrotRating = normCarrots * carrotWeight;
 		
 		return saladRating + fieldRating + carrotRating;
 	}
