@@ -31,6 +31,9 @@ public abstract class TreeSearchPlayer implements Player {
 	private HUIPruner pruner = new LightPruner();
 	private boolean orderMoves = false;
 	
+	/**
+	 * Small implementation data-class. 
+	 */
 	private static class BestResult {
 		private volatile HUIMove bestMove = null;
 		private volatile double bestRating = Double.NEGATIVE_INFINITY;
@@ -65,8 +68,6 @@ public abstract class TreeSearchPlayer implements Player {
 		final BestResult result = new BestResult();
 		final List<HUIMove> legalMoves = new ArrayList<>(((HUIGameState) game).getLegalMovesList());
 		final ExecutorService threadPool = Executors.newFixedThreadPool(legalMoves.size());
-		
-		// TODO: Debug this entire method, results seems to be a little weird-ish...
 		
 		for (HUIMove move : legalMoves) {
 			LOG.trace("Evaluate move {}  with depth {}", move, level);

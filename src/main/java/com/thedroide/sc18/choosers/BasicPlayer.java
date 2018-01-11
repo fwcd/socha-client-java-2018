@@ -13,7 +13,12 @@ import com.thedroide.sc18.core.HUIGameState;
  */
 public class BasicPlayer implements Player {
 	private final MoveChooser chooser;
-
+	
+	/**
+	 * Constructs a new BasicPlayer given a move chooser.
+	 * 
+	 * @param chooser - The chooser to be used.
+	 */
 	public BasicPlayer(MoveChooser chooser) {
 		this.chooser = chooser;
 	}

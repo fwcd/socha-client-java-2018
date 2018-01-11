@@ -27,6 +27,9 @@ public class SmartHeuristic implements HUIHeuristic {
 	private final int fieldIndexWeight = 2; // Higher values priorize advance
 	private final int turnWeight = 1; // Higher values priorize fast play
 	
+	/**
+	 * Calculates a domain-specific game state evaluation.
+	 */
 	@Override
 	public double heuristic(
 			HUIGameState gameBeforeMove,
@@ -63,6 +66,10 @@ public class SmartHeuristic implements HUIHeuristic {
 		}
 	}
 	
+	/**
+	 * Rates a player given it's current attributes. This method
+	 * is not just essential to the heuristic, it allows for easy testing too.
+	 */
 	public double rate(int salads, int carrots, int fieldIndex) {
 		// Values that are normalized to the range [0 to 320] where higher is better
 		// (except for the carrots, which should be contained most of the time but are not bounded)
@@ -80,6 +87,10 @@ public class SmartHeuristic implements HUIHeuristic {
 		return saladRating + fieldRating + carrotRating;
 	}
 	
+	/**
+	 * Determines the "optimal amount of carrots" given a
+	 * specific field index.
+	 */
 	public int carrotOptimum(int fieldIndex) {
 		int fieldsToGoal = 64 - fieldIndex;
 		

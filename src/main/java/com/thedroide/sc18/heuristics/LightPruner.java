@@ -10,7 +10,7 @@ import com.thedroide.sc18.core.HUIPlayerColor;
 import sc.plugin2018.ExchangeCarrots;
 
 /**
- * A hopefully fast pruner.
+ * A hopefully fast game state pruner.
  */
 public class LightPruner implements HUIPruner {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");

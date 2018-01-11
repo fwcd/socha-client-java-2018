@@ -15,6 +15,9 @@ import com.antelmann.game.GamePlay;
 import com.antelmann.game.GameUtilities;
 import com.thedroide.sc18.core.TreeSearchPlayer;
 
+/**
+ * An iteratively deepening alpha-beta player.
+ */
 public class IterativeDeepeningABPlayer extends TreeSearchPlayer {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
