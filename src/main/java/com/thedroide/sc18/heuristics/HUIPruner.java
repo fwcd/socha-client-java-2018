@@ -4,6 +4,10 @@ import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
 
+/**
+ * An API-wrapper seperating the pruning-mechanisms
+ * from the rest of the code.
+ */
 @FunctionalInterface
 public interface HUIPruner {
 	/**

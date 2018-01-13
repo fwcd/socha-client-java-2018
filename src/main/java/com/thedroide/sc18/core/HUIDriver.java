@@ -98,7 +98,10 @@ public class HUIDriver implements AutoPlay {
 	public void setResponseTime(long ms) {
 		responseTime = ms;
 	}
-
+	
+	/**
+	 * Fetches the soft maximum time in milliseconds.
+	 */
 	@Override
 	public long getResponseTime() {
 		return responseTime;
