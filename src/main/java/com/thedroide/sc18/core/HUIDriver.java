@@ -59,6 +59,10 @@ public class HUIDriver implements AutoPlay {
 		return next;
 	}
 
+	public Player getRecentPlayer() {
+		return players[game.nextPlayer()];
+	}
+	
 	@Override
 	public Player getPlayer(int gameRole) {
 		return players[gameRole];

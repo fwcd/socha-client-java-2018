@@ -24,8 +24,8 @@ public class SmartHeuristic implements HUIHeuristic {
 	
 	private final int carrotWeight = 2; // Higher values priorize carrot optimization
 	private final int saladWeight = 16384; // Higher values priorize salad reduction (which is ALWAYS a good thing)
-	private final int fieldIndexWeight = 2; // Higher values priorize advance
-	private final int turnWeight = 1; // Higher values priorize fast play
+	private final int fieldIndexWeight = 1; // Higher values priorize advance
+	private final int turnWeight = 8; // Higher values priorize fast play
 	
 	/**
 	 * Calculates a domain-specific game state evaluation.
