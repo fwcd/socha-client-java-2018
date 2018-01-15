@@ -1,7 +1,8 @@
-package com.thedroide.sc18.test.clientsimulator.core;
+package com.thedroide.sc18.test.clientbench.core;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -9,10 +10,12 @@ import com.antelmann.game.AutoPlay;
 import com.antelmann.game.Player;
 import com.thedroide.sc18.core.HUIDriver;
 import com.thedroide.sc18.core.HUIGameState;
+import com.thedroide.sc18.core.HUIMove;
+import com.thedroide.sc18.core.HUIPlayerColor;
 
 import sc.plugin2018.GameState;
 
-public class ClientSimulator implements Runnable {
+public class GameSimulator implements Runnable {
 	private static final int TURNS = 60;
 	private boolean muted = true;
 	
@@ -25,8 +28,9 @@ public class ClientSimulator implements Runnable {
 
 	private long softMaxTime = Long.MAX_VALUE;
 	private int depth = 2;
+	private Optional<GameView> boundView = Optional.empty();
 	
-	public ClientSimulator(Player strategy1, Player strategy2) {
+	public GameSimulator(Player strategy1, Player strategy2) {
 		GameState state = new GameState();
 		
 		p1 = new VirtualPlayer(strategy1);
@@ -41,29 +45,34 @@ public class ClientSimulator implements Runnable {
 	 * 
 	 * @param muted - Whether this simulator should be "muted"
 	 */
-	public ClientSimulator setMuted(boolean muted) {
+	public GameSimulator setMuted(boolean muted) {
 		this.muted = muted;
 		return this;
 	}
 	
-	public ClientSimulator setDepth(int depth) {
+	public GameSimulator setDepth(int depth) {
 		this.depth = depth;
 		return this;
 	}
 	
-	public ClientSimulator setSoftMaxTime(long ms) {
+	public GameSimulator setSoftMaxTime(long ms) {
 		softMaxTime = ms;
 		return this;
 	}
 	
-	public ClientSimulator setThreadCount(int threadCount) {
+	public GameSimulator setThreadCount(int threadCount) {
 		this.threadCount = threadCount;
 		pool = Executors.newFixedThreadPool(threadCount);
 		return this;
 	}
 	
-	public ClientSimulator setGameRounds(int rounds) {
+	public GameSimulator setGameRounds(int rounds) {
 		gameRounds = rounds;
+		return this;
+	}
+	
+	public GameSimulator bind(GameView view) {
+		boundView = Optional.of(view);
 		return this;
 	}
 	
@@ -152,16 +161,25 @@ public class ClientSimulator implements Runnable {
 	 */
 	@Override
 	public void run() {
-		VirtualPlayer current = p1;
 		HUIGameState game = new HUIGameState(new GameState());
+		VirtualPlayer current = p1;
 		HUIDriver autoPlay = new HUIDriver(game, depth, p1.getAI(), p2.getAI());
 		
 		autoPlay.setResponseTime(softMaxTime);
+		game.getSCPlayer(HUIPlayerColor.RED).setDisplayName(p1.getName());
+		game.getSCPlayer(HUIPlayerColor.BLUE).setDisplayName(p2.getName());
 		
 		int t = 0;
 		while (t < TURNS && game.getWinner() == null) {
-			game = game.spawnChild(autoPlay.hint(game.nextPlayer()));
+			if (boundView.isPresent()) {
+				boundView.orElse(null).update(game);
+			}
+			
+			autoPlay.setGame(game);
+			HUIMove move = autoPlay.hint(game.nextPlayer());
+			game = game.spawnChild(move);
 			current = opponentOf(current);
+			
 			t++;
 		}
 		

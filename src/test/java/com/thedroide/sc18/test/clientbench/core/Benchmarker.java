@@ -1,7 +1,8 @@
-package com.thedroide.sc18.test.clientsimulator.core;
+package com.thedroide.sc18.test.clientbench.core;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,7 +15,7 @@ import com.antelmann.game.Player;
  * @author Fredrik
  *
  */
-public class ClientBench {
+public class Benchmarker {
 	private boolean muted = false;
 	private final Map<Player, Integer> players = new LinkedHashMap<>(); // Players and scores
 	
@@ -22,29 +23,35 @@ public class ClientBench {
 	private int depth = 2;
 	private long softMaxTime = Long.MAX_VALUE;
 	private int gameRounds = 5;
+	private Optional<GameView> boundGame = Optional.empty();
 	
-	public ClientBench add(Player player) {
+	public Benchmarker add(Player player) {
 		players.put(player, 0);
 		return this;
 	}
 	
-	public ClientBench setDepth(int depth) {
+	public Benchmarker setDepth(int depth) {
 		this.depth = depth;
 		return this;
 	}
 	
-	public ClientBench setSoftMaxTime(long ms) {
+	public Benchmarker setSoftMaxTime(long ms) {
 		softMaxTime = ms;
 		return this;
 	}
 
-	public ClientBench setGameRounds(int gameRounds) {
+	public Benchmarker setGameRounds(int gameRounds) {
 		this.gameRounds  = gameRounds;
 		return this;
 	}
 	
-	public ClientBench setThreadCount(int threads) {
+	public Benchmarker setThreadCount(int threads) {
 		pool = Executors.newFixedThreadPool(threads);
+		return this;
+	}
+
+	public Benchmarker bind(GameView game) {
+		boundGame = Optional.of(game);
 		return this;
 	}
 	
@@ -56,10 +63,11 @@ public class ClientBench {
 	 * @param b - Player B
 	 */
 	private void simulate(Player a, Player b) {
-		ClientSimulator simulator = new ClientSimulator(a, b)
+		GameSimulator simulator = new GameSimulator(a, b)
 				.setDepth(depth)
 				.setSoftMaxTime(softMaxTime)
 				.setMuted(true);
+		boundGame.ifPresent(simulator::bind);
 		simulator.run();
 		
 		int score1 = simulator.getPlayer1().getScore();

@@ -1,6 +1,5 @@
 package com.thedroide.sc18.core;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -131,9 +130,8 @@ public class HUIGameState implements GamePlay, TreeNode {
 	 * Updates the list of legal moves internally. <b>Should
 	 * be called whenever the field "state" is updated!!</b>
 	 */
-	private synchronized void updateLegalMoves() {
-		legalMoves = state
-				.getPossibleMoves()
+	private void updateLegalMoves() {
+		legalMoves = state.getPossibleMoves()
 				.stream()
 				.map(scMove -> new HUIMove(nextHUIEnumPlayer(), scMove))
 				.filter(huiMove -> !huiMove.isSkip())
@@ -233,8 +231,8 @@ public class HUIGameState implements GamePlay, TreeNode {
 		} catch (InvalidMoveException e) {
 			// This exception is expected to happen, when the hard max time
 			// is reached and a ShallowStrategy is used to determine the best
-			// move in SmartLogic. Thus it is intended that no stacktrace is
-			// printed.
+			// move in SmartLogic.
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -297,7 +295,8 @@ public class HUIGameState implements GamePlay, TreeNode {
 	@Override
 	public HUIGameState spawnChild(GameMove move) {
 		HUIMove huiMove = (HUIMove) move;
-		return CACHE.getOrStoreChild(this, huiMove, () -> createChild(move));
+		HUIGameState result = CACHE.getOrStoreChild(this, huiMove, () -> createChild(move));
+		return result;
 	}
 
 	private HUIGameState createChild(GameMove move) {
@@ -323,7 +322,7 @@ public class HUIGameState implements GamePlay, TreeNode {
 			HUIGameState clone = new HUIGameState();
 			
 			clone.state = state.clone();
-			clone.legalMoves = new ArrayList<>(legalMoves);
+			clone.updateLegalMoves();
 
 			return clone;
 		} catch (CloneNotSupportedException e) {
@@ -390,16 +389,41 @@ public class HUIGameState implements GamePlay, TreeNode {
 
 	@Override
 	public int hashCode() {
+		Player red = state.getRedPlayer();
+		Player blue = state.getBluePlayer();
 		return (state.getTurn()
+				+ red.getSalads()
+				+ red.getCarrots()
+				+ red.getFieldIndex()
+				+ red.getCards().hashCode()
+				+ blue.getSalads()
+				+ blue.getCarrots()
+				+ blue.getFieldIndex()
+				+ blue.getCards().hashCode()
 				+ state.getStartPlayerColor().hashCode()
-				+ state.getCurrentPlayerColor().hashCode()) * 31;
+				+ state.getCurrentPlayerColor().hashCode()
+		) * 31;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		HUIGameState other = (HUIGameState) obj;
+		Player red = state.getRedPlayer();
+		Player blue = state.getBluePlayer();
+		Player otherRed = other.state.getRedPlayer();
+		Player otherBlue = other.state.getBluePlayer();
+		
 		return state.getTurn() == other.state.getTurn()
+				&& red.getSalads() == otherRed.getSalads()
+				&& red.getCarrots() == otherRed.getCarrots()
+				&& red.getFieldIndex() == otherRed.getFieldIndex()
+				&& red.getCards().equals(otherRed.getCards())
+				&& blue.getSalads() == otherBlue.getSalads()
+				&& blue.getCarrots() == otherBlue.getCarrots()
+				&& blue.getFieldIndex() == otherBlue.getFieldIndex()
+				&& blue.getCards().equals(otherBlue.getCards())
 				&& state.getStartPlayerColor().equals(other.state.getStartPlayerColor())
-				&& state.getCurrentPlayerColor().equals(other.state.getCurrentPlayerColor());
+				&& state.getCurrentPlayerColor().equals(other.state.getCurrentPlayerColor()
+		);
 	}
 }

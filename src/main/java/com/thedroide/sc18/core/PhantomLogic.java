@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.choosers.MoveChooser;
 import com.thedroide.sc18.choosers.SimpleMoveChooser;
-import com.thedroide.sc18.mcts.MCTSPlayer;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;

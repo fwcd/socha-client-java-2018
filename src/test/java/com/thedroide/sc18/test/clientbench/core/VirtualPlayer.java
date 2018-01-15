@@ -1,4 +1,4 @@
-package com.thedroide.sc18.test.clientsimulator.core;
+package com.thedroide.sc18.test.clientbench.core;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;

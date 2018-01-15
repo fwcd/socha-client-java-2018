@@ -58,7 +58,7 @@ public class HUIMove implements GameMove, Iterable<Action> {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return move.equals(obj);
+		return move.getActions().equals(((HUIMove) obj).move.getActions());
 	}
 	
 	/**
