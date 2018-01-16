@@ -5,17 +5,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.antelmann.game.Player;
 
 /**
  * Simulates multiple players by letting each player
  * compete against every other player per round.
- * 
- * @author Fredrik
- *
  */
 public class Benchmarker {
+	private boolean started = false;
 	private boolean muted = false;
 	private final Map<Player, Integer> players = new LinkedHashMap<>(); // Players and scores
 	
@@ -37,6 +36,11 @@ public class Benchmarker {
 	
 	public Benchmarker setSoftMaxTime(long ms) {
 		softMaxTime = ms;
+		return this;
+	}
+	
+	public Benchmarker setMuted(boolean muted) {
+		this.muted = muted;
 		return this;
 	}
 
@@ -80,15 +84,17 @@ public class Benchmarker {
 		}
 	}
 	
-	private void println(String str) {
-		if (!muted) {
-			System.out.println(str);
-		}
-	}
-	
 	public void start() {
-		println(" ==== Client Bench ==== ");
-		println("");
+		if (started) {
+			throw new IllegalStateException("Benchmarker already has been started.");
+		} else {
+			started = true;
+		}
+		
+		if (!muted) {
+			System.out.println(" ==== Client Bench ==== ");
+			System.out.println();
+		}
 		
 		for (int i=0; i<gameRounds; i++) {
 			for (Player playerA : players.keySet()) {
@@ -100,7 +106,18 @@ public class Benchmarker {
 			}
 		}
 	}
+	
+	public void waitFor() {
+		try {
+			pool.shutdown();
+			pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {}
+	}
 
+	public int getScore(Player player) {
+		return players.get(player);
+	}
+	
 	private void simulateAndPrint(Player playerA, Player playerB) {
 		simulate(playerA, playerB);
 		printScores();
@@ -110,9 +127,13 @@ public class Benchmarker {
 		for (Player player : players.keySet()) {
 			Integer score = players.get(player);
 			
-			System.out.print("[" + player.getPlayerName() + ":] " + score.toString() + "\t\t");
+			if (!muted) {
+				System.out.print("[" + player.getPlayerName() + ":] " + score.toString() + "\t\t");
+			}
 		}
 		
-		System.out.println();
+		if (!muted) {
+			System.out.println();
+		}
 	}
 }

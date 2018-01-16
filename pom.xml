@@ -56,6 +56,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>io.jenetics</groupId>
+			<artifactId>jenetics</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.antelmann</groupId>
 			<artifactId>antelmann</artifactId>
 			<version>1.0</version>

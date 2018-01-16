@@ -1,5 +1,6 @@
 package com.thedroide.sc18.test.clientbench.core;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 public class ScoreTable extends AbstractTableModel {
@@ -10,8 +11,8 @@ public class ScoreTable extends AbstractTableModel {
 	public void set(String[] colNames, String[][] data) {
 		this.colNames = colNames;
 		this.data = data;
-		fireTableStructureChanged();
-		fireTableDataChanged();
+		SwingUtilities.invokeLater(super::fireTableStructureChanged);
+		SwingUtilities.invokeLater(super::fireTableDataChanged);
 	}
 	
 	public void set(int x, int y, String v) {

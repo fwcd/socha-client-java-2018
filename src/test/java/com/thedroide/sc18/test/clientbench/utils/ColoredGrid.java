@@ -49,11 +49,11 @@ public class ColoredGrid {
 				if (bgColor != null) {
 					g2d.setColor(bgColor);
 					g2d.fillRect(x * width, y * height, width, height);
-				}
-				
-				if (c != 0) {
-					g2d.setColor(invert(bgColor));
-					g2d.drawString(Character.toString(c), x * width, y * height + height);
+
+					if (c != 0) {
+						g2d.setColor(invert(bgColor));
+						g2d.drawString(Character.toString(c), x * width, y * height + height);
+					}
 				}
 				
 				if (fgColor != null) {

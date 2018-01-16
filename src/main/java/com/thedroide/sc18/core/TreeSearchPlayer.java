@@ -17,7 +17,7 @@ import com.antelmann.game.TemplatePlayer;
 import com.thedroide.sc18.heuristics.HUIHeuristic;
 import com.thedroide.sc18.heuristics.HUIPruner;
 import com.thedroide.sc18.heuristics.LightPruner;
-import com.thedroide.sc18.heuristics.SmartHeuristic;
+import com.thedroide.sc18.heuristics.StatsHeuristic;
 
 /**
  * This class aims to provide a better (domain-specific) base
@@ -27,7 +27,7 @@ import com.thedroide.sc18.heuristics.SmartHeuristic;
 public abstract class TreeSearchPlayer implements Player {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
-	private HUIHeuristic heuristic = new SmartHeuristic();
+	private HUIHeuristic heuristic = new StatsHeuristic();
 	private HUIPruner pruner = new LightPruner();
 	private boolean orderMoves = false;
 	

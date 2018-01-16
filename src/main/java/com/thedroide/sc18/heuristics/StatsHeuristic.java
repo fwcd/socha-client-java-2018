@@ -15,17 +15,35 @@ import sc.plugin2018.util.Constants;
  * of a {@link HUIHeuristic} that is based
  * on player statistics.
  */
-public class SmartHeuristic implements HUIHeuristic {
+public class StatsHeuristic implements HUIHeuristic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private static final double GOOD_HEURISTIC = Double.POSITIVE_INFINITY;
 	private static final double BAD_HEURISTIC = Double.NEGATIVE_INFINITY;
 	
 	// All weights should be (almost) equally effective to due normalization
 	
-	private final int carrotWeight = 2; // Higher values priorize carrot optimization
-	private final int saladWeight = 16384; // Higher values priorize salad reduction (which is ALWAYS a good thing)
-	private final int fieldIndexWeight = 1; // Higher values priorize advance
-	private final int turnWeight = 8; // Higher values priorize fast play
+	private final int carrotWeight; // Higher values priorize carrot optimization
+	private final int saladWeight; // Higher values priorize salad reduction (which is ALWAYS a good thing)
+	private final int fieldIndexWeight; // Higher values priorize advance
+	private final int turnWeight; // Higher values priorize fast play
+	
+	public StatsHeuristic() {
+//		carrotWeight = 2;
+//		saladWeight = 16384;
+//		fieldIndexWeight = 1;
+//		turnWeight = 8;
+		carrotWeight = 70;
+		saladWeight = 16384;
+		fieldIndexWeight = 404;
+		turnWeight = 500;
+	}
+	
+	public StatsHeuristic(int carrotWeight, int saladWeight, int fieldIndexWeight, int turnWeight) {
+		this.carrotWeight = carrotWeight;
+		this.saladWeight = saladWeight;
+		this.fieldIndexWeight = fieldIndexWeight;
+		this.turnWeight = turnWeight;
+	}
 	
 	/**
 	 * Calculates a domain-specific game state evaluation.
@@ -102,5 +120,30 @@ public class SmartHeuristic implements HUIHeuristic {
 		 */
 		
 		return (fieldsToGoal + 6) / 2;
+	}
+
+	public int getCarrotWeight() {
+		return carrotWeight;
+	}
+
+	public int getSaladWeight() {
+		return saladWeight;
+	}
+
+	public int getFieldIndexWeight() {
+		return fieldIndexWeight;
+	}
+
+	public int getTurnWeight() {
+		return turnWeight;
+	}
+
+	@Override
+	public String toString() {
+		return "[StatsHeuristic] "
+				+ "Carrot weight: " + Integer.toString(carrotWeight)
+				+ "Salad weight: " + Integer.toString(saladWeight)
+				+ "Field index weight: " + Integer.toString(fieldIndexWeight)
+				+ "Turn weight: " + Integer.toString(turnWeight);
 	}
 }
