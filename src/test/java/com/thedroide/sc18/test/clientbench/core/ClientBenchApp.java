@@ -1,6 +1,7 @@
 package com.thedroide.sc18.test.clientbench.core;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
@@ -12,6 +13,7 @@ import com.thedroide.sc18.alphabeta.AlphaBetaPlayer;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.TreeSearchPlayer;
 import com.thedroide.sc18.heuristics.StatsHeuristic;
+import com.thedroide.sc18.test.clientbench.utils.ConsolePane;
 import com.thedroide.sc18.test.clientbench.utils.SimpleButton;
 
 import io.jenetics.Chromosome;
@@ -28,10 +30,11 @@ public class ClientBenchApp {
 	
 	private final JToolBar toolBar;
 	private final GameView game;
+	private final ConsolePane console;
 	
 	public ClientBenchApp() {
 		view = new JFrame("ClientBench");
-		view.setSize(640, 480);
+		view.setSize(800, 600);
 		view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		view.setLayout(new BorderLayout());
 
@@ -43,6 +46,12 @@ public class ClientBenchApp {
 		toolBar.add(new SimpleButton("Simulate (50x depth 2)", this::simulate));
 		toolBar.add(new SimpleButton("Genetic optimization", this::geneticOptimization));
 		view.add(toolBar, BorderLayout.NORTH);
+		
+		console = new ConsolePane();
+		System.setOut(console.getOutStream());
+		System.setErr(console.getErrStream());
+		console.getView().setPreferredSize(new Dimension(100, 100));
+		view.add(console.getView(), BorderLayout.SOUTH);
 		
 		view.setVisible(true);
 	}
@@ -79,7 +88,7 @@ public class ClientBenchApp {
 				b.waitFor();
 				return b.getScore(testedPlayer);
 			};
-			int generations = 1024;
+			int generations = 2048;
 			System.out.println("Evolving " + Integer.toString(generations) + " generations!");
 			System.out.println(
 					decoder.apply(Engine
