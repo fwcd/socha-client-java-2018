@@ -21,4 +21,8 @@ public interface HUIHeuristic {
 	 * @return A rating of this move
 	 */
 	double heuristic(HUIGameState gameBeforeMove, HUIGameState gameAfterMove, HUIMove move, HUIPlayerColor player);
+	
+	default String shortToString() {
+		return "";
+	}
 }

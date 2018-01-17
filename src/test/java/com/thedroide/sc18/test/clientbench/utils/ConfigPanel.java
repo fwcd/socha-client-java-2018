@@ -21,6 +21,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
+/**
+ * A configuration UI with a very convenient API.
+ */
 public class ConfigPanel {
 	private static final JFileChooser FILE_CHOOSER = new JFileChooser();
 	private final JComponent view;
@@ -31,8 +34,13 @@ public class ConfigPanel {
 	private boolean horizontal;
 	
 	public ConfigPanel(boolean horizontal) {
+		this(horizontal, true);
+	}
+	
+	public ConfigPanel(boolean horizontal, boolean floatable) {
 		this.horizontal = horizontal;
 		view = new JToolBar(getOrientation());
+		((JToolBar) view).setFloatable(floatable);
 		view.setLayout(new BoxLayout(view, SwingConstants.VERTICAL));
 		nextSuperSection();
 	}

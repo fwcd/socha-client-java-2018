@@ -10,11 +10,6 @@ import com.thedroide.sc18.core.TreeSearchPlayer;
  */
 public class AlphaBetaPlayer extends TreeSearchPlayer {
 	@Override
-	public String getPlayerName() {
-		return "AlphaBetaPlayer";
-	}
-
-	@Override
 	public double evaluate(GamePlay game, GameMove move, int[] role, int level, long ms) {
 		return GameUtilities.alphaBetaSearch(game, move, this, role, level, System.currentTimeMillis() + ms, doesOrderMoves());
 	}

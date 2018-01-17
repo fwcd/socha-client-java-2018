@@ -18,6 +18,7 @@ import com.thedroide.sc18.heuristics.HUIHeuristic;
 import com.thedroide.sc18.heuristics.HUIPruner;
 import com.thedroide.sc18.heuristics.LightPruner;
 import com.thedroide.sc18.heuristics.StatsHeuristic;
+import com.thedroide.sc18.utils.Lazy;
 
 /**
  * This class aims to provide a better (domain-specific) base
@@ -30,6 +31,7 @@ public abstract class TreeSearchPlayer implements Player {
 	private HUIHeuristic heuristic = new StatsHeuristic();
 	private HUIPruner pruner = new LightPruner();
 	private boolean orderMoves = false;
+	private Lazy<String> stringRepresentation = new Lazy<>(() -> getClass().getSimpleName() + ": " + heuristic.shortToString());
 	
 	/**
 	 * Small implementation data-class. 
@@ -37,6 +39,11 @@ public abstract class TreeSearchPlayer implements Player {
 	private static class BestResult {
 		private volatile HUIMove bestMove = null;
 		private volatile double bestRating = Double.NEGATIVE_INFINITY;
+	}
+
+	@Override
+	public String getPlayerName() {
+		return stringRepresentation.get();
 	}
 	
 	public void setPruner(HUIPruner pruner) {
@@ -110,5 +117,10 @@ public abstract class TreeSearchPlayer implements Player {
 				(HUIMove) move,
 				HUIPlayerColor.of(role)
 		);
+	}
+
+	@Override
+	public String toString() {
+		return getPlayerName();
 	}
 }

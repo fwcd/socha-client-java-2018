@@ -3,7 +3,6 @@ package com.thedroide.sc18.choosers;
 import com.antelmann.game.CannotPlayGameException;
 import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
-import com.antelmann.game.GameRuntimeException;
 import com.antelmann.game.Player;
 import com.thedroide.sc18.core.HUIGameState;
 
@@ -13,6 +12,10 @@ import com.thedroide.sc18.core.HUIGameState;
  */
 public class BasicPlayer implements Player {
 	private final MoveChooser chooser;
+	
+	public BasicPlayer() {
+		chooser = new SimpleMoveChooser();
+	}
 	
 	/**
 	 * Constructs a new BasicPlayer given a move chooser.
@@ -39,14 +42,12 @@ public class BasicPlayer implements Player {
 	}
 
 	@Override
-	public double evaluate(GamePlay game, GameMove move, int[] role, int level, long milliseconds)
-			throws CannotPlayGameException, GameRuntimeException {
+	public double evaluate(GamePlay game, GameMove move, int[] role, int level, long milliseconds) {
 		return 0;
 	}
 
 	@Override
-	public double heuristic(GamePlay game, GameMove move, int[] role)
-			throws CannotPlayGameException, GameRuntimeException {
+	public double heuristic(GamePlay game, GameMove move, int[] role) {
 		return 0;
 	}
 

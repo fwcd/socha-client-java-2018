@@ -75,6 +75,7 @@ public class PhantomLogic implements IGameHandler {
 	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
 		LOG.info(" ==== Game ended, WINNER: {} ==== ", data.getWinners().get(0).getDisplayName());
+		threadPool.shutdown();
 	}
 	
 	/**

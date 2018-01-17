@@ -4,25 +4,26 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.antelmann.game.Player;
+import com.thedroide.sc18.utils.ClosingExecutor;
 
 /**
  * Simulates multiple players by letting each player
  * compete against every other player per round.
  */
 public class Benchmarker {
-	private boolean started = false;
 	private boolean muted = false;
 	private final Map<Player, Integer> players = new LinkedHashMap<>(); // Players and scores
 	
-	private ExecutorService pool = Executors.newSingleThreadExecutor();
+	private int threadCount = 1;
 	private int depth = 2;
 	private long softMaxTime = Long.MAX_VALUE;
 	private int gameRounds = 5;
+	
 	private Optional<GameView> boundGame = Optional.empty();
+	private Optional<ExecutorService> lastExecutor = Optional.empty();
 	
 	public Benchmarker add(Player player) {
 		players.put(player, 0);
@@ -50,7 +51,7 @@ public class Benchmarker {
 	}
 	
 	public Benchmarker setThreadCount(int threads) {
-		pool = Executors.newFixedThreadPool(threads);
+		threadCount = threads;
 		return this;
 	}
 
@@ -85,22 +86,21 @@ public class Benchmarker {
 	}
 	
 	public void start() {
-		if (started) {
-			throw new IllegalStateException("Benchmarker already has been started.");
-		} else {
-			started = true;
-		}
-		
 		if (!muted) {
+			System.out.println();
 			System.out.println(" ==== Client Bench ==== ");
 			System.out.println();
 		}
 		
-		for (int i=0; i<gameRounds; i++) {
-			for (Player playerA : players.keySet()) {
-				for (Player playerB : players.keySet()) {
-					if (playerA != playerB) {
-						pool.execute(() -> simulateAndPrint(playerA, playerB));
+		try (ClosingExecutor pool = new ClosingExecutor(threadCount)) {
+			lastExecutor = Optional.of(pool);
+			
+			for (int i=0; i<gameRounds; i++) {
+				for (Player playerA : players.keySet()) {
+					for (Player playerB : players.keySet()) {
+						if (playerA != playerB) {
+							pool.execute(() -> simulateAndPrint(playerA, playerB));
+						}
 					}
 				}
 			}
@@ -109,8 +109,9 @@ public class Benchmarker {
 	
 	public void waitFor() {
 		try {
-			pool.shutdown();
-			pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+			if (lastExecutor.filter(e -> !e.isTerminated()).isPresent()) {
+				lastExecutor.orElse(null).awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+			}
 		} catch (InterruptedException e) {}
 	}
 
@@ -128,7 +129,7 @@ public class Benchmarker {
 			Integer score = players.get(player);
 			
 			if (!muted) {
-				System.out.print("[" + player.getPlayerName() + ":] " + score.toString() + "\t\t");
+				System.out.print("[" + player.getPlayerName() + ":] " + score.toString() + " \t");
 			}
 		}
 		

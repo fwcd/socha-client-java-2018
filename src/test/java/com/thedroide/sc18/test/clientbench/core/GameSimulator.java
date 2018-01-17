@@ -3,8 +3,6 @@ package com.thedroide.sc18.test.clientbench.core;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.antelmann.game.AutoPlay;
 import com.antelmann.game.Player;
@@ -12,6 +10,7 @@ import com.thedroide.sc18.core.HUIDriver;
 import com.thedroide.sc18.core.HUIGameState;
 import com.thedroide.sc18.core.HUIMove;
 import com.thedroide.sc18.core.HUIPlayerColor;
+import com.thedroide.sc18.utils.ClosingExecutor;
 
 import sc.plugin2018.GameState;
 
@@ -24,7 +23,6 @@ public class GameSimulator implements Runnable {
 
 	private int gameRounds = 5;
 	private int threadCount = 1;
-	private ExecutorService pool = Executors.newSingleThreadExecutor();
 
 	private long softMaxTime = Long.MAX_VALUE;
 	private int depth = 2;
@@ -62,7 +60,6 @@ public class GameSimulator implements Runnable {
 	
 	public GameSimulator setThreadCount(int threadCount) {
 		this.threadCount = threadCount;
-		pool = Executors.newFixedThreadPool(threadCount);
 		return this;
 	}
 	
@@ -140,14 +137,14 @@ public class GameSimulator implements Runnable {
 	public void start() {
 		println(" ==== Client Simulator ==== ");
 		println(" ~~ [" + Integer.toString(gameRounds) + " rounds] - [" + Integer.toString(threadCount) + " threads] ~~");
-		println(" ~~�[" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
+		println(" ~~ [" + p1.getName() + "] vs [" + p2.getName() + "] ~~ ");
 		println("");
 		
-		for (int i=0; i<gameRounds; i++) {
-			pool.execute(this);
+		try (ClosingExecutor executor = new ClosingExecutor(1)) {
+			for (int i=0; i<gameRounds; i++) {
+				executor.execute(this);
+			}
 		}
-		
-		pool.shutdown();
 	}
 
 	private void println(String str) {

@@ -146,4 +146,13 @@ public class StatsHeuristic implements HUIHeuristic {
 				+ "Field index weight: " + Integer.toString(fieldIndexWeight)
 				+ "Turn weight: " + Integer.toString(turnWeight);
 	}
+
+	@Override
+	public String shortToString() {
+		return "{C: " + Integer.toString(carrotWeight)
+				+ ", S: " + Integer.toString(saladWeight)
+				+ ", F: " + Integer.toString(fieldIndexWeight)
+				+ ", T: " + Integer.toString(turnWeight)
+				+ "}";
+	}
 }
