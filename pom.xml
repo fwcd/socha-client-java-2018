@@ -56,11 +56,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.chen0040</groupId>
-			<artifactId>java-reinforcement-learning</artifactId>
-			<version>1.0.5</version>
-		</dependency>
-		<dependency>
 			<groupId>io.jenetics</groupId>
 			<artifactId>jenetics</artifactId>
 			<version>4.0.0</version>

@@ -32,8 +32,8 @@ public class PhantomLogic implements IGameHandler {
 	
 	// === Parameters that may be tweaked and tested: ==
 	
-	private int minSearchDepth = 2; // Used at the beginning because of slow JVM startup
-	private int maxSearchDepth = 12;
+	private int minSearchDepth = 1; // Used at the beginning because of slow JVM startup
+	private int maxSearchDepth = 24;
 	private boolean dynamicSearchDepth = true; // Whether to dynamically modify search depth based off response times
 	
 	private int minTime = 200; // in ms - Minimum move time, causes dynamic search to increate depth at next iteration
