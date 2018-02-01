@@ -28,14 +28,14 @@ public class StatsHeuristic implements HUIHeuristic {
 	private final int turnWeight; // Higher values priorize fast play
 	
 	public StatsHeuristic() {
-//		carrotWeight = 2;
-//		saladWeight = 16384;
-//		fieldIndexWeight = 1;
-//		turnWeight = 8;
-		carrotWeight = 70;
+		carrotWeight = 2;
 		saladWeight = 16384;
-		fieldIndexWeight = 404;
-		turnWeight = 500;
+		fieldIndexWeight = 1;
+		turnWeight = 8;
+//		carrotWeight = 70;
+//		saladWeight = 16384;
+//		fieldIndexWeight = 404;
+//		turnWeight = 500;
 	}
 	
 	public StatsHeuristic(int carrotWeight, int saladWeight, int fieldIndexWeight, int turnWeight) {
