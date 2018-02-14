@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.thedroide.phantomclient</groupId>
 	<artifactId>phantomclient</artifactId>
-	<version>7.0</version>
+	<version>9.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -55,6 +55,11 @@
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.fwcd</groupId>
+			<artifactId>fructose</artifactId>
+			<version>1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>io.jenetics</groupId>
 			<artifactId>jenetics</artifactId>
