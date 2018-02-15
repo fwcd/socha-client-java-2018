@@ -32,6 +32,10 @@ public class StatsHeuristic implements HUIHeuristic {
 		saladWeight = 16384;
 		fieldIndexWeight = 1;
 		turnWeight = 8;
+//		carrotWeight = 70;
+//		saladWeight = 16384;
+//		fieldIndexWeight = 404;
+//		turnWeight = 500;
 	}
 	
 	public StatsHeuristic(int carrotWeight, int saladWeight, int fieldIndexWeight, int turnWeight) {
