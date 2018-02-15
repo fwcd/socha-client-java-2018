@@ -2,6 +2,9 @@ package com.fwcd.sc18.geneticneural;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fwcd.sc18.core.EvaluatingLogic;
 
 import sc.plugin2018.AbstractClient;
@@ -13,6 +16,8 @@ import sc.shared.GameResult;
 import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
+	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
+	
 	private final int encodedBoardSize = 14;
 	private final float winFactor = 100;
 	
@@ -21,6 +26,9 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private final Perceptron neuralNet = new Perceptron(layerSizes);
 	
 	private int alphaBetaDepth = 2; // TODO: Tweak this parameter
+	
+	// FIXME: Relaunching the client is useless, currently, as the population details are not preserved
+	// FIXME: Some debugging thus is required
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
@@ -42,10 +50,11 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				) * (color == me.getPlayerColor() ? winFactor : -winFactor);
 		
 		population.setFitness(neuralNet.getWeights(), fitness);
+		GENETIC_LOG.info("Finished game with fitness {}", fitness);
 	}
 	
 	private float evaluateLeaf(Move move, GameState gameAfterMove) {
-		return neuralNet.compute(encode(spawnChild(gameAfterMove, move)))[0];
+		return neuralNet.compute(encode(gameAfterMove))[0];
 	}
 	
 	private float alphaBeta(
@@ -58,7 +67,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	) {
 		GameState gameAfterMove = spawnChild(gameBeforeMove, move);
 		
-		if (depth == 0 || isGameOver(gameBeforeMove)) {
+		if (depth == 0 || isGameOver(gameAfterMove)) {
 			return evaluateLeaf(move, gameAfterMove);
 		} else {
 			float bestRating = maximizing ? alpha : beta;

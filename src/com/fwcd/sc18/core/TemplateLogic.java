@@ -46,16 +46,14 @@ public abstract class TemplateLogic implements IGameHandler {
 		}
 		
 		long startTime = System.currentTimeMillis();
-		LOG.info("A move has been requested.");
 		
 		Move move = selectMove(gameState, currentPlayer);
 		move.orderActions();
 		
-		LOG.info("Sending move {}", move);
 		long endTime = System.currentTimeMillis();
 		sendAction(move);
 		
-		LOG.warn("Time needed for turn: {} ms", endTime - startTime);
+		LOG.debug("Committed move {} in {} ms", move, endTime - startTime);
 	}
 	
 	protected abstract Move selectMove(GameState gameBeforeMove, Player me);
@@ -69,7 +67,6 @@ public abstract class TemplateLogic implements IGameHandler {
 	@Override
 	public void onUpdate(Player player, Player opponent) {
 		currentPlayer = player;
-		
 	}
 
 	@Override
@@ -85,6 +82,7 @@ public abstract class TemplateLogic implements IGameHandler {
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		} catch (InvalidMoveException e) {
+			LOG.error("Invalid move {} on game state {}", move, state);
 			throw new HUIException(e);
 		}
 	}
