@@ -1,11 +1,11 @@
 # phantomclient
 
-My contribution to the annual [Software Challenge](http://www.software-challenge.de), which
+My contribution to the [Software Challenge 2018](http://www.software-challenge.de), which
 deals with creating an AI for a board game called "Hase und Igel".
 
 ## General notes
 
-Package structure (following the Maven conventions):
+Package structure:
 
 * **src/main/java** - Client source code
     * **com.thedroide.sc18** - Contains game ai logic
@@ -21,7 +21,7 @@ The respective package-info.java files contain further information for each subp
 
 * Clone this repository to your pc using git:
 
-      git clone https://bitbucket.org/TheDroide/sochaclient.git
+      git clone https://bitbucket.org/TheDroide/phantomclient.git
 
 * Link the root repository folder to your workspace by opening
   it through "File" > "Open Projects from File System..."
