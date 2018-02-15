@@ -1,4 +1,4 @@
-package com.fwcd.sc18;
+package com.fwcd.sc18.core;
 
 import java.util.stream.Stream;
 
@@ -8,7 +8,7 @@ import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 
 public abstract class EvaluatingLogic extends TemplateLogic {
-	private boolean parallelize = true; // TODO: Add get/set
+	private boolean parallelize = true;
 	
 	public EvaluatingLogic(AbstractClient client) {
 		super(client);
@@ -31,4 +31,8 @@ public abstract class EvaluatingLogic extends TemplateLogic {
 	}
 	
 	protected abstract float evaluateMove(Move move, GameState gameBeforeMove, Player me);
+
+	public void setParallelize(boolean parallelize) {
+		this.parallelize = parallelize;
+	}
 }

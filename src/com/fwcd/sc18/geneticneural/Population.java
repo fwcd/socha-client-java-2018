@@ -27,7 +27,7 @@ public class Population {
 		}
 	}
 	
-	public float[] selectIndividual() {
+	public float[] sample() {
 		Random random = ThreadLocalRandom.current();
 		
 		if (random.nextFloat() < selectorEpsilon) {
