@@ -37,6 +37,8 @@ public interface IndexedMap<K, V> extends Map<K, V> {
 	 */
 	K getKey(int index);
 	
+	int indexOfKey(K key);
+	
 	void sortByKey(Comparator<K> comparator);
 	
 	void sortByValue(Comparator<V> comparator);

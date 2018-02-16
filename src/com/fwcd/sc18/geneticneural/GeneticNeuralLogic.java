@@ -1,10 +1,12 @@
 package com.fwcd.sc18.geneticneural;
 
+import java.io.File;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
 
 import sc.plugin2018.AbstractClient;
@@ -13,18 +15,18 @@ import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.shared.GameResult;
+import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
-	
+
 	private final int encodedBoardSize = 14;
-	private final float winFactor = 100;
-	
 	private final int[] layerSizes = {encodedBoardSize, 10, 1};
-	private final Population population = new Population(10, () -> Perceptron.generateWeights(layerSizes));
-	private final Perceptron neuralNet = new Perceptron(layerSizes);
-	
+	private final Population population;
+	private final Perceptron neuralNet;
+
+	private final float winFactor = 100;
 	private int alphaBetaDepth = 2; // TODO: Tweak this parameter
 	
 	// FIXME: Relaunching the client is useless, currently, as the population details are not preserved
@@ -32,29 +34,50 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
+		population = new Population(10, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		neuralNet = new Perceptron(layerSizes);
+	}
+
+	/**
+	 * Copy constructor.
+	 */
+	public GeneticNeuralLogic(AbstractClient client, GeneticNeuralLogic other) {
+		super(client);
+		population = other.population;
+		neuralNet = other.neuralNet;
 	}
 
 	@Override
-	protected void gameStarted(GameState gameState) {
+	protected void onGameStart(GameState gameState) {
 		neuralNet.setWeights(population.sample());
 	}
 
 	@Override
-	public void gameEnded(GameResult result, PlayerColor color, String errorMessage) {
+	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
 		Player me = getMe();
 		float fitness = (
 				invertNormalize(me.getCarrots(), 0, 200)
 				+ invertNormalize(me.getSalads(), 0, 5)
 				+ normalize(me.getFieldIndex(), 0, 64)
 				+ invertNormalize(me.getCards().size(), 0, 4)
-				) * (color == me.getPlayerColor() ? winFactor : -winFactor);
+				) * (won ? winFactor : -winFactor);
 		
-		population.setFitness(neuralNet.getWeights(), fitness);
-		GENETIC_LOG.info("Finished game with fitness {}", fitness);
+		population.put(neuralNet.getWeights(), fitness);
+		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? "won" : "lost"));
 	}
 	
 	private float evaluateLeaf(Move move, GameState gameAfterMove) {
-		return neuralNet.compute(encode(gameAfterMove))[0];
+		PlayerColor winner = getWinnerOrNull(gameAfterMove);
+		PlayerColor me = getMyColor();
+		PlayerColor opponent = getOpponentColor();
+		
+		if (winner == me) {
+			return 10000000 - gameAfterMove.getTurn();
+		} else if (winner == opponent) {
+			return -10000000 + gameAfterMove.getTurn();
+		} else {
+			return neuralNet.compute(encode(gameAfterMove))[0];
+		}
 	}
 	
 	private float alphaBeta(
@@ -65,9 +88,14 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 			float alpha,
 			float beta
 	) {
-		GameState gameAfterMove = spawnChild(gameBeforeMove, move);
+		GameState gameAfterMove;
+		try {
+			gameAfterMove = spawnChild(gameBeforeMove, move);
+		} catch (InvalidMoveException e) {
+			return Float.NaN;
+		}
 		
-		if (depth == 0 || isGameOver(gameAfterMove)) {
+		if (depth <= 0 || isGameOver(gameAfterMove)) {
 			return evaluateLeaf(move, gameAfterMove);
 		} else {
 			float bestRating = maximizing ? alpha : beta;
@@ -78,7 +106,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				
 				if (maximizing) {
 					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, bestRating, beta);
-					if (rating > bestRating) {
+					if (!Float.isNaN(rating) && rating > bestRating) {
 						bestRating = rating;
 						if (bestRating >= beta) {
 							break; // Beta-cutoff
@@ -86,7 +114,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 					}
 				} else {
 					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, alpha, bestRating);
-					if (rating < bestRating) {
+					if (!Float.isNaN(rating) && rating < bestRating) {
 						bestRating = rating;
 						if (bestRating <= alpha) {
 							break; // Alpha-cutoff
@@ -135,5 +163,10 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	private float normalize(float x, float min, float max) {
 		return (x - min) / (max - min);
+	}
+
+	@Override
+	public CopyableLogic copy(AbstractClient client) {
+		return new GeneticNeuralLogic(client, this);
 	}
 }

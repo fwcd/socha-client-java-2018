@@ -11,7 +11,7 @@
 	</appender>
 
 	<logger name="geneticlog" level="INFO" />
-	<logger name="ownlog" level="INFO" />
+	<logger name="ownlog" level="WARN" />
 	<root level="ERROR">
 		<appender-ref ref="STDOUT" />
 	</root>

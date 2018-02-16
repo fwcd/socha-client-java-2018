@@ -113,4 +113,9 @@ public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 	public void sortByKey(Comparator<K> comparator) {
 		Collections.sort(keyIndex, comparator);
 	}
+
+	@Override
+	public int indexOfKey(K key) {
+		return keyIndex.indexOf(key);
+	}
 }

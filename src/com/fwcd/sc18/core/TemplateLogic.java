@@ -3,8 +3,6 @@ package com.fwcd.sc18.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fwcd.sc18.utils.HUIException;
-
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.IGameHandler;
@@ -19,7 +17,7 @@ import sc.shared.PlayerColor;
  * Provides a skeletal implementation for
  * game logics.
  */
-public abstract class TemplateLogic implements IGameHandler {
+public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
 	private final AbstractClient client;
@@ -32,15 +30,21 @@ public abstract class TemplateLogic implements IGameHandler {
 		this.client = client;
 	}
 	
-	protected void gameStarted(GameState gameState) {}
+	protected void onGameStart(GameState gameState) {}
+	
+	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {}
 	
 	@Override
-	public void gameEnded(GameResult result, PlayerColor color, String errorMessage) {}
+	public void gameEnded(GameResult result, PlayerColor color, String errorMessage) {
+		PlayerColor winner = getWinnerOrNull(gameState);
+		boolean won = (winner != null) && (winner == me);
+		onGameEnd(gameState, won, result, errorMessage);
+	}
 
 	@Override
 	public void onRequestAction() {
 		if (firstMove) {
-			gameStarted(gameState);
+			onGameStart(gameState);
 			firstMove = false;
 			me = currentPlayer.getPlayerColor();
 		}
@@ -53,7 +57,7 @@ public abstract class TemplateLogic implements IGameHandler {
 		long endTime = System.currentTimeMillis();
 		sendAction(move);
 		
-		LOG.debug("Committed move {} in {} ms", move, endTime - startTime);
+		LOG.info("Committed move {} in {} ms", move, endTime - startTime);
 	}
 	
 	protected abstract Move selectMove(GameState gameBeforeMove, Player me);
@@ -74,16 +78,13 @@ public abstract class TemplateLogic implements IGameHandler {
 		client.sendMove(move);
 	}
 	
-	protected GameState spawnChild(GameState state, Move move) {
+	protected GameState spawnChild(GameState state, Move move) throws InvalidMoveException {
 		try {
 			GameState result = state.clone();
 			move.perform(result);
 			return result;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
-		} catch (InvalidMoveException e) {
-			LOG.error("Invalid move {} on game state {}", move, state);
-			throw new HUIException(e);
 		}
 	}
 	
@@ -103,23 +104,31 @@ public abstract class TemplateLogic implements IGameHandler {
 		return me == PlayerColor.BLUE ? state.getRedPlayer() : state.getBluePlayer();
 	}
 	
-	public Player getWinnerOrNull(GameState state) {
+	public PlayerColor getMyColor() {
+		return me;
+	}
+	
+	public PlayerColor getOpponentColor() {
+		return me.opponent();
+	}
+	
+	public PlayerColor getWinnerOrNull(GameState state) {
 		Player red = state.getRedPlayer();
 		Player blue = state.getBluePlayer();
 		
-		if (state.getRound() > Constants.ROUND_LIMIT) {
-			return red.getFieldIndex() > blue.getFieldIndex() ? red : blue;
+		if (state.getRound() >= Constants.ROUND_LIMIT) {
+			return red.getFieldIndex() > blue.getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
 		} else if (red.inGoal()) {
-			return red;
+			return PlayerColor.RED;
 		} else if (blue.inGoal()) {
-			return blue;
+			return PlayerColor.BLUE;
 		} else {
 			return null;
 		}
 	}
 	
 	public boolean isGameOver(GameState state) {
-		return state.getRound() > Constants.ROUND_LIMIT
+		return state.getRound() >= Constants.ROUND_LIMIT
 				|| state.getBluePlayer().inGoal()
 				|| state.getRedPlayer().inGoal();
 	}
