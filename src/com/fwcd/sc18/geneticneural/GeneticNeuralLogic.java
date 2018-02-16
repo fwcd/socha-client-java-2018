@@ -63,6 +63,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				) * (won ? winFactor : -winFactor);
 		
 		population.put(neuralNet.getWeights(), fitness);
+		population.evolve();
 		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? "won" : "lost"));
 	}
 	
