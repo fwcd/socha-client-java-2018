@@ -64,7 +64,7 @@ public class Population {
 			// Reached a full generation
 			sortByFitnessDescending();
 			crossoverIndividuals();
-			mutateIndividuals(survivorsPerGeneration, individuals.size());
+			mutateIndividuals(survivorsPerGeneration, individuals.size() - 2);
 			
 			counter = 0;
 			saveAll();
@@ -73,6 +73,10 @@ public class Population {
 		}
 	}
 
+	public int size() {
+		return individuals.size();
+	}
+	
 	private void saveAll() {
 		String folderPath = autoSaveFolder.getAbsolutePath();
 		
@@ -192,21 +196,27 @@ public class Population {
 		
 		int indexA = dist.pickIndexStochastically();
 		int indexB = dist.pickIndexStochastically(indexA);
-		
+
+		int size = size();
 		float[] a = individuals.getKey(indexA);
 		float[] b = individuals.getKey(indexB);
+		float[] targetA = individuals.getKey(size - 1);
+		float[] targetB = individuals.getKey(size - 2);
 		
-		crossover(a, b, ThreadLocalRandom.current());
+		crossover(a, b, targetA, targetB, ThreadLocalRandom.current());
 	}
 	
-	private void crossover(float[] a, float[] b, Random random) {
-		// Uniform crossover
+	private void crossover(float[] a, float[] b, float[] targetA, float[] targetB, Random random) {
+		// Single-point crossover
+		int point = random.nextInt(a.length);
 		
 		for (int i=0; i<a.length; i++) {
-			if (random.nextBoolean()) {
-				float tmp = a[i];
-				a[i] = b[i];
-				b[i] = tmp;
+			if (i < point) {
+				targetA[i] = a[i];
+				targetB[i] = b[i];
+			} else {
+				targetA[i] = b[i];
+				targetB[i] = a[i];
 			}
 		}
 	}
