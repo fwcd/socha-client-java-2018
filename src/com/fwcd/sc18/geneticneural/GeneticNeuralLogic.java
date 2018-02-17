@@ -34,8 +34,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private float carrotWeight = 1;
 	private float cardsWeight = 1;
 	
-	// FIXME: Relaunching the client is useless, currently, as the population details are not preserved
-	// FIXME: Some debugging thus is required
+	/*
+	 * Submission TODO-list:
+	 * 
+	 * - Increase alpha beta to a feasible depth
+	 * - Change population sample strategy to a more greedy one
+	 * - Set autoRelaunch flag in PhantomClient to false
+	 */
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
