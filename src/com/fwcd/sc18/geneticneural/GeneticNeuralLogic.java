@@ -26,15 +26,20 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private final Population population;
 	private final Perceptron neuralNet;
 
-	private final float winFactor = 100;
-	private int alphaBetaDepth = 2; // TODO: Tweak this parameter
+	private final float winFactor = 2048;
+	private int alphaBetaDepth = 0; // FIXME: Tweak this parameter
+
+	private float fieldWeight = 8;
+	private float saladWeight = 2;
+	private float carrotWeight = 1;
+	private float cardsWeight = 1;
 	
 	// FIXME: Relaunching the client is useless, currently, as the population details are not preserved
 	// FIXME: Some debugging thus is required
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		population = new Population(10, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		population = new Population(40, () -> Perceptron.generateWeights(layerSizes), new File("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
 
@@ -55,18 +60,33 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
 		Player me = getMe();
-		float fitness = (
-				invertNormalize(me.getCarrots(), 0, 200)
-				+ invertNormalize(me.getSalads(), 0, 5)
-				+ normalize(me.getFieldIndex(), 0, 64)
-				+ invertNormalize(me.getCards().size(), 0, 4)
-				) * (won ? winFactor : -winFactor);
+		Player opponent = getOpponent();
+		float fitness;
 		
-		population.put(neuralNet.getWeights(), fitness);
+		GENETIC_LOG.debug("=========================");
+		
+		if (me.inGoal()) {
+			fitness = invertNormalize(gameState.getTurn(), 0, 60) * winFactor;
+		} else {
+			int carrots = me.getCarrots();
+			int field = me.getFieldIndex();
+			
+			float normCarrots = invertNormalize(me.getCarrots(), 0, 360) * carrotWeight;
+			float normSalads = invertNormalize(me.getSalads(), 0, 5) * saladWeight;
+			float normField = normalize(me.getFieldIndex(), 0, 64) * fieldWeight;
+			float normCards = invertNormalize(me.getCards().size(), 0, 4) * cardsWeight;
+			float winBias = (won ? 8 : (opponent.inGoal() ? -16 : -8));
+			
+			fitness = normCarrots + normSalads + normField + normCards + winBias;
+			GENETIC_LOG.debug("Carrots: {}, field: {}", carrots, field);
+		}
+		
+		population.updateFitness(neuralNet.getWeights(), fitness);
 		population.evolve();
 		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? "won" : "lost"));
+		GENETIC_LOG.debug("Individuals: {}", population);
 	}
-	
+
 	private float evaluateLeaf(Move move, GameState gameAfterMove) {
 		PlayerColor winner = getWinnerOrNull(gameAfterMove);
 		PlayerColor me = getMyColor();
@@ -140,7 +160,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		List<CardType> opponentsCards = opponent.getCards();
 		float[] encoded = new float[encodedBoardSize];
 		
-		encoded[0] = normalize(me.getCarrots(), 0, 200);
+		encoded[0] = normalize(me.getCarrots(), 0, 360);
 		encoded[1] = normalize(me.getSalads(), 0, 5);
 		encoded[2] = normalize(me.getFieldIndex(), 0, 64);
 		encoded[3] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
@@ -157,7 +177,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		
 		return encoded;
 	}
-
+	
 	private float invertNormalize(float x, float min, float max) {
 		return normalize(max - x, min, max);
 	}

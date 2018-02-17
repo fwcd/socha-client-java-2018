@@ -30,9 +30,6 @@ The respective package-info.java files contain further information for each subp
 * Build the client using the "build.xml" ANT-file (though it should already show up as a pre-configured project builder in Eclipse)
   
 * You should find the compiled JAR under the path target/phantomclient.jar
-
-* Copy the compiled JAR to the subfolder Player A or Player B
-    * This ensures that the saved models won't be saved in the target directory
   
 * Launch the Server-GUI and load the compiled client as a computer-player.
   (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/),

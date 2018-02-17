@@ -1,11 +1,9 @@
 package com.fwcd.sc18.utils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Represents a weighted list of items from
+ * Represents a softmaxed, weighted list of items from
  * which an item may be picked stochastically.
  * 
  * @author Fredrik
@@ -14,36 +12,70 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class Distribution<E> {
 	private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
-	private final List<E> items = new ArrayList<>();
-	private final FloatList probabilities = new FloatList();
+	private final IndexedMap<E, Float> probabilities;
 	private float total = 0;
 	
-	public void add(E item, float probability) {
-		items.add(item);
-		probabilities.add(probability);
-		total += probability;
+	public Distribution(IndexedMap<E, Float> input) {
+		probabilities = new IndexedHashMap<>(input.size());
+		float expSum = 0;
+		
+		for (float v : input.values()) {
+			float exp = clamp((float) Math.exp(v), 1e32F, -1e32F);
+			expSum += exp;
+		}
+		
+		for (E key : input.keyList()) {
+			float p = clamp((float) Math.exp(input.get(key)), 1e32F, -1e32F) / expSum;
+			total += p;
+			probabilities.put(key, p);
+		}
 	}
 	
-	public int pickIndexStochastically() {
-		// Total "should" always be 1, but may be different due to
-		// floating point inaccuracies
+	private float clamp(float x, float min, float max) {
+		if (x > max) {
+			return max;
+		} else if (x < min) {
+			return min;
+		} else {
+			return x;
+		}
+	}
+
+	public int pickIndexStochastically(int excludedIndex) {
+		int size = probabilities.size();
+		float random = RANDOM.nextFloat() - probabilities.getValue(excludedIndex);
 		
-		int resultingIndex = -1;
-		float random = RANDOM.nextFloat() * total;
-		
-		for (int i=0; i<items.size(); i++) {
-			random -= probabilities.get(i);
+		for (int i=0; i<size; i++) {
+			if (i == excludedIndex) {
+				continue;
+			}
+			
+			random -= probabilities.getValue(i);
 			
 			if (random <= 0) {
-				resultingIndex = i;
-				break;
+				return i;
 			}
 		}
 		
-		return resultingIndex;
+		throw new RuntimeException("No index could be picked from the distribution.");
+	}
+
+	public int pickIndexStochastically() {
+		int size = probabilities.size();
+		float random = RANDOM.nextFloat();
+		
+		for (int i=0; i<size; i++) {
+			random -= probabilities.getValue(i);
+			
+			if (random <= 0) {
+				return i;
+			}
+		}
+		
+		throw new RuntimeException("No index could be picked from the distribution.");
 	}
 	
 	public E pickStochastically() {
-		return items.get(pickIndexStochastically());
+		return probabilities.getKey(pickIndexStochastically());
 	}
 }

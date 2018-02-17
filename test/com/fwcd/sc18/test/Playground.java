@@ -3,10 +3,25 @@ package com.fwcd.sc18.test;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fwcd.sc18.utils.Distribution;
+import com.fwcd.sc18.utils.IndexedHashMap;
+import com.fwcd.sc18.utils.IndexedMap;
+
 import sc.plugin2018.CardType;
 
 public class Playground {
 	public static void main(String[] args) {
+		IndexedMap<String, Float> map = new IndexedHashMap<>();
+		map.put("a", 5F);
+		map.put("b", 2F);
+		map.put("c", 1F);
+		Distribution<String> dist = new Distribution<>(map);
+		
+		for (int i=0; i<10; i++) {
+			int j = dist.pickIndexStochastically();
+			System.out.println(j + ", " + dist.pickIndexStochastically(j));
+		}
+		
 		System.out.println(Float.toString(encodeCards(Arrays.asList(CardType.TAKE_OR_DROP_CARROTS, CardType.HURRY_AHEAD))));
 	}
 	

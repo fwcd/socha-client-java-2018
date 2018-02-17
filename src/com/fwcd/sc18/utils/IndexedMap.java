@@ -1,6 +1,7 @@
 package com.fwcd.sc18.utils;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,6 +37,10 @@ public interface IndexedMap<K, V> extends Map<K, V> {
 	 * @return The key
 	 */
 	K getKey(int index);
+	
+	List<K> keyList();
+	
+	List<V> valueList();
 	
 	int indexOfKey(K key);
 	

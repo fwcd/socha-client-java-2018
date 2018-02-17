@@ -25,6 +25,10 @@ public class Perceptron {
 		}
 		
 		float[] newWeights = new float[weightCount];
+		return initWeights(newWeights);
+	}
+
+	public static float[] initWeights(float[] newWeights) {
 		Random random = ThreadLocalRandom.current();
 		for (int i=0; i<newWeights.length; i++) {
 			// Gaussian weight initialization

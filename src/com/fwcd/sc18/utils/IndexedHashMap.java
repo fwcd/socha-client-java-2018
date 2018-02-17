@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,8 +19,18 @@ import java.util.Set;
 public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 	// Intentionally not declaring interface types to
 	// avoid unnecessary virtual method calls.
-	private ArrayList<K> keyIndex = new ArrayList<>();
-	private HashMap<K, V> data = new HashMap<>();
+	private final ArrayList<K> keyIndex;
+	private final HashMap<K, V> data;
+	
+	public IndexedHashMap() {
+		keyIndex = new ArrayList<>();
+		data = new HashMap<>();
+	}
+	
+	public IndexedHashMap(int initialCapacity) {
+		keyIndex = new ArrayList<>(initialCapacity);
+		data = new HashMap<>(initialCapacity);
+	}
 	
 	@Override
 	public int size() {
@@ -48,7 +59,10 @@ public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 
 	@Override
 	public V put(K key, V value) {
-		keyIndex.add(key);
+		if (!data.containsKey(key)) {
+			keyIndex.add(key);
+		}
+		
 		return data.put(key, value);
 	}
 
@@ -95,7 +109,7 @@ public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 
 	@Override
 	public V put(int index, K key, V value) {
-		keyIndex.add(index, key);
+		keyIndex.set(index, key);
 		return data.put(key, value);
 	}
 
@@ -117,5 +131,21 @@ public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 	@Override
 	public int indexOfKey(K key) {
 		return keyIndex.indexOf(key);
+	}
+
+	@Override
+	public List<K> keyList() {
+		return keyIndex;
+	}
+
+	@Override
+	public List<V> valueList() {
+		List<V> values = new ArrayList<>();
+		
+		for (K key : keyIndex) {
+			values.add(data.get(key));
+		}
+		
+		return values;
 	}
 }
