@@ -17,6 +17,7 @@ import com.fwcd.sc18.utils.IndexedMap;
 
 public class Population {
 	private final IndexedMap<float[], Float> individuals;
+	private final Supplier<float[]> spawner;
 	
 	private File autoSaveFolder = null;
 	private int survivorsPerGeneration = 5;
@@ -30,7 +31,8 @@ public class Population {
 	public Population(int size, Supplier<float[]> spawner, File autoSaveFolder) {
 		this.autoSaveFolder = autoSaveFolder;
 		individuals = new IndexedHashMap<>();
-
+		this.spawner = spawner;
+		
 		if (!loadAll(size)) {
 			Float initialFitness = Float.NEGATIVE_INFINITY;
 			
@@ -50,6 +52,14 @@ public class Population {
 		
 		if (autoSaveFolder != null) {
 			save(individual, fitness);
+		}
+	}
+	
+	public void put(int index, float[] individual, float fitness) {
+		individuals.put(index, individual, fitness);
+		
+		if (autoSaveFolder != null) {
+			save(autoSaveFolder.getAbsolutePath(), index, individual, fitness);
 		}
 	}
 
@@ -148,7 +158,7 @@ public class Population {
 				
 				individuals.put(individual, fitness);
 			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				put(spawner.get(), Float.NEGATIVE_INFINITY);
 			}
 		}
 		
@@ -175,7 +185,7 @@ public class Population {
 			mutate(individual, random);
 			
 			if (random.nextFloat() < resetChance) {
-				Perceptron.initWeights(individual);
+				individuals.put(i, spawner.get(), Float.NEGATIVE_INFINITY);
 			}
 		}
 	}

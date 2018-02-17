@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
+import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.CardType;
@@ -64,11 +65,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
+		
 		Player me = getMe();
 		Player opponent = getOpponent();
 		float fitness;
 		
 		GENETIC_LOG.debug("=========================");
+		GENETIC_LOG.debug("Turn {}", gameState.getTurn());
 		
 		if (me.inGoal()) {
 			fitness = invertNormalize(gameState.getTurn(), 0, 60) * winFactor;
@@ -92,8 +95,8 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		GENETIC_LOG.debug("Individuals: {}", population);
 	}
 
-	private float evaluateLeaf(Move move, GameState gameAfterMove) {
-		PlayerColor winner = getWinnerOrNull(gameAfterMove);
+	private float evaluateLeaf(Move move, GameState gameBeforeMove, GameState gameAfterMove) {
+		PlayerColor winner = HUIUtils.getWinnerOrNull(gameBeforeMove);
 		PlayerColor me = getMyColor();
 		PlayerColor opponent = getOpponentColor();
 		
@@ -116,13 +119,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	) {
 		GameState gameAfterMove;
 		try {
-			gameAfterMove = spawnChild(gameBeforeMove, move);
+			gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
 		} catch (InvalidMoveException e) {
 			return Float.NaN;
 		}
 		
-		if (depth <= 0 || isGameOver(gameAfterMove)) {
-			return evaluateLeaf(move, gameAfterMove);
+		if (depth <= 0 || HUIUtils.isGameOver(gameAfterMove)) {
+			return evaluateLeaf(move, gameBeforeMove, gameAfterMove);
 		} else {
 			float bestRating = maximizing ? alpha : beta;
 			

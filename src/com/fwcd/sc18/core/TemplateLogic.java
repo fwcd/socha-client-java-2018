@@ -3,14 +3,14 @@ package com.fwcd.sc18.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fwcd.sc18.utils.HUIUtils;
+
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.IGameHandler;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
-import sc.plugin2018.util.Constants;
 import sc.shared.GameResult;
-import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 /**
@@ -36,7 +36,7 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	
 	@Override
 	public void gameEnded(GameResult result, PlayerColor color, String errorMessage) {
-		PlayerColor winner = getWinnerOrNull(gameState);
+		PlayerColor winner = HUIUtils.getWinnerOrNull(gameState);
 		boolean won = (winner != null) && (winner == me);
 		onGameEnd(gameState, won, result, errorMessage);
 	}
@@ -78,16 +78,6 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 		client.sendMove(move);
 	}
 	
-	protected GameState spawnChild(GameState state, Move move) throws InvalidMoveException {
-		try {
-			GameState result = state.clone();
-			move.perform(result);
-			return result;
-		} catch (CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
 	public Player getMe() {
 		return getMe(gameState);
 	}
@@ -110,26 +100,5 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	
 	public PlayerColor getOpponentColor() {
 		return me.opponent();
-	}
-	
-	public PlayerColor getWinnerOrNull(GameState state) {
-		Player red = state.getRedPlayer();
-		Player blue = state.getBluePlayer();
-		
-		if (state.getRound() >= Constants.ROUND_LIMIT) {
-			return red.getFieldIndex() > blue.getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
-		} else if (red.inGoal()) {
-			return PlayerColor.RED;
-		} else if (blue.inGoal()) {
-			return PlayerColor.BLUE;
-		} else {
-			return null;
-		}
-	}
-	
-	public boolean isGameOver(GameState state) {
-		return state.getRound() >= Constants.ROUND_LIMIT
-				|| state.getBluePlayer().inGoal()
-				|| state.getRedPlayer().inGoal();
 	}
 }
