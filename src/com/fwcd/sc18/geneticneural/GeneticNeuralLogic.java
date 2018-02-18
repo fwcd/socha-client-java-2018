@@ -17,7 +17,6 @@ import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.shared.GameResult;
 import sc.shared.InvalidMoveException;
-import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
@@ -29,11 +28,6 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 
 	private final float winFactor = 2048;
 	private int alphaBetaDepth = 0; // FIXME: Tweak this parameter
-
-	private float fieldWeight = 8;
-	private float saladWeight = 2;
-	private float carrotWeight = 1;
-	private float cardsWeight = 1;
 	
 	/*
 	 * Submission TODO-list:
@@ -45,7 +39,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		population = new Population(40, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		population = new Population(20, () -> Perceptron.generateWeights(layerSizes), new File("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
 
@@ -65,48 +59,50 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
-		
 		Player me = getMe();
-		Player opponent = getOpponent();
+		
+		int turn = gameState.getTurn();
+		boolean inGoal = me.inGoal();
 		float fitness;
 		
 		GENETIC_LOG.debug("=========================");
-		GENETIC_LOG.debug("Turn {}", gameState.getTurn());
+		GENETIC_LOG.debug("Turns: {}", turn);
 		
-		if (me.inGoal()) {
-			fitness = invertNormalize(gameState.getTurn(), 0, 60) * winFactor;
+		if (inGoal) {
+			fitness = (invertNormalize(turn, 0, 60) + 1) * winFactor;
 		} else {
 			int carrots = me.getCarrots();
 			int field = me.getFieldIndex();
 			
-			float normCarrots = invertNormalize(me.getCarrots(), 0, 360) * carrotWeight;
-			float normSalads = invertNormalize(me.getSalads(), 0, 5) * saladWeight;
-			float normField = normalize(me.getFieldIndex(), 0, 64) * fieldWeight;
-			float normCards = invertNormalize(me.getCards().size(), 0, 4) * cardsWeight;
-			float winBias = (won ? 8 : (opponent.inGoal() ? -16 : -8));
+			float normCarrots = invertNormalize(me.getCarrots(), 0, 200);
+			float normSalads = invertNormalize(me.getSalads(), 0, 5);
+			float normField = normalize(me.getFieldIndex(), 0, 64);
+			float normCards = invertNormalize(me.getCards().size(), 0, 4);
 			
-			fitness = normCarrots + normSalads + normField + normCards + winBias;
+			fitness = normCarrots + normSalads + normField + normCards;
 			GENETIC_LOG.debug("Carrots: {}, field: {}", carrots, field);
 		}
 		
 		population.updateFitness(neuralNet.getWeights(), fitness);
-		population.evolve();
-		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? "won" : "lost"));
+		population.evolve(!inGoal);
+		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? (inGoal ? "won + in goal" : "won") : "lost"));
 		GENETIC_LOG.debug("Individuals: {}", population);
 	}
 
-	private float evaluateLeaf(Move move, GameState gameBeforeMove, GameState gameAfterMove) {
-		PlayerColor winner = HUIUtils.getWinnerOrNull(gameBeforeMove);
-		PlayerColor me = getMyColor();
-		PlayerColor opponent = getOpponentColor();
+	private float evaluateLeaf(boolean maximizing, Move move, GameState gameBeforeMove, GameState gameAfterMove) {
+		Player me = getMe(gameAfterMove);
+		Player opponent = getOpponent(gameAfterMove);
+		float myRating;
 		
-		if (winner == me) {
-			return 10000000 - gameAfterMove.getTurn();
-		} else if (winner == opponent) {
-			return -10000000 + gameAfterMove.getTurn();
+		if (me.inGoal()) {
+			myRating = 10000000 - gameAfterMove.getTurn();
+		} else if (opponent.inGoal()) {
+			myRating = -10000000 + gameAfterMove.getTurn();
 		} else {
-			return neuralNet.compute(encode(gameAfterMove))[0];
+			myRating = neuralNet.compute(encode(gameAfterMove))[0];
 		}
+		
+		return maximizing ? myRating : -myRating;
 	}
 	
 	private float alphaBeta(
@@ -121,11 +117,15 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		try {
 			gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
 		} catch (InvalidMoveException e) {
-			return Float.NaN;
+			if (maximizing) {
+				return Float.NEGATIVE_INFINITY;
+			} else {
+				return Float.POSITIVE_INFINITY;
+			}
 		}
 		
 		if (depth <= 0 || HUIUtils.isGameOver(gameAfterMove)) {
-			return evaluateLeaf(move, gameBeforeMove, gameAfterMove);
+			return evaluateLeaf(maximizing, move, gameBeforeMove, gameAfterMove);
 		} else {
 			float bestRating = maximizing ? alpha : beta;
 			
@@ -135,7 +135,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				
 				if (maximizing) {
 					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, bestRating, beta);
-					if (!Float.isNaN(rating) && rating > bestRating) {
+					if (rating > bestRating) {
 						bestRating = rating;
 						if (bestRating >= beta) {
 							break; // Beta-cutoff
@@ -143,7 +143,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 					}
 				} else {
 					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, alpha, bestRating);
-					if (!Float.isNaN(rating) && rating < bestRating) {
+					if (rating < bestRating) {
 						bestRating = rating;
 						if (bestRating <= alpha) {
 							break; // Alpha-cutoff
