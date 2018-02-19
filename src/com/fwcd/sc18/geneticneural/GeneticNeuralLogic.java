@@ -22,6 +22,10 @@ import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
+	private static final int MAX_FIELD = Constants.NUM_FIELDS - 1;
+	private static final int CARROT_THRESHOLD = 360;
+	private static final int FITNESS_BIAS = 5;
+	private static final int WIN_FITNESS_BIAS = 10;
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
 	private final int[] layerSizes;
@@ -70,13 +74,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		float fitness;
 		
 		if (inGoal) {
-			fitness = 10 - HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
+			fitness = WIN_FITNESS_BIAS - HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
 		} else {
-			float normCarrots = HUIUtils.normalize(me.getCarrots(), 0, 360);
-			float normSalads = HUIUtils.normalize(me.getSalads(), 0, 5);
-			float normField = HUIUtils.normalize(me.getFieldIndex(), 0, 64);
+			float normCarrots = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
+			float normSalads = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
+			float normField = HUIUtils.normalize(me.getFieldIndex(), 0, MAX_FIELD);
 			
-			fitness = 5 - normSalads + normField - normCarrots;
+			fitness = FITNESS_BIAS - normSalads + normField - normCarrots;
 		}
 		
 		int counter = population.getCounter();
@@ -108,13 +112,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		float[] encoded = new float[layerSizes[0]];
 		
 		encoded[0] = me.getPlayerColor() == PlayerColor.RED ? 1 : 0;
-		encoded[1] = HUIUtils.normalize(me.getCarrots(), 0, 360);
-		encoded[2] = HUIUtils.normalize(me.getSalads(), 0, 5);
-		encoded[3] = HUIUtils.normalize(me.getFieldIndex(), 0, 64);
+		encoded[1] = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
+		encoded[2] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
+		encoded[3] = HUIUtils.normalize(me.getFieldIndex(), 0, MAX_FIELD);
 		encoded[4] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
-		encoded[5] = HUIUtils.normalize(opponent.getFieldIndex(), 0, 64);
-		encoded[6] = HUIUtils.normalize(opponent.getSalads(), 0, 5);
-		encoded[7] = HUIUtils.normalize(opponent.getCarrots(), 0, 360);
+		encoded[5] = HUIUtils.normalize(opponent.getFieldIndex(), 0, MAX_FIELD);
+		encoded[6] = HUIUtils.normalize(opponent.getSalads(), 0, Constants.SALADS_TO_EAT);
+		encoded[7] = HUIUtils.normalize(opponent.getCarrots(), 0, CARROT_THRESHOLD);
 		encoded[8] = myField == FieldType.CARROT ? 1 : 0;
 		encoded[9] = myField == FieldType.HARE ? 1 : 0;
 		encoded[10] = myField == FieldType.HEDGEHOG ? 1 : 0;
