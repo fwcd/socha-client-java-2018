@@ -63,7 +63,7 @@ public class Population {
 		individuals.put(individual, fitness);
 		
 		if (autoSaveFolder != null) {
-			save(individual, fitness);
+			save(autoSaveFolder.getAbsolutePath(), individuals.indexOfKey(individual), individual, fitness);
 		}
 	}
 	
@@ -74,11 +74,11 @@ public class Population {
 			save(autoSaveFolder.getAbsolutePath(), index, individual, fitness);
 		}
 	}
-
-	public float updateFitness(float[] individual, float newFitness) {
+	
+	public float updateFitness(boolean won, float[] individual, float newFitness) {
 		float bias = (streak > 0 ? individuals.get(individual) : 0);
 		float totalFitness = bias + newFitness;
-		put(individual, totalFitness);
+		put(counter, individual, totalFitness);
 		
 		return totalFitness;
 	}
@@ -97,7 +97,6 @@ public class Population {
 		if (nextGeneration) {
 			// Reached a full generation
 			sortByFitnessDescending();
-			copyMutate();
 			
 			counter = 0;
 			streak = 0;
@@ -107,7 +106,8 @@ public class Population {
 			GENETIC_LOG.debug(" <------------------ Generation {} ------------------> ", generation);
 			GENETIC_LOG.debug("{}", this);
 			GENETIC_LOG.debug("");
-			
+
+			copyMutate();
 			saveAll();
 		} else {
 			saveCounter(autoSaveFolder.getAbsolutePath());
@@ -154,10 +154,6 @@ public class Population {
 		}
 		
 		return true;
-	}
-
-	private void save(float[] individual, float fitness) {
-		save(autoSaveFolder.getAbsolutePath(), individuals.indexOfKey(individual), individual, fitness);
 	}
 
 	private void save(String folderPath, int index, float[] individual, float fitness) {
