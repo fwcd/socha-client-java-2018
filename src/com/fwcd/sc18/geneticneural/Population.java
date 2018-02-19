@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fwcd.sc18.utils.FloatList;
 import com.fwcd.sc18.utils.IndexedHashMap;
 import com.fwcd.sc18.utils.IndexedMap;
 
@@ -29,7 +30,7 @@ public class Population {
 	private float mutatorBias = 0;
 	
 	private int counter = 0;
-	private int roundCounter = 0;
+	private int streak = 0;
 	private int generation = 0;
 	
 	public Population(int size, Supplier<float[]> spawner, File autoSaveFolder) {
@@ -49,8 +50,10 @@ public class Population {
 	}
 	
 	public float[] sample() {
-		if (counter >= individuals.size()) {
-			evolve(false);
+		int size = individuals.size();
+		if (counter >= size) {
+			counter = size - 1;
+			saveCounter(autoSaveFolder.getAbsolutePath());
 		}
 		
 		return individuals.getKey(counter);
@@ -72,30 +75,37 @@ public class Population {
 		}
 	}
 
-	public void updateFitness(float[] individual, float newFitness) {
-		float bias = (roundCounter > 0 ? individuals.get(individual) : 0);
-		put(individual, bias + newFitness);
+	public float updateFitness(float[] individual, float newFitness) {
+		float bias = (streak > 0 ? individuals.get(individual) : 0);
+		float totalFitness = bias + newFitness;
+		put(individual, totalFitness);
+		
+		return totalFitness;
 	}
 	
-	public void evolve(boolean streak) {
-		if (!streak && roundCounter > 1) {
+	public void evolve(boolean won) {
+		boolean nextGeneration = false;
+		
+		if (!won && streak >= 1) {
 			counter++;
-			roundCounter = 0;
+			nextGeneration = (counter >= individuals.size()) && (streak >= 1);
+			streak = 0;
 		} else {
-			roundCounter++;
+			streak++;
 		}
 		
-		if (counter >= individuals.size()) {
+		if (nextGeneration) {
 			// Reached a full generation
 			sortByFitnessDescending();
 			copyMutate();
 			
 			counter = 0;
-			roundCounter = 0;
+			streak = 0;
 			generation++;
 			
 			GENETIC_LOG.debug("");
 			GENETIC_LOG.debug(" <------------------ Generation {} ------------------> ", generation);
+			GENETIC_LOG.debug("{}", this);
 			GENETIC_LOG.debug("");
 			
 			saveAll();
@@ -125,7 +135,7 @@ public class Population {
 		
 		try (FileOutputStream fos = new FileOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeInt(counter);
-			dos.writeInt(roundCounter);
+			dos.writeInt(streak);
 			dos.writeInt(generation);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -137,8 +147,8 @@ public class Population {
 		
 		try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			counter = dis.readInt();
-			roundCounter = dis.readInt();
-			generation = dis.readInt();
+			streak = dis.readInt();
+			generation = (dis.available() > 0 ? dis.readInt() : 0);
 		} catch (IOException e) {
 			return false;
 		}
@@ -154,7 +164,6 @@ public class Population {
 		File file = new File(folderPath + "/Individual" + Integer.toString(index));
 		
 		try (FileOutputStream fos = new FileOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
-			dos.writeInt(individual.length);
 			dos.writeFloat(fitness);
 			for (float gene : individual) {
 				dos.writeFloat(gene);
@@ -175,15 +184,14 @@ public class Population {
 			}
 			
 			try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
-				float[] individual = new float[dis.readInt()];
+				FloatList individual = new FloatList();
 				float fitness = dis.readFloat();
-				int i = 0;
 				
 				while (dis.available() > 0) {
-					individual[i++] = dis.readFloat();
+					individual.add(dis.readFloat());
 				}
 				
-				individuals.put(individual, fitness);
+				individuals.put(individual.toArray(), fitness);
 			} catch (IOException e) {
 				put(spawner.get(), Float.NEGATIVE_INFINITY);
 			}
@@ -223,6 +231,14 @@ public class Population {
 			mutate(source, target, random);
 			individuals.setValue(targetIndex, mutate(individuals.get(source), random));
 		}
+	}
+	
+	public int getCounter() {
+		return counter;
+	}
+	
+	public int getStreak() {
+		return streak;
 	}
 	
 	@Override

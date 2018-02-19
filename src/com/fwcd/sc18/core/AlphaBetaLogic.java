@@ -9,35 +9,25 @@ import sc.plugin2018.Player;
 import sc.shared.InvalidMoveException;
 
 public class AlphaBetaLogic extends EvaluatingLogic {
-	private static final float LARGE_NUMBER = 10000000000000F;
-	
-	private float fieldWeight = 128;
-	private float carrotWeight = 2;
-	private float saladWeight = 256;
-	private float turnWeight = 2;
-	private int alphaBetaDepth = 4;
+	private int depth = 4;
 	
 	public AlphaBetaLogic(AbstractClient client) {
 		super(client);
 	}
 
-	private float evaluateLeaf(boolean maximizing, Move move, GameState gameBeforeMove, GameState gameAfterMove) {
-		Player me = getMe(gameAfterMove);
-		Player opponent = getOpponent(gameAfterMove);
-		float myRating = 0;
-		
-		if (me.inGoal()) {
-			myRating = LARGE_NUMBER;
-		} else if (opponent.inGoal()) {
-			myRating = -LARGE_NUMBER; 
-		} else {
-			myRating += HUIUtils.invertNormalize(me.getSalads(), 0, 5) * saladWeight;
-			myRating += HUIUtils.invertNormalize(me.getCarrots(), 0, 200) * carrotWeight;
-			myRating += HUIUtils.normalize(me.getFieldIndex(), 0, 64) * fieldWeight;
-			myRating += HUIUtils.invertNormalize(gameAfterMove.getTurn(), 0, 60) * turnWeight;
-		}
-		
-		return maximizing ? myRating : -myRating;
+	@Override
+	public CopyableLogic copy(AbstractClient client) {
+		return new AlphaBetaLogic(client);
+	}
+
+	@Override
+	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
+		return alphaBeta(false, move, gameBeforeMove, depth, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+	}
+
+	private float evaluateLeaf(Move move, GameState gameBeforeMove, GameState gameAfterMove) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	private float alphaBeta(
@@ -60,7 +50,7 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 		}
 		
 		if (depth <= 0 || HUIUtils.isGameOver(gameAfterMove)) {
-			return evaluateLeaf(maximizing, move, gameBeforeMove, gameAfterMove);
+			return evaluateLeaf(move, gameBeforeMove, gameAfterMove);
 		} else {
 			float bestRating = maximizing ? alpha : beta;
 			
@@ -89,15 +79,5 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 			
 			return bestRating;
 		}
-	}
-	
-	@Override
-	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
-		return alphaBeta(true, move, gameBeforeMove, alphaBetaDepth, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
-	}
-
-	@Override
-	public CopyableLogic copy(AbstractClient client) {
-		return new AlphaBetaLogic(client);
 	}
 }

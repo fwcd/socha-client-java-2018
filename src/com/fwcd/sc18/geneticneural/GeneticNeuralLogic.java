@@ -12,21 +12,21 @@ import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.CardType;
+import sc.plugin2018.FieldType;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
+import sc.plugin2018.util.Constants;
 import sc.shared.GameResult;
 import sc.shared.InvalidMoveException;
+import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
-	private final int encodedBoardSize = 14;
-	private final int[] layerSizes = {encodedBoardSize, 10, 1};
+	private final int[] layerSizes;
 	private final Population population;
 	private final Perceptron neuralNet;
-
-	private final float winFactor = 2048;
 	
 	/*
 	 * Submission TODO-list:
@@ -36,8 +36,9 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	 * - Set autoRelaunch flag in PhantomClient to false
 	 */
 	
-	public GeneticNeuralLogic(AbstractClient client) {
+	public GeneticNeuralLogic(int[] layerSizes, AbstractClient client) {
 		super(client);
+		this.layerSizes = layerSizes;
 		population = new Population(10, () -> Perceptron.generateWeights(layerSizes), new File("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
@@ -47,6 +48,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	 */
 	public GeneticNeuralLogic(AbstractClient client, GeneticNeuralLogic other) {
 		super(client);
+		layerSizes = other.layerSizes;
 		population = other.population;
 		neuralNet = other.neuralNet;
 	}
@@ -58,34 +60,32 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
-		Player me = getMe();
-		
+		Player me = getMe(gameState);
+
+		int carrots = me.getCarrots();
+		int field = me.getFieldIndex();
 		int turn = gameState.getTurn();
+		
 		boolean inGoal = me.inGoal();
 		float fitness;
 		
-		GENETIC_LOG.debug("=========================");
-		GENETIC_LOG.debug("Turns: {}", turn);
-		
 		if (inGoal) {
-			fitness = (HUIUtils.invertNormalize(turn, 0, 60) + 1) * winFactor;
+			fitness = 10 - HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
 		} else {
-			int carrots = me.getCarrots();
-			int field = me.getFieldIndex();
-			
-			float normCarrots = HUIUtils.invertNormalize(me.getCarrots(), 0, 100);
-			float normSalads = HUIUtils.invertNormalize(me.getSalads(), 0, 5);
+			float normCarrots = HUIUtils.normalize(me.getCarrots(), 0, 360);
+			float normSalads = HUIUtils.normalize(me.getSalads(), 0, 5);
 			float normField = HUIUtils.normalize(me.getFieldIndex(), 0, 64);
-			float normCards = HUIUtils.invertNormalize(me.getCards().size(), 0, 4);
 			
-			fitness = normCarrots + normSalads + normField + normCards;
-			GENETIC_LOG.debug("Carrots: {}, field: {}", carrots, field);
+			fitness = 5 - normSalads + normField - normCarrots;
 		}
 		
-		population.updateFitness(neuralNet.getWeights(), fitness);
-		population.evolve(won); // TODO: inGoal instead?
-		GENETIC_LOG.info("Finished game with fitness {} ({})", fitness, (won ? (inGoal ? "won + in goal" : "won") : "lost"));
-		GENETIC_LOG.debug("Individuals: {}", population);
+		float totalFitness = population.updateFitness(neuralNet.getWeights(), fitness);
+		population.evolve(won);
+		
+		String message = won ? (inGoal ? "won + in goal" : "won") : "lost";
+		GENETIC_LOG.debug("[{}:{}] - Carrots: {}, Field: {}, Turns: {}, Fitness: {} ({})", new Object[] {
+				population.getCounter(), population.getStreak(), carrots, field, turn, totalFitness, message
+		});
 	}
 	
 	@Override
@@ -101,23 +101,29 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		Player me = getMe(gameState);
 		Player opponent = getOpponent(gameState);
 		List<CardType> myCards = me.getCards();
-		List<CardType> opponentsCards = opponent.getCards();
-		float[] encoded = new float[encodedBoardSize];
+		FieldType myField = gameState.getTypeAt(me.getFieldIndex());
 		
-		encoded[0] = HUIUtils.normalize(me.getCarrots(), 0, 360);
-		encoded[1] = HUIUtils.normalize(me.getSalads(), 0, 5);
-		encoded[2] = HUIUtils.normalize(me.getFieldIndex(), 0, 64);
-		encoded[3] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
-		encoded[4] = myCards.contains(CardType.FALL_BACK) ? 1 : 0;
-		encoded[5] = myCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
-		encoded[6] = myCards.contains(CardType.TAKE_OR_DROP_CARROTS) ? 1 : 0;
-		encoded[7] = HUIUtils.normalize(opponent.getCarrots(), 0, 200);
-		encoded[8] = HUIUtils.normalize(opponent.getSalads(), 0, 5);
-		encoded[9] = HUIUtils.normalize(opponent.getFieldIndex(), 0, 64);
-		encoded[10] = opponentsCards.contains(CardType.EAT_SALAD) ? 1 : 0;
-		encoded[11] = opponentsCards.contains(CardType.FALL_BACK) ? 1 : 0;
-		encoded[12] = opponentsCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
-		encoded[13] = opponentsCards.contains(CardType.TAKE_OR_DROP_CARROTS) ? 1 : 0;
+		float[] encoded = new float[layerSizes[0]];
+		
+		encoded[0] = me.getPlayerColor() == PlayerColor.RED ? 1 : 0;
+		encoded[1] = HUIUtils.normalize(me.getCarrots(), 0, 360);
+		encoded[2] = HUIUtils.normalize(me.getSalads(), 0, 5);
+		encoded[3] = HUIUtils.normalize(me.getFieldIndex(), 0, 64);
+		encoded[4] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
+		encoded[5] = HUIUtils.normalize(opponent.getFieldIndex(), 0, 64);
+		encoded[6] = HUIUtils.normalize(opponent.getSalads(), 0, 5);
+		encoded[7] = HUIUtils.normalize(opponent.getCarrots(), 0, 360);
+		encoded[8] = myField == FieldType.CARROT ? 1 : 0;
+		encoded[9] = myField == FieldType.HARE ? 1 : 0;
+		encoded[10] = myField == FieldType.HEDGEHOG ? 1 : 0;
+		encoded[11] = myField == FieldType.GOAL ? 1 : 0;
+		encoded[12] = myField == FieldType.POSITION_1 ? 1 : 0;
+		encoded[13] = myField == FieldType.POSITION_2 ? 1 : 0;
+		encoded[14] = myField == FieldType.SALAD ? 1 : 0;
+		encoded[15] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
+		encoded[16] = myCards.contains(CardType.FALL_BACK) ? 1 : 0;
+		encoded[17] = myCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
+		encoded[18] = myCards.contains(CardType.TAKE_OR_DROP_CARROTS) ? 1 : 0;
 		
 		return encoded;
 	}
