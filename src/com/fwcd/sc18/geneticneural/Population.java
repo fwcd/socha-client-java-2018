@@ -29,7 +29,7 @@ public class Population {
 	private float mutatorBias = 0;
 	
 	private int counter = 0;
-	private int streak = 0;
+	private int roundCounter = 0;
 	private int generation = 0;
 	
 	public Population(int size, Supplier<float[]> spawner, File autoSaveFolder) {
@@ -50,7 +50,7 @@ public class Population {
 	
 	public float[] sample() {
 		if (counter >= individuals.size()) {
-			evolve(true);
+			evolve(false);
 		}
 		
 		return individuals.getKey(counter);
@@ -73,16 +73,16 @@ public class Population {
 	}
 
 	public void updateFitness(float[] individual, float newFitness) {
-		float bias = (streak > 0 ? individuals.get(individual) : 0);
+		float bias = (roundCounter > 0 ? individuals.get(individual) : 0);
 		put(individual, bias + newFitness);
 	}
 	
-	public void evolve(boolean nextPerson) {
-		if (nextPerson) {
+	public void evolve(boolean streak) {
+		if (!streak && roundCounter > 1) {
 			counter++;
-			streak = 0;
+			roundCounter = 0;
 		} else {
-			streak++;
+			roundCounter++;
 		}
 		
 		if (counter >= individuals.size()) {
@@ -91,7 +91,7 @@ public class Population {
 			copyMutate();
 			
 			counter = 0;
-			streak = 0;
+			roundCounter = 0;
 			generation++;
 			
 			GENETIC_LOG.debug("");
@@ -125,7 +125,7 @@ public class Population {
 		
 		try (FileOutputStream fos = new FileOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeInt(counter);
-			dos.writeInt(streak);
+			dos.writeInt(roundCounter);
 			dos.writeInt(generation);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -137,7 +137,7 @@ public class Population {
 		
 		try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			counter = dis.readInt();
-			streak = dis.readInt();
+			roundCounter = dis.readInt();
 			generation = dis.readInt();
 		} catch (IOException e) {
 			return false;

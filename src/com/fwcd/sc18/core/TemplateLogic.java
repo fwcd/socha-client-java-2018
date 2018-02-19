@@ -57,7 +57,8 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 		long endTime = System.currentTimeMillis();
 		sendAction(move);
 		
-		LOG.info("Committed move {} in {} ms", move, endTime - startTime);
+		LOG.info("Committed move {} in {} ms", HUIUtils.toString(move) /* FIXME: Remove this later for performance */, endTime - startTime);
+		LOG.debug("Carrots: {}, field: {}", getMe().getCarrots(), getMe().getFieldIndex());
 	}
 	
 	protected abstract Move selectMove(GameState gameBeforeMove, Player me);
