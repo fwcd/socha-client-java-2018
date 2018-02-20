@@ -47,7 +47,7 @@ public class TrainerApp {
 		ConfigPanel subConfig = viewConfig.addSubPanel("Loader");
 		BooleanSupplier viewBound = subConfig.addBoolOption("Bind view", true);
 		Supplier<String> classA = subConfig.addStringOption("Logic A", "sc.player2018.RandomLogic");
-		Supplier<String> classB = subConfig.addStringOption("Logic B", "sc.player2018.RandomLogic");
+		Supplier<String> classB = subConfig.addStringOption("Logic B", "com.fwcd.sc18.geneticneural.GeneticNeuralLogic");
 		IntSupplier matches = subConfig.addIntOption("Matches", 1, 1, Integer.MAX_VALUE);
 		subConfig.addButton(" === Play === ", () -> play(viewBound.getAsBoolean(), classA.get(), classB.get(), matches.getAsInt()));
 		sideBar.setBottomComponent(viewConfig.getView());

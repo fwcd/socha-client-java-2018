@@ -24,11 +24,12 @@ public class PopulationPanel {
 		view.setLayout(new BorderLayout());
 		
 		config = new ConfigPanel(true, false);
-		Supplier<File> file = config.addFileOption("Choose population " + Integer.toString(index) + " folder", "", null, true);
+		Supplier<File> file = config.addFileOption("Choose population " + Integer.toString(index) + " folder", "", new File("."), true);
 		
 		ConfigPanel options = config.addSubPanel("Configuration");
 		Supplier<String> counterName = options.addStringOption("Counter file name", "Counter");
 		Supplier<String> personName = options.addStringOption("Person file prefix", "Individual");
+		BooleanSupplier monitorWeights = options.addBoolOption("Monitor weights", false);
 		BooleanSupplier useAntonsFormat = options.addBoolOption("Use Anton's population format", false);
 
 		tableModel = new MapTableModel();
@@ -37,8 +38,9 @@ public class PopulationPanel {
 				file.get(),
 				counterName.get(),
 				personName.get(),
-				useAntonsFormat.getAsBoolean())
-		);
+				useAntonsFormat.getAsBoolean(),
+				monitorWeights.getAsBoolean()
+		));
 		
 		view.add(config.getView(), BorderLayout.NORTH);
 		view.add(new JScrollPane(new JTable(tableModel)));

@@ -24,13 +24,17 @@ public class MapTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		switch (columnIndex) {
-		
-		case 0:
+		if (columnIndex == 0) {
 			return data.getA(rowIndex);
-		default:
-			return data.getB(rowIndex)[columnIndex - 1];
-		
+		} else {
+			String[] values = data.getB(rowIndex);
+			int i = columnIndex - 1;
+			
+			if (i < values.length) {
+				return values[i];
+			} else {
+				return "";
+			}
 		}
 	}
 
@@ -41,8 +45,8 @@ public class MapTableModel extends AbstractTableModel {
 			data.remap(key, values);
 		}
 		
-		if (values.length > width) {
-			width = values.length;
+		if ((values.length + 1) > width) {
+			width = values.length + 1;
 			fireTableStructureChanged();
 		}
 		fireTableDataChanged();

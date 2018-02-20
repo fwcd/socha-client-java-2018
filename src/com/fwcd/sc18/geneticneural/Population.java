@@ -102,10 +102,10 @@ public class Population {
 			streak = 0;
 			generation++;
 			
-			GENETIC_LOG.debug("");
-			GENETIC_LOG.debug(" <------------------ Generation {} ------------------> ", generation);
-			GENETIC_LOG.debug("{}", this);
-			GENETIC_LOG.debug("");
+			GENETIC_LOG.info("");
+			GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
+			GENETIC_LOG.info("{}", this);
+			GENETIC_LOG.info("");
 
 			copyMutate();
 			saveAll();

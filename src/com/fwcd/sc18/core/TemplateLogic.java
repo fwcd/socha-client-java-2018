@@ -47,6 +47,7 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 		PlayerColor winner = HUIUtils.getWinnerOrNull(gameState);
 		boolean won = (winner != null) && (winner == me);
 		onGameEnd(gameState, won, result, errorMessage);
+		firstMove = true;
 	}
 
 	@Override

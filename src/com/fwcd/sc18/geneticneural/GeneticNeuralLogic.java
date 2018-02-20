@@ -90,7 +90,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		int streak = population.getStreak();
 		
 		float totalFitness = population.updateFitness(won, neuralNet.getWeights(), fitness);
-		GENETIC_LOG.info("[{}:{}] - Carrots: {}, Field: {}, Turns: {}, Fitness: {} ({})", new Object[] {
+		GENETIC_LOG.debug("[{}:{}] - Carrots: {}, Field: {}, Turns: {}, Fitness: {} ({})", new Object[] {
 				counter, streak, carrots, field, turn, totalFitness, (won ? (inGoal ? "won + in goal" : "won") : "lost")
 		});
 		

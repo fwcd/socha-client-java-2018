@@ -16,13 +16,22 @@ public class PopulationMonitor {
 	private final String counterName;
 	private final String personName;
 	private final boolean useAntonsFormat;
+	private final boolean monitorWeights;
 	
-	public PopulationMonitor(MapTableModel table, File folder, String counterName, String personName, boolean useAntonsFormat) {
+	public PopulationMonitor(
+			MapTableModel table,
+			File folder,
+			String counterName,
+			String personName,
+			boolean useAntonsFormat,
+			boolean monitorWeights
+	) {
 		this.table = table;
 		this.folder = folder;
 		this.counterName = counterName;
 		this.personName = personName;
 		this.useAntonsFormat = useAntonsFormat;
+		this.monitorWeights = monitorWeights;
 		
 		table.clear();
 		reload();
@@ -54,10 +63,7 @@ public class PopulationMonitor {
 			} else {
 				index = "Index: " + dis.readInt();
 				streak = "Streak: " + dis.readInt();
-				
-				if (dis.available() > 0) {
-					gen = "Generation: " + dis.readInt();
-				}
+				gen = "Generation: " + dis.readInt();
 			}
 			
 			table.put("Counter", index, streak, gen);
@@ -70,14 +76,19 @@ public class PopulationMonitor {
 		for (File file : folder.listFiles(file -> file.getName().startsWith(personName))) {
 			try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 				String fitness = "Fitness: " + dis.readFloat();
-				StringBuilder weights = new StringBuilder("Weights: [");
 				
-				while (dis.available() > 0) {
-					weights.append(dis.readFloat()).append(", ");
+				if (monitorWeights) {
+					StringBuilder weights = new StringBuilder("Weights: [");
+					
+					while (dis.available() > 0) {
+						weights.append(dis.readFloat()).append(", ");
+					}
+					
+					weights.delete(weights.length() - 2, weights.length()).append(']');
+					table.put(file.getName(), fitness, weights.toString());
+				} else {
+					table.put(file.getName(), fitness);
 				}
-				
-				weights.delete(weights.length() - 2, weights.length()).append(']');
-				table.put(file.getName(), fitness, weights.toString());
 			} catch (IOException e) {
 				reject("Invalid individual/person file: " + file.getName());
 			} catch (NumberFormatException e) {

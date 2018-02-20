@@ -1,8 +1,10 @@
 package com.fwcd.sc18.trainer.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.fwcd.sc18.trainer.ui.GameView;
 
@@ -19,38 +21,44 @@ import sc.shared.ScoreDefinition;
 
 public class GameSimulator {
 	private final Optional<GameView> view;
-	private final IGameHandler logicRed;
-	private final IGameHandler logicBlue;
-	private final VirtualClient clientRed;
-	private final VirtualClient clientBlue;
-	private final String nameRed;
-	private final String nameBlue;
-	private final int matches;
+	private final IGameHandler redLogic;
+	private final IGameHandler blueLogic;
+	private final VirtualClient redClient;
+	private final VirtualClient blueClient;
+	private final long matches;
 	private final List<Runnable> gameEndListeners;
 	
 	private GameState state = new GameState();
 	private boolean started = false;
 	private boolean stopped = false;
 	
+	public GameSimulator(Function<VirtualClient, IGameHandler> red, Function<VirtualClient, IGameHandler> blue, long matches) {
+		this.matches = matches;
+		view = Optional.empty();
+		gameEndListeners = Collections.emptyList();
+		
+		redClient = new VirtualClient(PlayerColor.RED);
+		redLogic = red.apply(redClient);
+		blueClient = new VirtualClient(PlayerColor.BLUE);
+		blueLogic = blue.apply(blueClient);
+	}
+	
 	public GameSimulator(
 			Optional<GameView> view,
-			IGameHandler logicRed,
-			IGameHandler logicB,
-			VirtualClient clientRed,
-			VirtualClient clientB,
-			int matches,
+			IGameHandler redLogic,
+			IGameHandler blueLogic,
+			VirtualClient redClient,
+			VirtualClient blueClient,
+			long matches,
 			List<Runnable> gameEndListeners
 	) {
 		this.view = view;
-		this.logicRed = logicRed;
-		this.logicBlue = logicB;
-		this.clientRed = clientRed;
-		this.clientBlue = clientB;
+		this.redLogic = redLogic;
+		this.blueLogic = blueLogic;
+		this.redClient = redClient;
+		this.blueClient = blueClient;
 		this.matches = matches;
 		this.gameEndListeners = gameEndListeners;
-		
-		nameRed = logicRed.getClass().getName();
-		nameBlue = logicB.getClass().getName();
 	}
 	
 	public void start() {
@@ -62,18 +70,18 @@ public class GameSimulator {
 			started = true;
 		}
 		
-		for (int match=0; match<matches; match++) {
+		for (long match=0; match<matches; match++) {
 			state = new GameState();
 			updateState();
 			for (int round=0; round<=Constants.ROUND_LIMIT; round++) {
-				logicRed.onRequestAction();
-				boolean success1 = perform(clientRed.getLastMove());
+				redLogic.onRequestAction();
+				boolean success1 = perform(redClient.getLastMove());
 				if (!success1) {
 					break;
 				}
 				
-				logicBlue.onRequestAction();
-				boolean success2 = perform(clientBlue.getLastMove());
+				blueLogic.onRequestAction();
+				boolean success2 = perform(blueClient.getLastMove());
 				if (!success2) {
 					break;
 				}
@@ -82,8 +90,8 @@ public class GameSimulator {
 			PlayerColor winner = getWinner();
 			
 			ScoreDefinition scoreDef = new ScoreDefinition();
-			scoreDef.add(nameRed);
-			scoreDef.add(nameBlue);
+			scoreDef.add("RED");
+			scoreDef.add("BLUE");
 			List<PlayerScore> scores = new ArrayList<>();
 			scores.add(new PlayerScore(winner == PlayerColor.RED, ""));
 			scores.add(new PlayerScore(winner == PlayerColor.BLUE, ""));
@@ -93,8 +101,8 @@ public class GameSimulator {
 			PlayerColor color = winner;
 			String msg = winner + " won the game";
 			
-			logicRed.gameEnded(result, color, msg);
-			logicBlue.gameEnded(result, color, msg);
+			redLogic.gameEnded(result, color, msg);
+			blueLogic.gameEnded(result, color, msg);
 			
 			for (Runnable listener : gameEndListeners) {
 				listener.run();
@@ -124,10 +132,10 @@ public class GameSimulator {
 
 	private void updateState() {
 		view.ifPresent(view -> view.update(state));
-		logicRed.onUpdate(state);
-		logicRed.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
-		logicBlue.onUpdate(state);
-		logicBlue.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
+		redLogic.onUpdate(state);
+		redLogic.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
+		blueLogic.onUpdate(state);
+		blueLogic.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
 	}
 
 	public void stop() {
