@@ -131,7 +131,7 @@ public class Population {
 	}
 	
 	private void saveCounter(String folderPath) {
-		File file = new File(folderPath + "/Counter");
+		File file = new File(folderPath + File.separator + "Counter");
 		
 		try (FileOutputStream fos = new FileOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeInt(counter);
@@ -143,7 +143,7 @@ public class Population {
 	}
 	
 	private boolean loadCounter(String folderPath) {
-		File file = new File(folderPath + "/Counter");
+		File file = new File(folderPath + File.separator + "Counter");
 		
 		try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			counter = dis.readInt();
@@ -157,7 +157,7 @@ public class Population {
 	}
 
 	private void save(String folderPath, int index, float[] individual, float fitness) {
-		File file = new File(folderPath + "/Individual" + Integer.toString(index));
+		File file = new File(folderPath + File.separator + "Individual" + Integer.toString(index));
 		
 		try (FileOutputStream fos = new FileOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeFloat(fitness);
@@ -173,7 +173,7 @@ public class Population {
 		String folderPath = autoSaveFolder.getAbsolutePath();
 		
 		for (int index=0; index<total; index++) {
-			File file = new File(folderPath + "/Individual" + Integer.toString(index));
+			File file = new File(folderPath + File.separator + "Individual" + Integer.toString(index));
 			
 			if (!file.exists()) {
 				return false;

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
+import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
@@ -19,31 +20,34 @@ import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
 import sc.shared.GameResult;
 import sc.shared.InvalidMoveException;
-import sc.shared.PlayerColor;
 
 public class GeneticNeuralLogic extends EvaluatingLogic {
-	private static final int MAX_FIELD = Constants.NUM_FIELDS - 1;
+	private static final int MAX_FIELD = 64;
 	private static final int CARROT_THRESHOLD = 360;
 	private static final int FITNESS_BIAS = 5;
 	private static final int WIN_FITNESS_BIAS = 10;
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
-	private final int[] layerSizes;
+	private final int populationSize = 10;
+	private final int[] layerSizes = {19, 30, 10, 1};
 	private final Population population;
 	private final Perceptron neuralNet;
+	
+	public GeneticNeuralLogic(VirtualClient client) {
+		super(client);
+		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		neuralNet = new Perceptron(layerSizes);
+	}
 	
 	/*
 	 * Submission TODO-list:
 	 * 
-	 * - Increase alpha beta to a feasible depth
-	 * - Change population sample strategy to a more greedy one
 	 * - Set autoRelaunch flag in PhantomClient to false
 	 */
 	
-	public GeneticNeuralLogic(int[] layerSizes, AbstractClient client) {
+	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		this.layerSizes = layerSizes;
-		population = new Population(10, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), new File("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
 
@@ -52,7 +56,6 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	 */
 	public GeneticNeuralLogic(AbstractClient client, GeneticNeuralLogic other) {
 		super(client);
-		layerSizes = other.layerSizes;
 		population = other.population;
 		neuralNet = other.neuralNet;
 	}
@@ -111,7 +114,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		
 		float[] encoded = new float[layerSizes[0]];
 		
-		encoded[0] = me.getPlayerColor() == PlayerColor.RED ? 1 : 0;
+		encoded[0] = 1; // Bias weight
 		encoded[1] = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
 		encoded[2] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
 		encoded[3] = HUIUtils.normalize(me.getFieldIndex(), 0, MAX_FIELD);

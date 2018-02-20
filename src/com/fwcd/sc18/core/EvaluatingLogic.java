@@ -2,6 +2,8 @@ package com.fwcd.sc18.core;
 
 import java.util.stream.Stream;
 
+import com.fwcd.sc18.trainer.core.VirtualClient;
+
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -9,6 +11,10 @@ import sc.plugin2018.Player;
 
 public abstract class EvaluatingLogic extends TemplateLogic {
 	private boolean parallelize = true;
+	
+	public EvaluatingLogic(VirtualClient client) {
+		super(client);
+	}
 	
 	public EvaluatingLogic(AbstractClient client) {
 		super(client);

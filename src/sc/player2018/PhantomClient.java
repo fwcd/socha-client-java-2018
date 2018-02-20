@@ -25,7 +25,7 @@ public class PhantomClient extends AbstractClient {
 		this.reservation = reservation;
 		
 		if (strategy == null || strategy.isEmpty()) {
-			logic = new GeneticNeuralLogic(new int[] {19, 30, 10, 1}, this);
+			logic = new GeneticNeuralLogic(this);
 		} else {
 			try {
 				logic = (CopyableLogic) Class.forName(strategy).newInstance();

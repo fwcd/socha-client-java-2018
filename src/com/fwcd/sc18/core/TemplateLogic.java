@@ -3,6 +3,7 @@ package com.fwcd.sc18.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
@@ -20,14 +21,21 @@ import sc.shared.PlayerColor;
 public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
+	private final VirtualClient virtualClient;
 	private final AbstractClient client;
 	private GameState gameState;
 	private Player currentPlayer;
 	private PlayerColor me;
 	private boolean firstMove = true;
 	
+	public TemplateLogic(VirtualClient virtualClient) {
+		this.virtualClient = virtualClient;
+		client = null;
+	}
+	
 	public TemplateLogic(AbstractClient client) {
 		this.client = client;
+		virtualClient = null;
 	}
 	
 	protected void onGameStart(GameState gameState) {}
@@ -76,7 +84,11 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 
 	@Override
 	public void sendAction(Move move) {
-		client.sendMove(move);
+		if (client != null) {
+			client.sendMove(move);
+		} else {
+			virtualClient.sendMove(move);
+		}
 	}
 	
 	public Player getMe() {
