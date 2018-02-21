@@ -33,6 +33,10 @@ public class Population {
 	private int streak = 0;
 	private int generation = 0;
 	
+	private int wins = 0;
+	private int goalWins = 0;
+	private int losses = 0;
+	
 	public Population(int size, Supplier<float[]> spawner, File autoSaveFolder) {
 		this.autoSaveFolder = autoSaveFolder;
 		survivorsPerGeneration = size / 2;
@@ -83,7 +87,7 @@ public class Population {
 		return totalFitness;
 	}
 	
-	public void evolve(boolean won) {
+	public void evolve(boolean won, boolean inGoal) {
 		boolean nextGeneration = false;
 		
 		if (!won && streak >= 1) {
@@ -94,19 +98,35 @@ public class Population {
 			streak++;
 		}
 		
+		if (won) {
+			if (inGoal) {
+				goalWins++;
+			} else {
+				wins++;
+			}
+		} else {
+			losses++;
+		}
+		
 		if (nextGeneration) {
 			// Reached a full generation
 			sortByFitnessDescending();
 			
 			counter = 0;
 			streak = 0;
+			
 			generation++;
 			
 			GENETIC_LOG.info("");
 			GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
 			GENETIC_LOG.info("{}", this);
+			GENETIC_LOG.info("{} wins, {} goal wins, {} losses", new Object[] {wins, goalWins, losses});
 			GENETIC_LOG.info("");
 
+			wins = 0;
+			losses = 0;
+			goalWins = 0;
+			
 			copyMutate();
 			saveAll();
 		} else {
@@ -137,6 +157,9 @@ public class Population {
 			dos.writeInt(counter);
 			dos.writeInt(streak);
 			dos.writeInt(generation);
+			dos.writeInt(wins);
+			dos.writeInt(goalWins);
+			dos.writeInt(losses);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -149,6 +172,9 @@ public class Population {
 			counter = dis.readInt();
 			streak = dis.readInt();
 			generation = (dis.available() > 0 ? dis.readInt() : 0);
+			wins = (dis.available() > 0 ? dis.readInt() : 0);
+			goalWins = (dis.available() > 0 ? dis.readInt() : 0);
+			losses = (dis.available() > 0 ? dis.readInt() : 0);
 		} catch (IOException e) {
 			return false;
 		}

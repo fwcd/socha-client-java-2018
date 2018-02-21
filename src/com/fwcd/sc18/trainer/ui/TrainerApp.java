@@ -106,7 +106,7 @@ public class TrainerApp {
 					matches,
 					Collections.singletonList(this::onGameEnd)
 			);
-			new Thread(simulator::start).start();
+			new Thread(simulator::run).start();
 		} catch (ReflectiveOperationException e) {
 			error("Your logic class is missing the required 1-argument VirtualClient constructor!\n\n"
 					+ "(If you do add such a constructor, place the VirtualClient\n"

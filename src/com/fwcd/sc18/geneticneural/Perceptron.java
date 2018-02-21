@@ -56,8 +56,8 @@ public class Perceptron {
 					dot += neuron * weights[weightIndex++];
 				}
 				
-				float bias = weights[weightIndex++];
-				nextLayer[nextNeuronI] = relu(dot) * bias;
+				float extra = weights[weightIndex++];
+				nextLayer[nextNeuronI] = relu(dot) * extra;
 			}
 			
 			layer = nextLayer;

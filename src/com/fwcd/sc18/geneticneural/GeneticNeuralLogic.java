@@ -94,7 +94,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				counter, streak, carrots, field, turn, totalFitness, (won ? (inGoal ? "won + in goal" : "won") : "lost")
 		});
 		
-		population.evolve(won);
+		population.evolve(won, inGoal);
 	}
 	
 	@Override

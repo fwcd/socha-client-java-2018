@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import com.fwcd.sc18.trainer.ui.GameView;
@@ -27,7 +28,8 @@ public class GameSimulator {
 	private final VirtualClient blueClient;
 	private final long matches;
 	private final List<Runnable> gameEndListeners;
-	
+
+	private BooleanSupplier stopCondition = null;
 	private GameState state = new GameState();
 	private boolean started = false;
 	private boolean stopped = false;
@@ -61,7 +63,11 @@ public class GameSimulator {
 		this.gameEndListeners = gameEndListeners;
 	}
 	
-	public void start() {
+	public void setStopCondition(BooleanSupplier stopCondition) {
+		this.stopCondition = stopCondition;
+	}
+	
+	public void run() {
 		if (started) {
 			throw new IllegalStateException("GameSimulator already started.");
 		} else if (stopped) {
@@ -70,10 +76,13 @@ public class GameSimulator {
 			started = true;
 		}
 		
-		for (long match=0; match<matches; match++) {
+		long match = 0;
+		while (match < matches && !shouldStop()) {
 			state = new GameState();
 			updateState();
-			for (int round=0; round<=Constants.ROUND_LIMIT; round++) {
+			
+			int round = 0;
+			while (round < Constants.ROUND_LIMIT && getWinner() == null) {
 				redLogic.onRequestAction();
 				boolean success1 = perform(redClient.getLastMove());
 				if (!success1) {
@@ -85,6 +94,8 @@ public class GameSimulator {
 				if (!success2) {
 					break;
 				}
+				
+				round++;
 			}
 			
 			PlayerColor winner = getWinner();
@@ -107,7 +118,13 @@ public class GameSimulator {
 			for (Runnable listener : gameEndListeners) {
 				listener.run();
 			}
+			
+			match++;
 		}
+	}
+
+	private boolean shouldStop() {
+		return stopCondition == null ? false : stopCondition.getAsBoolean();
 	}
 
 	private PlayerColor getWinner() {
@@ -115,8 +132,10 @@ public class GameSimulator {
 			return PlayerColor.RED;
 		} else if (state.getBluePlayer().inGoal()) {
 			return PlayerColor.BLUE;
-		} else {
+		} else if (state.getRound() >= Constants.ROUND_LIMIT) {
 			return state.getRedPlayer().getFieldIndex() > state.getBluePlayer().getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
+		} else {
+			return null;
 		}
 	}
 
