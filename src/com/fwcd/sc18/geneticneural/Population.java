@@ -40,8 +40,8 @@ public class Population {
 	private int wins = 0;
 	private int goalWins = 0;
 	private int losses = 0;
-	private int minGoalMoves = 0;
-	private int maxGoalMoves = 0;
+	private int minGoalMoves = Integer.MAX_VALUE;
+	private int maxGoalMoves = Integer.MIN_VALUE;
 
 	public Population(int size, Supplier<float[]> spawner, File saveFolder) {
 		this.saveFolder = saveFolder;
@@ -132,8 +132,8 @@ public class Population {
 			wins = 0;
 			losses = 0;
 			goalWins = 0;
-			minGoalMoves = 0;
-			maxGoalMoves = 0;
+			minGoalMoves = Integer.MAX_VALUE;
+			maxGoalMoves = Integer.MIN_VALUE;
 			
 			copyMutate();
 			saveAll();
