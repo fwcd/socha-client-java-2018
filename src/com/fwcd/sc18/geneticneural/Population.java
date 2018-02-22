@@ -7,6 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -14,6 +17,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fwcd.sc18.exception.CorruptedDataException;
 import com.fwcd.sc18.utils.FloatList;
 import com.fwcd.sc18.utils.IndexedHashMap;
 import com.fwcd.sc18.utils.IndexedMap;
@@ -25,7 +29,7 @@ public class Population {
 	private final Supplier<float[]> spawner;
 	private final int survivorsPerGeneration;
 	
-	private File autoSaveFolder = null;
+	private File saveFolder = null;
 	private float mutatorWeight = 1;
 	private float mutatorBias = 0;
 	
@@ -36,18 +40,22 @@ public class Population {
 	private int wins = 0;
 	private int goalWins = 0;
 	private int losses = 0;
-	
-	public Population(int size, Supplier<float[]> spawner, File autoSaveFolder) {
-		this.autoSaveFolder = autoSaveFolder;
+	private int minGoalMoves = 0;
+	private int maxGoalMoves = 0;
+
+	public Population(int size, Supplier<float[]> spawner, File saveFolder) {
+		this.saveFolder = saveFolder;
 		survivorsPerGeneration = size / 2;
 		individuals = new IndexedHashMap<>();
 		this.spawner = spawner;
 		
 		if (!loadAll(size)) {
+			individuals.clear();
 			Float initialFitness = Float.NEGATIVE_INFINITY;
 			
 			for (int i=0; i<size; i++) {
 				float[] individual = spawner.get();
+				
 				put(individual, initialFitness);
 			}
 		}
@@ -55,9 +63,10 @@ public class Population {
 	
 	public float[] sample() {
 		int size = individuals.size();
-		if (counter >= size) {
-			counter = size - 1;
-			saveCounter(autoSaveFolder.getAbsolutePath());
+		
+		if (counter < 0 || counter >= size) {
+			counter = 0;
+			saveCounter(getSavePath());
 		}
 		
 		return individuals.getKey(counter);
@@ -66,16 +75,16 @@ public class Population {
 	public void put(float[] individual, float fitness) {
 		individuals.put(individual, fitness);
 		
-		if (autoSaveFolder != null) {
-			save(autoSaveFolder.getAbsolutePath(), individuals.indexOfKey(individual), individual, fitness);
+		if (saveFolder != null) {
+			save(getSavePath(), individuals.indexOfKey(individual), individual, fitness);
 		}
 	}
 	
 	public void put(int index, float[] individual, float fitness) {
 		individuals.put(index, individual, fitness);
 		
-		if (autoSaveFolder != null) {
-			save(autoSaveFolder.getAbsolutePath(), index, individual, fitness);
+		if (saveFolder != null) {
+			save(getSavePath(), index, individual, fitness);
 		}
 	}
 	
@@ -87,7 +96,7 @@ public class Population {
 		return totalFitness;
 	}
 	
-	public void evolve(boolean won, boolean inGoal) {
+	public void evolve(boolean won, boolean inGoal, int moves) {
 		boolean nextGeneration = false;
 		
 		if (!won && streak >= 1) {
@@ -100,6 +109,8 @@ public class Population {
 		
 		if (won) {
 			if (inGoal) {
+				minGoalMoves = Math.min(moves, minGoalMoves);
+				maxGoalMoves = Math.max(moves, maxGoalMoves);
 				goalWins++;
 			} else {
 				wins++;
@@ -114,40 +125,34 @@ public class Population {
 			
 			counter = 0;
 			streak = 0;
-			
 			generation++;
 			
-			GENETIC_LOG.info("");
-			GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
-			GENETIC_LOG.info("{}", this);
-			GENETIC_LOG.info("{} wins, {} goal wins, {} losses", new Object[] {wins, goalWins, losses});
-			GENETIC_LOG.info("");
+			log();
 
 			wins = 0;
 			losses = 0;
 			goalWins = 0;
+			minGoalMoves = 0;
+			maxGoalMoves = 0;
 			
 			copyMutate();
 			saveAll();
 		} else {
-			saveCounter(autoSaveFolder.getAbsolutePath());
+			saveCounter(getSavePath());
 		}
+	}
+
+	private void log() {
+		GENETIC_LOG.info("");
+		GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
+		GENETIC_LOG.info("{}", this);
+		GENETIC_LOG.info("{} wins, {} goal wins, {} losses", new Object[] {wins, goalWins, losses});
+		GENETIC_LOG.info("Min goal moves: {}, Max goal moves: {}", minGoalMoves, maxGoalMoves);
+		GENETIC_LOG.info("");
 	}
 
 	public int size() {
 		return individuals.size();
-	}
-	
-	private void saveAll() {
-		String folderPath = autoSaveFolder.getAbsolutePath();
-		
-		int i = 0;
-		for (float[] individual : individuals.keyList()) {
-			save(folderPath, i, individual, individuals.get(individual));
-			i++;
-		}
-		
-		saveCounter(folderPath);
 	}
 	
 	private void saveCounter(String folderPath) {
@@ -160,6 +165,8 @@ public class Population {
 			dos.writeInt(wins);
 			dos.writeInt(goalWins);
 			dos.writeInt(losses);
+			dos.writeInt(minGoalMoves);
+			dos.writeInt(maxGoalMoves);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -175,6 +182,8 @@ public class Population {
 			wins = (dis.available() > 0 ? dis.readInt() : 0);
 			goalWins = (dis.available() > 0 ? dis.readInt() : 0);
 			losses = (dis.available() > 0 ? dis.readInt() : 0);
+			minGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
+			maxGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
 		} catch (IOException e) {
 			return false;
 		}
@@ -195,11 +204,60 @@ public class Population {
 		}
 	}
 
+	private void saveAll() {
+		String folderPath = getSavePath();
+		
+		int i = 0;
+		for (float[] individual : individuals.keyList()) {
+			save(folderPath, i, individual, individuals.get(individual));
+			i++;
+		}
+		
+		saveCounter(folderPath);
+		
+		if (generation % 100 == 0) {
+			createBackup(i);
+		}
+	}
+
+	private String getSavePath() {
+		return saveFolder.getAbsolutePath();
+	}
+	
+	private void createBackup(int size) {
+		String savePath = getSavePath();
+		String backupPath = savePath + File.separator + "Backup";
+		
+		File backupFile = new File(backupPath);
+		
+		if (!backupFile.exists()) {
+			backupFile.mkdir();
+		}
+		
+		try {
+			Files.copy(
+					Paths.get(savePath + File.separator + "Counter"),
+					Paths.get(backupPath + File.separator + "Counter"),
+					StandardCopyOption.REPLACE_EXISTING
+			);
+			
+			for (int i=0; i<size; i++) {
+				Files.copy(
+						Paths.get(savePath + File.separator + "Individual" + i),
+						Paths.get(backupPath + File.separator + "Individual" + i),
+						StandardCopyOption.REPLACE_EXISTING
+				);
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
 	private boolean loadAll(int total) {
-		String folderPath = autoSaveFolder.getAbsolutePath();
+		String folderPath = getSavePath();
 		
 		for (int index=0; index<total; index++) {
-			File file = new File(folderPath + File.separator + "Individual" + Integer.toString(index));
+			File file = new File(folderPath + File.separator + "Individual" + index);
 			
 			if (!file.exists()) {
 				return false;
@@ -213,9 +271,9 @@ public class Population {
 					individual.add(dis.readFloat());
 				}
 				
-				individuals.put(individual.toArray(), fitness);
+				individuals.put(index, individual.toArray(), fitness);
 			} catch (IOException e) {
-				put(spawner.get(), Float.NEGATIVE_INFINITY);
+				put(index, spawner.get(), Float.NEGATIVE_INFINITY);
 			}
 		}
 		
@@ -230,11 +288,22 @@ public class Population {
 		individuals.sortByValue((a, b) -> b.compareTo(a));
 	}
 	
-	private void mutate(float[] individual, float[] target, Random random) {
+	private void mutate(float[] individual, float[] target, int individualIndex, int targetIndex, Random random) {
 		// Gaussian mutation
 		
 		for (int i=0; i<individual.length; i++) {
-			target[i] = mutate(individual[i], random);
+			float mutated;
+			try {
+				mutated = mutate(individual[i], random);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new CorruptedDataException(individualIndex);
+			}
+			
+			try {
+				target[i] = mutated;
+			} catch (ArrayIndexOutOfBoundsException e) {
+				throw new CorruptedDataException(targetIndex);
+			}
 		}
 	}
 	
@@ -250,7 +319,7 @@ public class Population {
 			float[] source = individuals.getKey(i);
 			float[] target = individuals.getKey(targetIndex);
 			
-			mutate(source, target, random);
+			mutate(source, target, i, targetIndex, random);
 			individuals.setValue(targetIndex, mutate(individuals.get(source), random));
 		}
 	}

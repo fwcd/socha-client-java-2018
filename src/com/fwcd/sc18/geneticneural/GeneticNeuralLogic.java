@@ -8,11 +8,14 @@ import org.slf4j.LoggerFactory;
 
 import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
+import com.fwcd.sc18.exception.CorruptedDataException;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
+import sc.plugin2018.Action;
 import sc.plugin2018.CardType;
+import sc.plugin2018.ExchangeCarrots;
 import sc.plugin2018.FieldType;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -94,15 +97,33 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				counter, streak, carrots, field, turn, totalFitness, (won ? (inGoal ? "won + in goal" : "won") : "lost")
 		});
 		
-		population.evolve(won, inGoal);
+		population.evolve(won, inGoal, turn);
 	}
 	
 	@Override
 	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
+		for (Action action : move.actions) {
+			if (action instanceof ExchangeCarrots) {
+				Action lastAction = me.getLastNonSkipAction();
+				if (lastAction instanceof ExchangeCarrots) {
+					ExchangeCarrots current = (ExchangeCarrots) action;
+					ExchangeCarrots last = (ExchangeCarrots) lastAction;
+					
+					if ((last.getValue() > 0 && current.getValue() < 0)
+							|| (last.getValue() < 0 && current.getValue() > 0)) {
+						return Float.NEGATIVE_INFINITY;
+					}
+				}
+			}
+		}
+		
 		try {
-			return neuralNet.compute(encode(HUIUtils.spawnChild(gameBeforeMove, move)))[0];
+			GameState gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
+			return neuralNet.compute(encode(gameAfterMove))[0];
 		} catch (InvalidMoveException e) {
 			return Float.NEGATIVE_INFINITY;
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new CorruptedDataException(population.getCounter());
 		}
 	}
 	

@@ -109,6 +109,10 @@ public class IndexedHashMap<K, V> implements IndexedMap<K, V> {
 
 	@Override
 	public V put(int index, K key, V value) {
+		while (keyIndex.size() <= index) {
+			keyIndex.add(null);
+		}
+		
 		keyIndex.set(index, key);
 		return data.put(key, value);
 	}

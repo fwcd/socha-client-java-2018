@@ -1,5 +1,8 @@
 package com.fwcd.sc18.utils;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
 import sc.plugin2018.GameState;
@@ -70,5 +73,15 @@ public final class HUIUtils {
 		return state.getRound() >= Constants.ROUND_LIMIT
 				|| state.getBluePlayer().inGoal()
 				|| state.getRedPlayer().inGoal();
+	}
+
+	public static Set<Class<? extends Action>> getActionTypes(Move move) {
+		Set<Class<? extends Action>> actionTypes = new HashSet<>();
+		
+		for (Action action : move.actions) {
+			actionTypes.add(action.getClass());
+		}
+		
+		return actionTypes;
 	}
 }
