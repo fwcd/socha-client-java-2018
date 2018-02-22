@@ -1,6 +1,6 @@
 package com.fwcd.sc18.geneticneural;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	public GeneticNeuralLogic(VirtualClient client) {
 		super(client);
-		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), Paths.get("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
 	
@@ -50,7 +50,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), new File("."));
+		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), Paths.get("."));
 		neuralNet = new Perceptron(layerSizes);
 	}
 

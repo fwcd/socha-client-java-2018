@@ -77,7 +77,7 @@ public class GameSimulator {
 		}
 		
 		long match = 0;
-		while (match < matches && !shouldStop()) {
+		while (match < matches && !shouldStop() && !Thread.interrupted()) {
 			state = new GameState();
 			updateState();
 			
