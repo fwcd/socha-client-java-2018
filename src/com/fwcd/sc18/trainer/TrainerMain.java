@@ -22,7 +22,7 @@ public class TrainerMain {
 				System.out.println("Waiting for shutdown...");
 				long start = System.currentTimeMillis();
 				
-				simThread.interrupt();
+				sim.stop();
 				Files.deleteIfExists(stopFile);
 				simThread.join();
 				

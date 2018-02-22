@@ -77,7 +77,7 @@ public class GameSimulator {
 		}
 		
 		long match = 0;
-		while (match < matches && !shouldStop() && !Thread.interrupted()) {
+		while (match < matches && !shouldStop()) {
 			state = new GameState();
 			updateState();
 			
@@ -124,7 +124,9 @@ public class GameSimulator {
 	}
 
 	private boolean shouldStop() {
-		return stopCondition == null ? false : stopCondition.getAsBoolean();
+		return stopped
+				|| (stopCondition == null ? false : stopCondition.getAsBoolean())
+				|| Thread.interrupted();
 	}
 
 	private PlayerColor getWinner() {
@@ -157,7 +159,7 @@ public class GameSimulator {
 		blueLogic.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
 	}
 
-	public void stop() {
+	public synchronized void stop() {
 		stopped = true;
 	}
 }
