@@ -4,10 +4,14 @@ import sc.plugin2018.Move;
 import sc.shared.PlayerColor;
 
 public class VirtualClient {
-	private final PlayerColor color;
+	private PlayerColor color;
 	private Move move;
 	
 	public VirtualClient(PlayerColor color) {
+		this.color = color;
+	}
+	
+	protected void setColor(PlayerColor color) {
 		this.color = color;
 	}
 	

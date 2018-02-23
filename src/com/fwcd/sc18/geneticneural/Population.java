@@ -66,7 +66,6 @@ public class Population {
 		
 		if (counter < 0 || counter >= size) {
 			counter = 0;
-			saveCounter(getSavePath());
 		}
 		
 		return individuals.getKey(counter);
@@ -74,18 +73,10 @@ public class Population {
 	
 	public void put(float[] individual, float fitness) {
 		individuals.put(individual, fitness);
-		
-		if (savePath != null) {
-			save(getSavePath(), individuals.indexOfKey(individual), individual, fitness);
-		}
 	}
 	
 	public void put(int index, float[] individual, float fitness) {
 		individuals.put(index, individual, fitness);
-		
-		if (savePath != null) {
-			save(getSavePath(), index, individual, fitness);
-		}
 	}
 	
 	public float updateFitness(boolean won, float[] individual, float newFitness) {
@@ -137,8 +128,6 @@ public class Population {
 			
 			copyMutate();
 			saveAll();
-		} else {
-			saveCounter(getSavePath());
 		}
 	}
 

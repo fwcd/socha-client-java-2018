@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
@@ -22,10 +24,10 @@ import sc.shared.ScoreDefinition;
 
 public class GameSimulator {
 	private final Optional<GameView> view;
-	private final IGameHandler redLogic;
-	private final IGameHandler blueLogic;
-	private final VirtualClient redClient;
-	private final VirtualClient blueClient;
+	private final IGameHandler logicA;
+	private final IGameHandler logicB;
+	private final VirtualClient clientA;
+	private final VirtualClient clientB;
 	private final long matches;
 	private final List<Runnable> gameEndListeners;
 
@@ -34,31 +36,31 @@ public class GameSimulator {
 	private boolean started = false;
 	private boolean stopped = false;
 	
-	public GameSimulator(Function<VirtualClient, IGameHandler> red, Function<VirtualClient, IGameHandler> blue, long matches) {
+	public GameSimulator(Function<VirtualClient, IGameHandler> a, Function<VirtualClient, IGameHandler> b, long matches) {
 		this.matches = matches;
 		view = Optional.empty();
 		gameEndListeners = Collections.emptyList();
 		
-		redClient = new VirtualClient(PlayerColor.RED);
-		redLogic = red.apply(redClient);
-		blueClient = new VirtualClient(PlayerColor.BLUE);
-		blueLogic = blue.apply(blueClient);
+		clientA = new VirtualClient(PlayerColor.RED);
+		logicA = a.apply(clientA);
+		clientB = new VirtualClient(PlayerColor.BLUE);
+		logicB = b.apply(clientB);
 	}
 	
 	public GameSimulator(
 			Optional<GameView> view,
-			IGameHandler redLogic,
-			IGameHandler blueLogic,
-			VirtualClient redClient,
-			VirtualClient blueClient,
+			IGameHandler logicA,
+			IGameHandler logicB,
+			VirtualClient clientA,
+			VirtualClient clientB,
 			long matches,
 			List<Runnable> gameEndListeners
 	) {
 		this.view = view;
-		this.redLogic = redLogic;
-		this.blueLogic = blueLogic;
-		this.redClient = redClient;
-		this.blueClient = blueClient;
+		this.logicA = logicA;
+		this.logicB = logicB;
+		this.clientA = clientA;
+		this.clientB = clientB;
 		this.matches = matches;
 		this.gameEndListeners = gameEndListeners;
 	}
@@ -76,10 +78,32 @@ public class GameSimulator {
 			started = true;
 		}
 		
+		Random random = ThreadLocalRandom.current();
+		
 		long match = 0;
 		while (match < matches && !shouldStop()) {
 			state = new GameState();
 			updateState();
+			
+			IGameHandler redLogic;
+			IGameHandler blueLogic;
+			VirtualClient redClient;
+			VirtualClient blueClient;
+			
+			if (random.nextBoolean()) {
+				redLogic = logicA;
+				redClient = clientA;
+				blueLogic = logicB;
+				blueClient = clientB;
+			} else {
+				redLogic = logicB;
+				redClient = clientB;
+				blueLogic = logicA;
+				blueClient = clientA;
+			}
+			
+			redClient.setColor(PlayerColor.RED);
+			blueClient.setColor(PlayerColor.BLUE);
 			
 			int round = 0;
 			while (round < Constants.ROUND_LIMIT && getWinner() == null) {
@@ -153,10 +177,10 @@ public class GameSimulator {
 
 	private void updateState() {
 		view.ifPresent(view -> view.update(state));
-		redLogic.onUpdate(state);
-		redLogic.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
-		blueLogic.onUpdate(state);
-		blueLogic.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
+		logicA.onUpdate(state);
+		logicA.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
+		logicB.onUpdate(state);
+		logicB.onUpdate(state.getCurrentPlayer(), state.getOtherPlayer());
 	}
 
 	public synchronized void stop() {
