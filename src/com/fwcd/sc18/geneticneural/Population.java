@@ -30,7 +30,7 @@ public class Population {
 	private final int survivorsPerGeneration;
 	
 	private Path savePath = null;
-	private float mutatorWeight = 1;
+	private float mutatorWeight = 0.8F;
 	private float mutatorBias = 0;
 	
 	private int counter = 0;

@@ -1,7 +1,9 @@
 package com.fwcd.sc18.utils;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
@@ -13,11 +15,30 @@ import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 /**
- * A collection of static utility methods that
- * operate on GameState objects.
+ * A collection of static utility methods.
  */
 public final class HUIUtils {
 	private HUIUtils() {}
+	
+	public static float[] generateWeights(int... layerSizes) {
+		int weightCount = 0;
+		for (int i=1; i<layerSizes.length; i++) {
+			weightCount += (layerSizes[i - 1] + 1) * layerSizes[i];
+		}
+		
+		float[] newWeights = new float[weightCount];
+		return initWeights(newWeights);
+	}
+
+	public static float[] initWeights(float[] newWeights) {
+		Random random = ThreadLocalRandom.current();
+		for (int i=0; i<newWeights.length; i++) {
+			// Gaussian weight initialization
+			newWeights[i] = (float) random.nextGaussian();
+		}
+		
+		return newWeights;
+	}
 	
 	public static float invertNormalize(float x, float min, float max) {
 		return normalize(max - x, min, max);

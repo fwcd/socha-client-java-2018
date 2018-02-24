@@ -38,20 +38,14 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	public GeneticNeuralLogic(VirtualClient client) {
 		super(client);
-		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), Paths.get("."));
-		neuralNet = new Perceptron(layerSizes);
+		population = newPopulation();
+		neuralNet = newPerceptron();
 	}
-	
-	/*
-	 * Submission TODO-list:
-	 * 
-	 * - Set autoRelaunch flag in PhantomClient to false
-	 */
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		population = new Population(populationSize, () -> Perceptron.generateWeights(layerSizes), Paths.get("."));
-		neuralNet = new Perceptron(layerSizes);
+		population = newPopulation();
+		neuralNet = newPerceptron();
 	}
 
 	/**
@@ -118,12 +112,11 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		}
 		
 		try {
-			GameState gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
-			return neuralNet.compute(encode(gameAfterMove))[0];
-		} catch (InvalidMoveException e) {
-			return Float.NEGATIVE_INFINITY;
+			return neuralNet.compute(encode(HUIUtils.spawnChild(gameBeforeMove, move)))[0];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new CorruptedDataException(population.getCounter());
+		} catch (InvalidMoveException e) {
+			return Float.NEGATIVE_INFINITY;
 		}
 	}
 	
@@ -161,5 +154,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	@Override
 	public CopyableLogic copy(AbstractClient client) {
 		return new GeneticNeuralLogic(client, this);
+	}
+
+	private Perceptron newPerceptron() {
+		return new Perceptron(layerSizes);
+	}
+
+	private Population newPopulation() {
+		return new Population(populationSize, () -> HUIUtils.generateWeights(layerSizes), Paths.get("."));
 	}
 }

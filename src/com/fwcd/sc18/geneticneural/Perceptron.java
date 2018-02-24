@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
+
+import com.fwcd.sc18.utils.HUIUtils;
 
 public class Perceptron {
 	private final int[] layerSizes;
@@ -15,27 +15,7 @@ public class Perceptron {
 	
 	public Perceptron(int... layerSizes) {
 		this.layerSizes = layerSizes;
-		weights = generateWeights(layerSizes);
-	}
-	
-	public static float[] generateWeights(int... layerSizes) {
-		int weightCount = 0;
-		for (int i=1; i<layerSizes.length; i++) {
-			weightCount += (layerSizes[i - 1] + 1) * layerSizes[i];
-		}
-		
-		float[] newWeights = new float[weightCount];
-		return initWeights(newWeights);
-	}
-
-	public static float[] initWeights(float[] newWeights) {
-		Random random = ThreadLocalRandom.current();
-		for (int i=0; i<newWeights.length; i++) {
-			// Gaussian weight initialization
-			newWeights[i] = (float) random.nextGaussian();
-		}
-		
-		return newWeights;
+		weights = HUIUtils.generateWeights(layerSizes);
 	}
 	
 	public float[] compute(float[] input) {

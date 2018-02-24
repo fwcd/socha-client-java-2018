@@ -13,7 +13,7 @@ import sc.shared.SharedConfiguration;
 public class PhantomClient extends AbstractClient {
 	private final String reservation;
 	private final CopyableLogic logic;
-	private boolean autoRelaunch = true; // FIXME: Might want to add accessors
+	private boolean autoRelaunch = false;
 
 	public PhantomClient() throws IOException {
 		this("localhost", SharedConfiguration.DEFAULT_PORT, "", "");
