@@ -21,6 +21,7 @@ import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
+import sc.plugin2018.util.GameRuleLogic;
 import sc.shared.GameResult;
 import sc.shared.InvalidMoveException;
 
@@ -31,20 +32,22 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final int WIN_FITNESS_BIAS = 10;
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
-	private final int populationSize = 10;
+	private final int populationSize = 20;
 	private final int[] layerSizes = {19, 30, 10, 1};
 	private final Population population;
 	private final Perceptron neuralNet;
 	
 	public GeneticNeuralLogic(VirtualClient client) {
 		super(client);
-		population = newPopulation();
+		GENETIC_LOG.info("Launching in test mode...");
+		population = newPopulation(true);
 		neuralNet = newPerceptron();
 	}
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		population = newPopulation();
+		GENETIC_LOG.info("Launching in production mode...");
+		population = newPopulation(false);
 		neuralNet = newPerceptron();
 	}
 
@@ -112,7 +115,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		}
 		
 		try {
-			return neuralNet.compute(encode(HUIUtils.spawnChild(gameBeforeMove, move)))[0];
+			GameState gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
+			
+			if (GameRuleLogic.canEnterGoal(gameBeforeMove) && !getMe(gameAfterMove).inGoal()) {
+				return Float.NEGATIVE_INFINITY;
+			}
+			
+			return neuralNet.compute(encode(gameAfterMove))[0];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new CorruptedDataException(population.getCounter());
 		} catch (InvalidMoveException e) {
@@ -160,7 +169,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		return new Perceptron(layerSizes);
 	}
 
-	private Population newPopulation() {
-		return new Population(populationSize, () -> HUIUtils.generateWeights(layerSizes), Paths.get("."));
+	private Population newPopulation(boolean trainMode) {
+		return new Population(populationSize, () -> HUIUtils.generateWeights(layerSizes), Paths.get("."), trainMode);
 	}
 }
