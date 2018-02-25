@@ -22,6 +22,10 @@ import com.fwcd.sc18.utils.FloatList;
 import com.fwcd.sc18.utils.IndexedHashMap;
 import com.fwcd.sc18.utils.IndexedMap;
 
+/**
+ * A population that uses genetic techniques to
+ * find optimize a solution.
+ */
 public class Population {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 	
@@ -43,7 +47,17 @@ public class Population {
 	private int losses = 0;
 	private int minGoalMoves = Integer.MAX_VALUE;
 	private int maxGoalMoves = Integer.MIN_VALUE;
-
+	
+	/**
+	 * Constructs a new population with the given hyperparameters. This
+	 * method will try to load an exisiting population from the given
+	 * folder and otherwise create a new one.
+	 * 
+	 * @param size - The amount of individuals in the new population
+	 * @param spawner - A supply of new individuals
+	 * @param savePath - The folder to which individuals will be serialized
+	 * @param trainMode - Whether the population should be created/loaded in training mode
+	 */
 	public Population(int size, Supplier<float[]> spawner, Path savePath, boolean trainMode) {
 		this.trainMode = trainMode;
 		this.savePath = savePath;
@@ -63,10 +77,16 @@ public class Population {
 		}
 	}
 	
+	/**
+	 * Samples an individual from this population depending on the trainMode.
+	 */
 	public float[] sample() {
 		return trainMode ? selectCurrentGenes() : selectFittestGenes();
 	}
-
+	
+	/**
+	 * Selects the current individual for training.
+	 */
 	private float[] selectCurrentGenes() {
 		int size = individuals.size();
 		
@@ -76,7 +96,10 @@ public class Population {
 		
 		return individuals.getKey(counter);
 	}
-
+	
+	/**
+	 * "Greedily" selects the individual with the highest (saved) fitness value.
+	 */
 	private float[] selectFittestGenes() {
 		float bestFitness = Float.NEGATIVE_INFINITY;
 		float[] bestIndividual = null;
@@ -97,14 +120,25 @@ public class Population {
 		}
 	}
 	
+	/**
+	 * Adds/replaces the given individual and it's associated fitness.
+	 */
 	public void put(float[] individual, float fitness) {
 		individuals.put(individual, fitness);
 	}
 	
+	/**
+	 * Adds/replaces the given individual and it's associated fitness
+	 * at the given index.
+	 */
 	public void put(int index, float[] individual, float fitness) {
 		individuals.put(index, individual, fitness);
 	}
 	
+	/**
+	 * Updates the given individual's fitness. It will increment or
+	 * replace, depending on whether the game has been won or not.
+	 */
 	public float updateFitness(boolean won, float[] individual, float newFitness) {
 		float bias = (streak > 0 ? individuals.get(individual) : 0);
 		float totalFitness = bias + newFitness;
@@ -113,6 +147,13 @@ public class Population {
 		return totalFitness;
 	}
 	
+	/**
+	 * Evolves this population. If all individuals have been tested,
+	 * a new generation has been reached and mutation/crossover will
+	 * be performed.
+	 * 
+	 * <p><b>This method only affects the population if trainMode is set to true.</b></p>
+	 */
 	public void evolve(boolean won, boolean inGoal, int moves) {
 		if (trainMode) {
 			boolean nextGeneration = false;
@@ -158,7 +199,7 @@ public class Population {
 			}
 		}
 	}
-
+	
 	private void log() {
 		GENETIC_LOG.info("");
 		GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
@@ -167,7 +208,10 @@ public class Population {
 		GENETIC_LOG.info("Min goal moves: {}, Max goal moves: {}", minGoalMoves, maxGoalMoves);
 		GENETIC_LOG.info("");
 	}
-
+	
+	/**
+	 * @return The amount of individuals in this population.
+	 */
 	public int size() {
 		return individuals.size();
 	}

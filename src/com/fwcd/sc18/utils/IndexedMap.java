@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A map with ordered keys providing easy operations
+ * A map with ordered keys providing convenient operations
  * to fetchs keys at a specific index.
  * 
  * @param <K> - The key type

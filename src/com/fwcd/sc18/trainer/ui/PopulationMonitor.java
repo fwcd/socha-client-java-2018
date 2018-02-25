@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
-import com.fwcd.sc18.trainer.utils.MapTableModel;
+import com.fwcd.sc18.utils.MapTableModel;
 
 public class PopulationMonitor {
 	private final MapTableModel table;

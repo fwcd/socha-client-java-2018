@@ -9,15 +9,25 @@ import java.io.UncheckedIOException;
 
 import com.fwcd.sc18.utils.HUIUtils;
 
+/**
+ * A feed-forward multi-layer perceptron.
+ */
 public class Perceptron {
 	private final int[] layerSizes;
 	private float[] weights;
 	
+	/**
+	 * Constructs a new Perceptron using the given
+	 * layer sizes.
+	 */
 	public Perceptron(int... layerSizes) {
 		this.layerSizes = layerSizes;
 		weights = HUIUtils.generateWeights(layerSizes);
 	}
 	
+	/**
+	 * Computes the output vector for a given input.
+	 */
 	public float[] compute(float[] input) {
 		if (input.length != layerSizes[0]) {
 			throw new RuntimeException("Input vector size does not match input layer size.");
@@ -54,6 +64,10 @@ public class Perceptron {
 		return weights;
 	}
 	
+	/**
+	 * Seralizes the weights of this perceptron
+	 * to the provided {@link OutputStream}.
+	 */
 	public void saveWeights(OutputStream os) {
 		try (DataOutputStream dos = new DataOutputStream(os)) {
 			dos.writeInt(weights.length);
@@ -66,6 +80,12 @@ public class Perceptron {
 		}
 	}
 	
+	/**
+	 * Deserializes the weights from a given {@link InputStream}.
+	 * Make sure that the data read from the source is valid as
+	 * no further checks are performed and subtle bugs could
+	 * occur when inconsistent data is read into the network.
+	 */
 	public void loadWeights(InputStream is) {
 		try (DataInputStream dis = new DataInputStream(is)) {
 			float[] newWeights = new float[dis.readInt()];
@@ -81,6 +101,10 @@ public class Perceptron {
 		}
 	}
 	
+	/**
+	 * Applies the ReLU activation function to
+	 * a given input.
+	 */
 	private float relu(float x) {
 		return x >= 0 ? x : 0;
 	}

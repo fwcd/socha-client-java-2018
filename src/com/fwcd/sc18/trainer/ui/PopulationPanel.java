@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-import com.fwcd.sc18.trainer.utils.MapTableModel;
+import com.fwcd.sc18.utils.MapTableModel;
 
 public class PopulationPanel {
 	private final JPanel view;

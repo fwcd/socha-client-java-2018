@@ -25,6 +25,10 @@ import sc.plugin2018.util.GameRuleLogic;
 import sc.shared.GameResult;
 import sc.shared.InvalidMoveException;
 
+/**
+ * A game logic that uses a neural network to evaluate
+ * board states and a genetic algorithm to train this network.
+ */
 public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final int MAX_FIELD = 64;
 	private static final int CARROT_THRESHOLD = 360;

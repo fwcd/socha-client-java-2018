@@ -14,8 +14,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import com.fwcd.sc18.trainer.utils.DelegatePrintStream;
-import com.fwcd.sc18.trainer.utils.Lazy;
+import com.fwcd.sc18.utils.DelegatePrintStream;
+import com.fwcd.sc18.utils.Lazy;
 
 public class ConsolePane {
 	private final JScrollPane view;
