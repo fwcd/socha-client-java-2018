@@ -15,8 +15,10 @@ import sc.framework.plugins.SimplePlayer;
 import sc.plugin2018.GameState;
 import sc.plugin2018.IGameHandler;
 import sc.plugin2018.Move;
+import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
 import sc.shared.GameResult;
+import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 import sc.shared.PlayerScore;
@@ -131,7 +133,7 @@ public class GameSimulator {
 			scores.add(new PlayerScore(winner == PlayerColor.RED, ""));
 			scores.add(new PlayerScore(winner == PlayerColor.BLUE, ""));
 			List<SimplePlayer> winners = new ArrayList<>();
-			winners.add(winner == PlayerColor.RED ? state.getRedPlayer() : state.getBluePlayer());
+			winners.add(state.getPlayer(winner));
 			GameResult result = new GameResult(scoreDef, scores, winners);
 			PlayerColor color = winner;
 			String msg = winner + " won the game";
@@ -154,12 +156,15 @@ public class GameSimulator {
 	}
 
 	private PlayerColor getWinner() {
-		if (state.getRedPlayer().inGoal()) {
+		Player red = state.getPlayer(PlayerColor.RED);
+		Player blue = state.getPlayer(PlayerColor.BLUE);
+		
+		if (red.inGoal()) {
 			return PlayerColor.RED;
-		} else if (state.getBluePlayer().inGoal()) {
+		} else if (blue.inGoal()) {
 			return PlayerColor.BLUE;
 		} else if (state.getRound() >= Constants.ROUND_LIMIT) {
-			return state.getRedPlayer().getFieldIndex() > state.getBluePlayer().getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
+			return red.getFieldIndex() > blue.getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
 		} else {
 			return null;
 		}
@@ -170,7 +175,7 @@ public class GameSimulator {
 			move.perform(state);
 			updateState();
 			return true;
-		} catch (InvalidMoveException e) {
+		} catch (InvalidMoveException | InvalidGameStateException e) {
 			return false;
 		}
 	}

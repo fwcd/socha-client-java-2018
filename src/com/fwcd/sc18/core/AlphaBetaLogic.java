@@ -6,6 +6,7 @@ import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
+import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
 
 public class AlphaBetaLogic extends EvaluatingLogic {
@@ -41,7 +42,7 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 		GameState gameAfterMove;
 		try {
 			gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
-		} catch (InvalidMoveException e) {
+		} catch (InvalidMoveException | InvalidGameStateException e) {
 			if (maximizing) {
 				return Float.NEGATIVE_INFINITY;
 			} else {

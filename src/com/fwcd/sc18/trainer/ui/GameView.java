@@ -15,6 +15,7 @@ import javax.swing.SwingUtilities;
 import sc.plugin2018.Board;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Player;
+import sc.shared.PlayerColor;
 
 public class GameView {
 	private final JPanel view;
@@ -75,8 +76,8 @@ public class GameView {
 	private void updateState(GameState game) {
 		grid.clear();
 		
-		Player red = game.getRedPlayer();
-		Player blue = game.getBluePlayer();
+		Player red = game.getPlayer(PlayerColor.RED);
+		Player blue = game.getPlayer(PlayerColor.BLUE);
 		
 		updateScores(red, blue);
 		

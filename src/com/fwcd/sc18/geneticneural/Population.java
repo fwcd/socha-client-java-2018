@@ -47,6 +47,7 @@ public class Population {
 	private int losses = 0;
 	private int minGoalMoves = Integer.MAX_VALUE;
 	private int maxGoalMoves = Integer.MIN_VALUE;
+	private int longestStreak = 0;
 	
 	/**
 	 * Constructs a new population with the given hyperparameters. This
@@ -161,6 +162,7 @@ public class Population {
 			if (!won && streak >= 1) {
 				counter++;
 				nextGeneration = (counter >= individuals.size()) && (streak >= 1);
+				longestStreak = Math.max(longestStreak, streak);
 				streak = 0;
 			} else {
 				streak++;
@@ -191,6 +193,7 @@ public class Population {
 				wins = 0;
 				losses = 0;
 				goalWins = 0;
+				longestStreak = 0;
 				minGoalMoves = Integer.MAX_VALUE;
 				maxGoalMoves = Integer.MIN_VALUE;
 				
@@ -205,7 +208,7 @@ public class Population {
 		GENETIC_LOG.info(" <------------------ Generation {} ------------------> ", generation);
 		GENETIC_LOG.info("{}", this);
 		GENETIC_LOG.info("{} wins, {} goal wins, {} losses", new Object[] {wins, goalWins, losses});
-		GENETIC_LOG.info("Min goal moves: {}, Max goal moves: {}", minGoalMoves, maxGoalMoves);
+		GENETIC_LOG.info("Min goal moves: {}, Max goal moves: {}, longest streak: {}", new Object[] {minGoalMoves, maxGoalMoves, longestStreak});
 		GENETIC_LOG.info("");
 	}
 	
@@ -228,6 +231,7 @@ public class Population {
 			dos.writeInt(losses);
 			dos.writeInt(minGoalMoves);
 			dos.writeInt(maxGoalMoves);
+			dos.writeInt(longestStreak);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -245,6 +249,7 @@ public class Population {
 			losses = (dis.available() > 0 ? dis.readInt() : 0);
 			minGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
 			maxGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
+			longestStreak = (dis.available() > 0 ? dis.readInt() : 0);
 		} catch (IOException e) {
 			return false;
 		}

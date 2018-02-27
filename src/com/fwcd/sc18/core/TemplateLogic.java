@@ -19,7 +19,7 @@ import sc.shared.PlayerColor;
  * game logics.
  */
 public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
-	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
+	protected static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
 	private final VirtualClient virtualClient;
 	private final AbstractClient client;
@@ -101,11 +101,11 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	}
 	
 	public Player getMe(GameState state) {
-		return me == PlayerColor.BLUE ? state.getBluePlayer() : state.getRedPlayer();
+		return state.getPlayer(me);
 	}
 	
 	public Player getOpponent(GameState state) {
-		return me == PlayerColor.BLUE ? state.getRedPlayer() : state.getBluePlayer();
+		return state.getPlayer(me.opponent());
 	}
 	
 	public PlayerColor getMyColor() {

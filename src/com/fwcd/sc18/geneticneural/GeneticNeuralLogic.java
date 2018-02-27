@@ -23,6 +23,7 @@ import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
 import sc.plugin2018.util.GameRuleLogic;
 import sc.shared.GameResult;
+import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
 
 /**
@@ -128,7 +129,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 			return neuralNet.compute(encode(gameAfterMove))[0];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new CorruptedDataException(population.getCounter());
-		} catch (InvalidMoveException e) {
+		} catch (InvalidMoveException | InvalidGameStateException e) {
 			return Float.NEGATIVE_INFINITY;
 		}
 	}

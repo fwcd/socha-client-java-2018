@@ -11,6 +11,7 @@ import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
+import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
@@ -65,7 +66,7 @@ public final class HUIUtils {
 		return s.toString();
 	}
 	
-	public static GameState spawnChild(GameState state, Move move) throws InvalidMoveException {
+	public static GameState spawnChild(GameState state, Move move) throws InvalidMoveException, InvalidGameStateException {
 		try {
 			GameState result = state.clone();
 			move.perform(result);
@@ -76,8 +77,8 @@ public final class HUIUtils {
 	}
 	
 	public static PlayerColor getWinnerOrNull(GameState state) {
-		Player red = state.getRedPlayer();
-		Player blue = state.getBluePlayer();
+		Player red = state.getPlayer(PlayerColor.RED);
+		Player blue = state.getPlayer(PlayerColor.BLUE);
 		
 		if (state.getRound() >= Constants.ROUND_LIMIT) {
 			return red.getFieldIndex() > blue.getFieldIndex() ? PlayerColor.RED : PlayerColor.BLUE;
@@ -92,8 +93,8 @@ public final class HUIUtils {
 	
 	public static boolean isGameOver(GameState state) {
 		return state.getRound() >= Constants.ROUND_LIMIT
-				|| state.getBluePlayer().inGoal()
-				|| state.getRedPlayer().inGoal();
+				|| state.getPlayer(PlayerColor.RED).inGoal()
+				|| state.getPlayer(PlayerColor.BLUE).inGoal();
 	}
 
 	public static Set<Class<? extends Action>> getActionTypes(Move move) {
