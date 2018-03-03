@@ -3,6 +3,11 @@ package com.fwcd.sc18.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.antelmann.game.GameMove;
+import com.antelmann.game.GamePlay;
+import com.fwcd.sc18.agbinds.AGGameState;
+import com.fwcd.sc18.agbinds.AGMove;
+import com.fwcd.sc18.agbinds.AGPlayerColor;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
@@ -16,9 +21,11 @@ import sc.shared.PlayerColor;
 
 /**
  * Provides a skeletal implementation for
- * game logics.
+ * game logics that are compatible with
+ * both the "Software Challenge"-API and the
+ * Antelmann-Game-API.
  */
-public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
+public abstract class TemplateLogic implements IGameHandler, CopyableLogic, com.antelmann.game.Player {
 	protected static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	
 	private final VirtualClient virtualClient;
@@ -66,7 +73,7 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 		long endTime = System.currentTimeMillis();
 		sendAction(move);
 		
-		LOG.info("Committed move {} in {} ms", HUIUtils.toString(move) /* FIXME: Remove this later for performance */, endTime - startTime);
+		LOG.info("Committed move in {} ms", endTime - startTime);
 		LOG.debug("Carrots: {}, field: {}", getMe().getCarrots(), getMe().getFieldIndex());
 	}
 	
@@ -114,5 +121,37 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic {
 	
 	public PlayerColor getOpponentColor() {
 		return me.opponent();
+	}
+
+	@Override
+	public String getPlayerName() {
+		return getClass().getSimpleName();
+	}
+
+	@Override
+	public boolean canPlayGame(GamePlay game) {
+		return game instanceof AGGameState;
+	}
+
+	@Override
+	public double evaluate(GamePlay game, GameMove move, int[] role, int level, long milliseconds) {
+		return 0;
+	}
+
+	@Override
+	public double heuristic(GamePlay game, GameMove move, int[] role) {
+		return 0;
+	}
+
+	@Override
+	public GameMove selectMove(GamePlay game, int[] role, int level, long milliseconds) {
+		GameState state = ((AGGameState) game).getState();
+		AGPlayerColor color = AGPlayerColor.of(role[0]);
+		return new AGMove(selectMove(state, state.getPlayer(color.asPlayerColor())), color);
+	}
+
+	@Override
+	public boolean pruneMove(GamePlay game, GameMove move, int[] role) {
+		return false;
 	}
 }

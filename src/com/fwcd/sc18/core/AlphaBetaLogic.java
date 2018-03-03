@@ -1,5 +1,6 @@
 package com.fwcd.sc18.core;
 
+import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.AbstractClient;
@@ -11,6 +12,10 @@ import sc.shared.InvalidMoveException;
 
 public class AlphaBetaLogic extends EvaluatingLogic {
 	private int depth = 4;
+	
+	public AlphaBetaLogic(VirtualClient client) {
+		super(client);
+	}
 	
 	public AlphaBetaLogic(AbstractClient client) {
 		super(client);
