@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
+import sc.plugin2018.FieldType;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
@@ -89,6 +90,14 @@ public final class HUIUtils {
 		} else {
 			return null;
 		}
+	}
+	
+	public static int distToNextField(FieldType fieldType, int currentIndex, GameState state) {
+		return state.getNextFieldByType(fieldType, currentIndex) - currentIndex;
+	}
+	
+	public static int distToPrevField(FieldType fieldType, int currentIndex, GameState state) {
+		return state.getPreviousFieldByType(fieldType, currentIndex) - currentIndex;
 	}
 	
 	public static boolean isGameOver(GameState state) {

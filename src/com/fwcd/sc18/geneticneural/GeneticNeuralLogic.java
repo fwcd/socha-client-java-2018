@@ -31,6 +31,7 @@ import sc.shared.InvalidMoveException;
  * board states and a genetic algorithm to train this network.
  */
 public class GeneticNeuralLogic extends EvaluatingLogic {
+	private static final int ENCODED_BOARD_SIZE = 26;
 	private static final int MAX_FIELD = 64;
 	private static final int CARROT_THRESHOLD = 360;
 	private static final int FITNESS_BIAS = 5;
@@ -38,7 +39,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
 	private final int populationSize = 20;
-	private final int[] layerSizes = {19, 30, 10, 1};
+	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
 	private final Population population;
 	private final Perceptron neuralNet;
 	
@@ -138,29 +139,41 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		Player me = getMe(gameState);
 		Player opponent = getOpponent(gameState);
 		List<CardType> myCards = me.getCards();
-		FieldType myField = gameState.getTypeAt(me.getFieldIndex());
+		int myFieldIndex = me.getFieldIndex();
+		int oppFieldIndex = opponent.getFieldIndex();
+		FieldType myFieldType = gameState.getTypeAt(myFieldIndex);
 		
-		float[] encoded = new float[layerSizes[0]];
+		float[] encoded = new float[ENCODED_BOARD_SIZE];
+		int i = 0;
 		
-		encoded[0] = 1; // Bias weight
-		encoded[1] = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
-		encoded[2] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
-		encoded[3] = HUIUtils.normalize(me.getFieldIndex(), 0, MAX_FIELD);
-		encoded[4] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
-		encoded[5] = HUIUtils.normalize(opponent.getFieldIndex(), 0, MAX_FIELD);
-		encoded[6] = HUIUtils.normalize(opponent.getSalads(), 0, Constants.SALADS_TO_EAT);
-		encoded[7] = HUIUtils.normalize(opponent.getCarrots(), 0, CARROT_THRESHOLD);
-		encoded[8] = myField == FieldType.CARROT ? 1 : 0;
-		encoded[9] = myField == FieldType.HARE ? 1 : 0;
-		encoded[10] = myField == FieldType.HEDGEHOG ? 1 : 0;
-		encoded[11] = myField == FieldType.GOAL ? 1 : 0;
-		encoded[12] = myField == FieldType.POSITION_1 ? 1 : 0;
-		encoded[13] = myField == FieldType.POSITION_2 ? 1 : 0;
-		encoded[14] = myField == FieldType.SALAD ? 1 : 0;
-		encoded[15] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
-		encoded[16] = myCards.contains(CardType.FALL_BACK) ? 1 : 0;
-		encoded[17] = myCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
-		encoded[18] = myCards.contains(CardType.TAKE_OR_DROP_CARROTS) ? 1 : 0;
+		// The total count of statements below needs to match the ENCODED_BOARD_SIZE
+		
+		encoded[i++] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
+		encoded[i++] = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
+		encoded[i++] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
+		encoded[i++] = HUIUtils.normalize(myFieldIndex, 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(opponent.getCarrots(), 0, CARROT_THRESHOLD);
+		encoded[i++] = HUIUtils.normalize(opponent.getSalads(), 0, Constants.SALADS_TO_EAT);
+		encoded[i++] = HUIUtils.normalize(oppFieldIndex, 0, MAX_FIELD);
+		encoded[i++] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
+		encoded[i++] = myCards.contains(CardType.FALL_BACK) ? 1 : 0;
+		encoded[i++] = myCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
+		encoded[i++] = myCards.contains(CardType.TAKE_OR_DROP_CARROTS) ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.CARROT ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.HARE ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.HEDGEHOG ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.POSITION_1 ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.POSITION_2 ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.SALAD ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.START ? 1 : 0;
+		encoded[i++] = myFieldType == FieldType.GOAL ? 1 : 0;
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.CARROT, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.HARE, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToPrevField(FieldType.HEDGEHOG, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_1, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_2, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.SALAD, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.GOAL, myFieldIndex, gameState), 0, MAX_FIELD);
 		
 		return encoded;
 	}

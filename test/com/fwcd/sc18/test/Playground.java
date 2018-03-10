@@ -22,7 +22,7 @@ public class Playground {
 			System.out.println(j + ", " + dist.pickIndexStochastically(j));
 		}
 		
-		System.out.println(Float.toString(encodeCards(Arrays.asList(CardType.TAKE_OR_DROP_CARROTS, CardType.HURRY_AHEAD))));
+		System.out.println(encodeCards(Arrays.asList(CardType.TAKE_OR_DROP_CARROTS, CardType.HURRY_AHEAD)));
 	}
 	
 	private static float encodeCards(List<CardType> cards) {

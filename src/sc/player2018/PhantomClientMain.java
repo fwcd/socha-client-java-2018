@@ -12,7 +12,7 @@ import sc.shared.SharedConfiguration;
  */
 public class PhantomClientMain {
 	private static final Logger LOG = LoggerFactory.getLogger(PhantomClientMain.class);
-	
+
 	public static void main(String[] args) {
 		System.setProperty("file.encoding", "UTF-8");
 
