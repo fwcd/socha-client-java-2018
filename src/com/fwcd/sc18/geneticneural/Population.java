@@ -5,10 +5,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,9 +37,15 @@ public class Population {
 	private final int survivorsPerGeneration;
 	private final boolean trainMode;
 	
-	private Path savePath = null;
 	private float mutatorWeight = 1F;
 	private float mutatorBias = 0;
+
+	private Path savePath = null;
+	private String counterFile = "Counter";
+	private String statsFile = "Stats";
+	private String individualFilePrefix = "Individual";
+	private String backupFolder = "Backup";
+	private int maxStatsBytes = 100000;
 	
 	private int counter = 0;
 	private int streak = 0;
@@ -48,6 +57,7 @@ public class Population {
 	private int minGoalMoves = Integer.MAX_VALUE;
 	private int maxGoalMoves = Integer.MIN_VALUE;
 	private int longestStreak = 0;
+	private float maxFitness = Float.NEGATIVE_INFINITY;
 	
 	/**
 	 * Constructs a new population with the given hyperparameters. This
@@ -183,12 +193,15 @@ public class Population {
 			if (nextGeneration) {
 				// Reached a full generation
 				sortByFitnessDescending();
+				maxFitness = individuals.getValue(0);
 				
 				counter = 0;
 				streak = 0;
 				generation++;
 				
 				log();
+				copyMutate();
+				saveAll();
 
 				wins = 0;
 				losses = 0;
@@ -196,9 +209,7 @@ public class Population {
 				longestStreak = 0;
 				minGoalMoves = Integer.MAX_VALUE;
 				maxGoalMoves = Integer.MIN_VALUE;
-				
-				copyMutate();
-				saveAll();
+				maxFitness = Float.NEGATIVE_INFINITY;
 			}
 		}
 	}
@@ -220,7 +231,7 @@ public class Population {
 	}
 	
 	private void saveCounter() {
-		Path file = savePath.resolve("Counter");
+		Path file = savePath.resolve(counterFile);
 		
 		try (OutputStream fos = Files.newOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeInt(counter);
@@ -237,8 +248,51 @@ public class Population {
 		}
 	}
 	
+	private void saveStats() {
+		Path file = savePath.resolve(statsFile);
+		boolean fileExists = Files.exists(file);
+		
+		try {
+			if (generation % 1000 == 0 && fileExists && Files.size(file) > maxStatsBytes) {
+				// Truncate beginning of file to maxStatsBytes when file is becoming too large
+				
+				try (RandomAccessFile raf = new RandomAccessFile(file.toFile(), "rwd")) {
+					long bytes = raf.length();
+					long truncatedBytes = bytes - maxStatsBytes;
+					int chunkBytes = Integer.BYTES * 7; // The number has to match the ints in a chunk written further below
+					
+					for (long i=truncatedBytes; i<bytes; i+=chunkBytes) {
+						raf.seek(i);
+						byte[] chunk = new byte[chunkBytes];
+						raf.read(chunk);
+						raf.seek(i - chunkBytes);
+						raf.write(chunk);
+					}
+					
+					raf.setLength(maxStatsBytes);
+				}
+			}
+			
+			OpenOption[] openOptions = fileExists ? new OpenOption[] {StandardOpenOption.APPEND} : new OpenOption[0];
+			
+			try (OutputStream fos = Files.newOutputStream(file, openOptions); DataOutputStream dos = new DataOutputStream(fos)) {
+				// Writes a chunk
+				
+				dos.writeInt(wins);
+				dos.writeInt(goalWins);
+				dos.writeInt((int) maxFitness);
+				dos.writeInt(losses);
+				dos.writeInt(minGoalMoves);
+				dos.writeInt(maxGoalMoves);
+				dos.writeInt(longestStreak);
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+	
 	private boolean loadCounter() {
-		Path file = savePath.resolve("Counter");
+		Path file = savePath.resolve(counterFile);
 		
 		try (InputStream fis = Files.newInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			counter = dis.readInt();
@@ -258,7 +312,7 @@ public class Population {
 	}
 
 	private void save(int index, float[] individual, float fitness) {
-		Path file = savePath.resolve("Individual" + index);
+		Path file = savePath.resolve(individualFilePrefix + index);
 		
 		try (OutputStream fos = Files.newOutputStream(file); DataOutputStream dos = new DataOutputStream(fos)) {
 			dos.writeFloat(fitness);
@@ -276,8 +330,9 @@ public class Population {
 			save(i, individual, individuals.get(individual));
 			i++;
 		}
-		
+
 		saveCounter();
+		saveStats();
 		
 		if (generation > 200 && generation % 100 == 0) {
 			createBackup(i);
@@ -285,7 +340,7 @@ public class Population {
 	}
 	
 	private void createBackup(int size) {
-		Path backupPath = savePath.resolve("Backup");
+		Path backupPath = savePath.resolve(backupFolder);
 		
 		try {
 			if (!Files.exists(backupPath)) {
@@ -293,15 +348,15 @@ public class Population {
 			}
 			
 			Files.copy(
-					savePath.resolve("Counter"),
-					backupPath.resolve("Counter"),
+					savePath.resolve(counterFile),
+					backupPath.resolve(counterFile),
 					StandardCopyOption.REPLACE_EXISTING
 			);
 			
 			for (int i=0; i<size; i++) {
 				Files.copy(
-						savePath.resolve("Individual" + i),
-						backupPath.resolve("Individual" + i),
+						savePath.resolve(individualFilePrefix + i),
+						backupPath.resolve(individualFilePrefix + i),
 						StandardCopyOption.REPLACE_EXISTING
 				);
 			}
@@ -312,7 +367,7 @@ public class Population {
 
 	private boolean loadAll(int total) {
 		for (int index=0; index<total; index++) {
-			Path file = savePath.resolve("Individual" + index);
+			Path file = savePath.resolve(individualFilePrefix + index);
 			
 			if (!Files.exists(file)) {
 				return false;

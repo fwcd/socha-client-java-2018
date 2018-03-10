@@ -1,52 +1,82 @@
 package com.fwcd.sc18.trainer.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.io.File;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
 
 import com.fwcd.sc18.utils.MapTableModel;
 
 public class PopulationPanel {
-	private final JPanel view;
+	private final JSplitPane view;
+	private final JPanel populationView;
+	private final StatsMonitor statsMonitor;
 	private final ConfigPanel config;
 	private final MapTableModel tableModel;
 	
 	private PopulationMonitor monitor;
+	private Supplier<File> file;
+	private Supplier<String> counterName;
+	private Supplier<String> personName;
+	private Supplier<String> statsName;
+	private BooleanSupplier monitorWeights;
+	private BooleanSupplier useAntonsFormat;
 	
 	public PopulationPanel(int index) {
-		view = new JPanel();
-		view.setLayout(new BorderLayout());
+		view = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		view.setBorder(new EmptyBorder(0, 0, 0, 0));
+		
+		populationView = new JPanel();
+		populationView.setLayout(new BorderLayout());
 		
 		config = new ConfigPanel(true, false);
-		Supplier<File> file = config.addFileOption("Choose population " + Integer.toString(index) + " folder", "", new File("."), true);
+		file = config.addFileOption("Choose population " + Integer.toString(index) + " folder", "", new File("."), true);
 		
 		ConfigPanel options = config.addSubPanel("Configuration");
-		Supplier<String> counterName = options.addStringOption("Counter file name", "Counter");
-		Supplier<String> personName = options.addStringOption("Person file prefix", "Individual");
-		BooleanSupplier monitorWeights = options.addBoolOption("Monitor weights", false);
-		BooleanSupplier useAntonsFormat = options.addBoolOption("Use Anton's population format", false);
+		counterName = options.addStringOption("Counter file name", "Counter");
+		personName = options.addStringOption("Person file prefix", "Individual");
+		statsName = options.addStringOption("Stats file name", "Stats");
+		monitorWeights = options.addBoolOption("Monitor weights", false);
+		useAntonsFormat = options.addBoolOption("Use Anton's population format", false);
 
 		tableModel = new MapTableModel();
-		config.addButton("Verify and load", () -> monitor = new PopulationMonitor(
+		config.addButton("Verify and load", this::load);
+		
+		populationView.add(config.getView(), BorderLayout.NORTH);
+		populationView.add(new JScrollPane(new JTable(tableModel)));
+		view.setLeftComponent(populationView);
+		
+		statsMonitor = new StatsMonitor();
+		JScrollPane statsScrollPane = new JScrollPane(statsMonitor.getView());
+		JScrollBar vsb = statsScrollPane.getVerticalScrollBar();
+		vsb.addAdjustmentListener(e -> statsMonitor.getView().repaint());
+		vsb.setUnitIncrement(10);
+		view.setRightComponent(statsScrollPane);
+	}
+
+	private void load() {
+		monitor = new PopulationMonitor(
 				tableModel,
-				file.get(),
+				file.get().toPath(),
 				counterName.get(),
 				personName.get(),
+				statsName.get(),
 				useAntonsFormat.getAsBoolean(),
 				monitorWeights.getAsBoolean()
-		));
-		
-		view.add(config.getView(), BorderLayout.NORTH);
-		view.add(new JScrollPane(new JTable(tableModel)));
+		);
+		statsMonitor.update(monitor);
 	}
 	
-	public Component getView() { return view; }
+	public PopulationMonitor getMonitor() { return monitor; }
+	
+	public JSplitPane getView() { return view; }
 	
 	public void reload() {
 		if (monitor != null) {

@@ -1,9 +1,9 @@
 package com.fwcd.sc18.trainer;
 
-import com.fwcd.sc18.trainer.ui.TrainerApp;
+import com.fwcd.sc18.trainer.ui.GUITrainerApp;
 
 public class GUITrainerMain {
 	public static void main(String[] args) {
-		new TrainerApp("Trainer", 1280, 720);
+		new GUITrainerApp("Trainer", 1280, 720);
 	}
 }
