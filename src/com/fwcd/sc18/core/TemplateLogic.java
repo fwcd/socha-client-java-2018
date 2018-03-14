@@ -49,6 +49,8 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic, com.
 	
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {}
 	
+	protected void onMoveSend(GameState gameBeforeMove, Move move) {}
+	
 	@Override
 	public void gameEnded(GameResult result, PlayerColor color, String errorMessage) {
 		PlayerColor winner = HUIUtils.getWinnerOrNull(gameState);
@@ -70,6 +72,7 @@ public abstract class TemplateLogic implements IGameHandler, CopyableLogic, com.
 		Move move = selectMove(gameState, currentPlayer);
 		move.orderActions();
 		
+		onMoveSend(gameState, move);
 		long endTime = System.currentTimeMillis();
 		sendAction(move);
 		

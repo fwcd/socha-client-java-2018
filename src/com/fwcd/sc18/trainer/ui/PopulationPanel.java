@@ -27,7 +27,6 @@ public class PopulationPanel {
 	private Supplier<String> personName;
 	private Supplier<String> statsName;
 	private BooleanSupplier monitorWeights;
-	private BooleanSupplier useAntonsFormat;
 	
 	public PopulationPanel(int index) {
 		view = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -44,7 +43,6 @@ public class PopulationPanel {
 		personName = options.addStringOption("Person file prefix", "Individual");
 		statsName = options.addStringOption("Stats file name", "Stats");
 		monitorWeights = options.addBoolOption("Monitor weights", false);
-		useAntonsFormat = options.addBoolOption("Use Anton's population format", false);
 
 		tableModel = new MapTableModel();
 		config.addButton("Verify and load", this::load);
@@ -68,7 +66,6 @@ public class PopulationPanel {
 				counterName.get(),
 				personName.get(),
 				statsName.get(),
-				useAntonsFormat.getAsBoolean(),
 				monitorWeights.getAsBoolean()
 		);
 		statsMonitor.update(monitor);

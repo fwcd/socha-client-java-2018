@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ public class PopulationMonitor {
 	private final String counterName;
 	private final String statsName;
 	private final String individualPrefix;
-	private final boolean useAntonsFormat;
 	private final boolean monitorWeights;
 	
 	public PopulationMonitor(
@@ -35,7 +33,6 @@ public class PopulationMonitor {
 			String counterName,
 			String personName,
 			String statsName,
-			boolean useAntonsFormat,
 			boolean monitorWeights
 	) {
 		this.table = table;
@@ -43,7 +40,6 @@ public class PopulationMonitor {
 		this.counterName = counterName;
 		this.statsName = statsName;
 		this.individualPrefix = personName;
-		this.useAntonsFormat = useAntonsFormat;
 		this.monitorWeights = monitorWeights;
 		
 		table.clear();
@@ -82,7 +78,7 @@ public class PopulationMonitor {
 		} catch (EOFException e) {
 			// Do nothing
 		} catch (IOException e) {
-			throw new UncheckedIOException(e);
+			reject("Invalid stats file.");
 		}
 		
 		return stats.entrySet().stream()
@@ -107,18 +103,9 @@ public class PopulationMonitor {
 	private void loadCounter() {
 		Path file = folder.resolve(counterName);
 		try (InputStream fis = Files.newInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
-			String index = "";
-			String streak = "";
-			String gen = "";
-			
-			if (useAntonsFormat) {
-				index = "Index: " + dis.readFloat();
-				streak = "Streak: " + dis.readFloat();
-			} else {
-				index = "Index: " + dis.readInt();
-				streak = "Streak: " + dis.readInt();
-				gen = "Generation: " + dis.readInt();
-			}
+			String index = "Index: " + dis.readInt();
+			String streak = "Streak: " + dis.readInt();
+			String gen = "Generation: " + dis.readInt();
 			
 			table.put("Counter", index, streak, gen);
 		} catch (IOException e) {

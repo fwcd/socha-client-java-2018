@@ -70,11 +70,11 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	protected void onGameStart(GameState gameState) {
 		neuralNet.setWeights(population.sample());
 	}
-
+	
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
 		Player me = getMe(gameState);
-
+		
 		int carrots = me.getCarrots();
 		int field = me.getFieldIndex();
 		int turn = gameState.getTurn();
@@ -83,7 +83,8 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		float fitness;
 		
 		if (inGoal) {
-			fitness = WIN_FITNESS_BIAS - HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
+			fitness = WIN_FITNESS_BIAS
+					- HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
 		} else {
 			float normCarrots = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
 			float normSalads = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
@@ -174,6 +175,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_2, myFieldIndex, gameState), 0, MAX_FIELD);
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.SALAD, myFieldIndex, gameState), 0, MAX_FIELD);
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.GOAL, myFieldIndex, gameState), 0, MAX_FIELD);
+		
 		
 		return encoded;
 	}
