@@ -6,8 +6,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,37 +21,30 @@ import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
+import com.fwcd.sc18.utils.EventListPoller;
 import com.fwcd.sc18.utils.MapTableModel;
 
-public class PopulationMonitor {
-	private final MapTableModel table;
+public class PopulationMonitor implements AutoCloseable {
+	private MapTableModel table;
 	
-	private final Path folder;
-	private final String counterName;
-	private final String statsName;
-	private final String individualPrefix;
-	private final boolean monitorWeights;
+	private Path folder;
+	private String counterName;
+	private String statsName;
+	private String individualPrefix;
+	private boolean monitorWeights;
+	private boolean autoUpdate;
+	private Runnable onReload;
 	
-	public PopulationMonitor(
-			MapTableModel table,
-			Path folder,
-			String counterName,
-			String personName,
-			String statsName,
-			boolean monitorWeights
-	) {
-		this.table = table;
-		this.folder = folder;
-		this.counterName = counterName;
-		this.statsName = statsName;
-		this.individualPrefix = personName;
-		this.monitorWeights = monitorWeights;
-		
-		table.clear();
-		reload();
-	}
+	private WatchService watcher;
+	private Thread watchPollThread;
+	
+	private PopulationMonitor() {}
 	
 	public Map<String, int[]> readStats() {
+		return readStats(false);
+	}
+	
+	private Map<String, int[]> readStats(boolean silently) {
 		Map<String, List<Integer>> stats = new HashMap<>();
 		
 		List<Integer> wins = new ArrayList<>();
@@ -78,7 +76,7 @@ public class PopulationMonitor {
 		} catch (EOFException e) {
 			// Do nothing
 		} catch (IOException e) {
-			reject("Invalid stats file.");
+			reject("Invalid stats file.", silently);
 		}
 		
 		return stats.entrySet().stream()
@@ -88,19 +86,24 @@ public class PopulationMonitor {
 	}
 	
 	public void reload() {
+		reload(false);
+	}
+	
+	private void reload(boolean silently) {
 		if (folder == null) {
-			reject("No folder selected");
+			reject("No folder selected", silently);
 		} else if (!Files.exists(folder)) {
-			reject("Not existing on drive");
+			reject("Not existing on drive", silently);
 		} else if (!Files.isDirectory(folder)) {
-			reject("Not a folder");
+			reject("Not a folder", silently);
 		} else {
-			loadCounter();
-			loadIndividuals();
+			loadCounter(silently);
+			loadIndividuals(silently);
+			onReload.run();
 		}
 	}
 
-	private void loadCounter() {
+	private void loadCounter(boolean silently) {
 		Path file = folder.resolve(counterName);
 		try (InputStream fis = Files.newInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			String index = "Index: " + dis.readInt();
@@ -109,11 +112,11 @@ public class PopulationMonitor {
 			
 			table.put("Counter", index, streak, gen);
 		} catch (IOException e) {
-			reject("Invalid counter file");
+			reject("Invalid counter file", silently);
 		}
 	}
 	
-	private void loadIndividuals() {
+	private void loadIndividuals(boolean silently) {
 		for (File file : folder.toFile().listFiles(file -> file.getName().startsWith(individualPrefix))) {
 			try (FileInputStream fis = new FileInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 				String fitness = "Fitness: " + dis.readFloat();
@@ -131,19 +134,80 @@ public class PopulationMonitor {
 					table.put(file.getName(), fitness);
 				}
 			} catch (IOException e) {
-				reject("Invalid individual/person file: " + file.getName());
+				reject("Invalid individual/person file: " + file.getName(), silently);
 			} catch (NumberFormatException e) {
-				reject("Invalid individual/person file naming: " + file.getName());
+				reject("Invalid individual/person file naming: " + file.getName(), silently);
 			}
 		}
 	}
 
-	private void reject(String msg) {
-		JOptionPane.showMessageDialog(
-				null,
-				folder != null ? ("Population " + folder + " is not valid: " + msg) : msg,
-				"Population load error",
-				JOptionPane.WARNING_MESSAGE
-		);
+	private void reject(String msg, boolean silently) {
+		if (!silently) {
+			JOptionPane.showMessageDialog(
+					null,
+					folder != null ? ("Population " + folder + " is not valid: " + msg) : msg,
+					"Population load error",
+					JOptionPane.WARNING_MESSAGE
+			);
+		}
+	}
+
+	@Override
+	public void close() {
+		try {
+			if (autoUpdate) {
+				watcher.close();
+				watchPollThread.interrupt();
+			}
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+	
+	public static class Builder {
+		private final PopulationMonitor obj = new PopulationMonitor();
+		
+		public Builder table(MapTableModel table) { obj.table = table; return this; }
+		
+		public Builder folder(Path folder) { obj.folder = folder; return this; }
+		
+		public Builder counterName(String counterName) { obj.counterName = counterName; return this; }
+		
+		public Builder personName(String personName) { obj.individualPrefix = personName; return this; }
+		
+		public Builder statsName(String statsName) { obj.statsName = statsName; return this; }
+		
+		public Builder monitorWeights(boolean monitorWeights) { obj.monitorWeights = monitorWeights; return this; }
+		
+		public Builder onReload(Runnable onReload) { obj.onReload = onReload; return this; }
+		
+		public Builder autoUpdate(boolean autoUpdate) {
+			obj.autoUpdate = autoUpdate;
+			try {
+				if (autoUpdate) {
+					obj.watcher = FileSystems.getDefault().newWatchService();
+					WatchKey key = obj.folder.register(
+							obj.watcher,
+							StandardWatchEventKinds.ENTRY_CREATE,
+							StandardWatchEventKinds.ENTRY_DELETE,
+							StandardWatchEventKinds.ENTRY_MODIFY
+					);
+					obj.watchPollThread = new Thread(new EventListPoller<>(key::pollEvents, e -> obj.reload(true)));
+					obj.watchPollThread.start();
+				} else {
+					obj.watcher = null;
+					obj.watchPollThread = null;
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			return this;
+		}
+		
+		public PopulationMonitor build() {
+			obj.table.clear();
+			obj.reload();
+			return obj;
+		}
 	}
 }

@@ -9,7 +9,6 @@ import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -254,9 +253,13 @@ public class Population {
 		
 		try {
 			boolean fileExists = Files.exists(file);
-			long fileSize = Files.size(file);
+			long fileSize = fileExists ? Files.size(file) : 0;
 			
-			if (generation % 1000 == 0 && fileExists && fileSize > maxStatsBytes) {
+			if (!fileExists) {
+				Files.createFile(file);
+			}
+			
+			if (generation % 1000 == 0 && generation > 1 && fileExists && fileSize > maxStatsBytes) {
 				// Truncate beginning of file to maxStatsBytes when file is becoming too large
 				
 				try (SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
@@ -275,9 +278,8 @@ public class Population {
 				}
 			}
 			
-			OpenOption[] openOptions = fileExists ? new OpenOption[] {StandardOpenOption.APPEND} : new OpenOption[0];
-			
-			try (OutputStream fos = Files.newOutputStream(file, openOptions); DataOutputStream dos = new DataOutputStream(fos)) {
+			try (OutputStream fos = Files.newOutputStream(file, StandardOpenOption.APPEND);
+					DataOutputStream dos = new DataOutputStream(fos)) {
 				// Writes a chunk
 				
 				dos.writeInt(wins);

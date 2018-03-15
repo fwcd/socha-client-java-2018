@@ -27,6 +27,7 @@ public class PopulationPanel {
 	private Supplier<String> personName;
 	private Supplier<String> statsName;
 	private BooleanSupplier monitorWeights;
+	private BooleanSupplier autoUpdate;
 	
 	public PopulationPanel(int index) {
 		view = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -43,6 +44,7 @@ public class PopulationPanel {
 		personName = options.addStringOption("Person file prefix", "Individual");
 		statsName = options.addStringOption("Stats file name", "Stats");
 		monitorWeights = options.addBoolOption("Monitor weights", false);
+		autoUpdate = options.addBoolOption("Auto-update", false);
 
 		tableModel = new MapTableModel();
 		config.addButton("Verify and load", this::load);
@@ -57,17 +59,33 @@ public class PopulationPanel {
 		vsb.addAdjustmentListener(e -> statsMonitor.getView().repaint());
 		vsb.setUnitIncrement(10);
 		view.setRightComponent(statsScrollPane);
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(this::closeMonitor));
+	}
+
+	private void closeMonitor() {
+		if (monitor != null) {
+			monitor.close();
+		}
 	}
 
 	private void load() {
-		monitor = new PopulationMonitor(
-				tableModel,
-				file.get().toPath(),
-				counterName.get(),
-				personName.get(),
-				statsName.get(),
-				monitorWeights.getAsBoolean()
-		);
+		closeMonitor();
+		monitor = new PopulationMonitor.Builder()
+				.table(tableModel)
+				.folder(file.get().toPath())
+				.counterName(counterName.get())
+				.personName(personName.get())
+				.statsName(statsName.get())
+				.monitorWeights(monitorWeights.getAsBoolean())
+				.autoUpdate(autoUpdate.getAsBoolean())
+				.onReload(() -> {
+					view.repaint();
+					if (monitor != null) {
+						statsMonitor.update(monitor);
+					}
+				})
+				.build();
 		statsMonitor.update(monitor);
 	}
 	
