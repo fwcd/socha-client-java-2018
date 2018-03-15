@@ -5,8 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -250,26 +251,27 @@ public class Population {
 	
 	private void saveStats() {
 		Path file = savePath.resolve(statsFile);
-		boolean fileExists = Files.exists(file);
 		
 		try {
-			if (generation % 1000 == 0 && fileExists && Files.size(file) > maxStatsBytes) {
+			boolean fileExists = Files.exists(file);
+			long fileSize = Files.size(file);
+			
+			if (generation % 1000 == 0 && fileExists && fileSize > maxStatsBytes) {
 				// Truncate beginning of file to maxStatsBytes when file is becoming too large
 				
-				try (RandomAccessFile raf = new RandomAccessFile(file.toFile(), "rwd")) {
-					long bytes = raf.length();
-					long truncatedBytes = bytes - maxStatsBytes;
+				try (SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
+					int oldBytes = (int) fileSize;
 					int chunkBytes = Integer.BYTES * 7; // The number has to match the ints in a chunk written further below
+					int truncatedBytes = oldBytes - maxStatsBytes;
+					truncatedBytes -= truncatedBytes % chunkBytes;
 					
-					for (long i=truncatedBytes; i<bytes; i+=chunkBytes) {
-						raf.seek(i);
-						byte[] chunk = new byte[chunkBytes];
-						raf.read(chunk);
-						raf.seek(i - chunkBytes);
-						raf.write(chunk);
-					}
-					
-					raf.setLength(maxStatsBytes);
+					ByteBuffer buffer = ByteBuffer.allocate(oldBytes);
+					channel.read(buffer);
+					buffer.position(truncatedBytes);
+					buffer.slice();
+					channel.position(0);
+					channel.write(buffer);
+					channel.truncate(maxStatsBytes);
 				}
 			}
 			

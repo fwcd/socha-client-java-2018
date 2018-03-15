@@ -16,7 +16,7 @@ The respective package-info.java files contain further information for each subp
 
 ## Setting up Eclipse for development
 
-* Clone this repository to your pc using git:
+* Clone this repository to your pc using git (you may want to use --depth to limit the clone depth):
 
       git clone https://bitbucket.org/TheDroide/phantomclient.git
 
