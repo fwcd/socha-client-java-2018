@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.fwcd.sc18.utils.HUIUtils;
+import com.fwcd.sc18.utils.IntSet;
 
 /**
  * A feed-forward multi-layer perceptron.
@@ -15,6 +18,10 @@ import com.fwcd.sc18.utils.HUIUtils;
 public class Perceptron {
 	private final int[] layerSizes;
 	private float[] weights;
+	
+	private IntSet dropoutIndices;
+	private float dropoutPercent = 0.1F;
+	private boolean dropoutEnabled = false;
 	
 	/**
 	 * Constructs a new Perceptron using the given
@@ -43,10 +50,15 @@ public class Perceptron {
 				float dot = 0;
 				
 				for (float neuron : layer) {
-					dot += neuron * weights[weightIndex++];
+					if (isWeightEnabled(weightIndex)) {
+						dot += neuron * weights[weightIndex];
+					}
+					weightIndex++;
 				}
 				
-				float bias = weights[weightIndex++];
+				float bias = isWeightEnabled(weightIndex) ? weights[weightIndex] : 0;
+				weightIndex++;
+				
 				nextLayer[nextNeuronI] = relu(dot + bias);
 			}
 			
@@ -54,6 +66,37 @@ public class Perceptron {
 		}
 		
 		return layer;
+	}
+	
+	private boolean isWeightEnabled(int weightIndex) {
+		return !dropoutEnabled || !dropoutIndices.contains(weightIndex);
+	}
+	
+	public void setDropoutEnabled(boolean dropoutEnabled) {
+		this.dropoutEnabled = dropoutEnabled;
+		
+		if (dropoutEnabled && dropoutIndices == null) {
+			Random random = ThreadLocalRandom.current();
+			int dropoutNeurons = (int) (dropoutPercent * weights.length);
+			int[] indices = new int[dropoutNeurons];
+			
+			// Randomly sample the neuron indices
+			
+			for (int i=0; i<dropoutNeurons; i++) {
+				indices[i] = i;
+			}
+			
+			for (int i=dropoutNeurons; i<weights.length; i++) {
+				int j = random.nextInt(i);
+				if (j < dropoutNeurons) {
+					indices[j] = i;
+				}
+			}
+			
+			dropoutIndices = new IntSet(indices);
+		} else if (!dropoutEnabled && dropoutIndices != null) {
+			dropoutIndices = null;
+		}
 	}
 	
 	public void setWeights(float[] weights) {

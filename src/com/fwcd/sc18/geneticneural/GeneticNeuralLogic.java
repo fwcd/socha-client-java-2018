@@ -39,21 +39,25 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
 	private final int populationSize = 20;
+	private final boolean useDropout = false;
 	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
 	private final Population population;
 	private final Perceptron neuralNet;
+	private final boolean trainMode;
 	
 	public GeneticNeuralLogic(VirtualClient client) {
 		super(client);
-		GENETIC_LOG.info("Launching in test mode...");
-		population = newPopulation(true);
+		GENETIC_LOG.info("Launching in training/testing mode...");
+		trainMode = true;
+		population = newPopulation(trainMode);
 		neuralNet = newPerceptron();
 	}
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
 		GENETIC_LOG.info("Launching in production mode...");
-		population = newPopulation(false);
+		trainMode = false;
+		population = newPopulation(trainMode);
 		neuralNet = newPerceptron();
 	}
 
@@ -62,6 +66,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	 */
 	public GeneticNeuralLogic(AbstractClient client, GeneticNeuralLogic other) {
 		super(client);
+		trainMode = other.trainMode;
 		population = other.population;
 		neuralNet = other.neuralNet;
 	}
@@ -69,6 +74,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	@Override
 	protected void onGameStart(GameState gameState) {
 		neuralNet.setWeights(population.sample());
+		neuralNet.setDropoutEnabled(trainMode && useDropout);
 	}
 	
 	@Override
@@ -101,7 +107,11 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				counter, streak, carrots, field, turn, totalFitness, (won ? (inGoal ? "won + in goal" : "won") : "lost")
 		});
 		
-		population.evolve(won, inGoal, turn);
+		boolean choseNextIndividual = population.evolve(won, inGoal, turn);
+		
+		if (choseNextIndividual) {
+			neuralNet.setDropoutEnabled(false); // Disable dropout and reset dropout indices
+		}
 	}
 	
 	@Override

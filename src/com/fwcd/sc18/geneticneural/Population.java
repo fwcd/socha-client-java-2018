@@ -164,13 +164,19 @@ public class Population {
 	 * be performed.
 	 * 
 	 * <p><b>This method only affects the population if trainMode is set to true.</b></p>
+	 * 
+	 * @return Whether the counter has been changed to the next individual
 	 */
-	public void evolve(boolean won, boolean inGoal, int moves) {
+	public boolean evolve(boolean won, boolean inGoal, int moves) {
+		boolean nextIndividual = false;
+		
 		if (trainMode) {
 			boolean nextGeneration = false;
 			
 			if (!won && streak >= 1) {
 				counter++;
+				nextIndividual = true;
+				
 				nextGeneration = (counter >= individuals.size()) && (streak >= 1);
 				longestStreak = Math.max(longestStreak, streak);
 				streak = 0;
@@ -212,6 +218,8 @@ public class Population {
 				maxFitness = Float.NEGATIVE_INFINITY;
 			}
 		}
+		
+		return nextIndividual;
 	}
 	
 	private void log() {
@@ -300,19 +308,23 @@ public class Population {
 		
 		try (InputStream fis = Files.newInputStream(file); DataInputStream dis = new DataInputStream(fis)) {
 			counter = dis.readInt();
-			streak = dis.readInt();
-			generation = (dis.available() > 0 ? dis.readInt() : 0);
-			wins = (dis.available() > 0 ? dis.readInt() : 0);
-			goalWins = (dis.available() > 0 ? dis.readInt() : 0);
-			losses = (dis.available() > 0 ? dis.readInt() : 0);
-			minGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
-			maxGoalMoves = (dis.available() > 0 ? dis.readInt() : 0);
-			longestStreak = (dis.available() > 0 ? dis.readInt() : 0);
+			streak = readIntOrZero(dis);
+			generation = readIntOrZero(dis);
+			wins = readIntOrZero(dis);
+			goalWins = readIntOrZero(dis);
+			losses = readIntOrZero(dis);
+			minGoalMoves = readIntOrZero(dis);
+			maxGoalMoves = readIntOrZero(dis);
+			longestStreak = readIntOrZero(dis);
 		} catch (IOException e) {
 			return false;
 		}
 		
 		return true;
+	}
+
+	private int readIntOrZero(DataInputStream dis) throws IOException {
+		return dis.available() > Integer.BYTES ? dis.readInt() : 0;
 	}
 
 	private void save(int index, float[] individual, float fitness) {
