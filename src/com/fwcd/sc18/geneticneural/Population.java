@@ -279,9 +279,9 @@ public class Population {
 					ByteBuffer buffer = ByteBuffer.allocate(oldBytes);
 					channel.read(buffer);
 					buffer.position(truncatedBytes);
-					buffer.slice();
+					ByteBuffer result = buffer.slice();
 					channel.position(0);
-					channel.write(buffer);
+					channel.write(result);
 					channel.truncate(maxStatsBytes);
 				}
 			}
