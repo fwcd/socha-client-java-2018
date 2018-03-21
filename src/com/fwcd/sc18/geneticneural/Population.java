@@ -24,6 +24,7 @@ import com.fwcd.sc18.exception.CorruptedDataException;
 import com.fwcd.sc18.utils.FloatList;
 import com.fwcd.sc18.utils.IndexedHashMap;
 import com.fwcd.sc18.utils.IndexedMap;
+import com.fwcd.sc18.utils.MatchResult;
 
 /**
  * A population that uses genetic techniques to
@@ -34,8 +35,10 @@ public class Population {
 	
 	private final IndexedMap<float[], Float> individuals;
 	private final Supplier<float[]> spawner;
+	private final GeneticStrategy strategy;
 	private final int survivorsPerGeneration;
 	private final boolean trainMode;
+	private final int trainIndex;
 	
 	private float mutatorWeight = 1F;
 	private float mutatorBias = 0;
@@ -67,14 +70,25 @@ public class Population {
 	 * @param size - The amount of individuals in the new population
 	 * @param spawner - A supply of new individuals
 	 * @param savePath - The folder to which individuals will be serialized
+	 * @param strategy - The strategy to be used
 	 * @param trainMode - Whether the population should be created/loaded in training mode
+	 * @param trainIndex - The index of the "training player" (relevant for selection)
 	 */
-	public Population(int size, Supplier<float[]> spawner, Path savePath, boolean trainMode) {
+	public Population(
+			int size,
+			Supplier<float[]> spawner,
+			Path savePath,
+			GeneticStrategy strategy,
+			boolean trainMode,
+			int trainIndex
+	) {
 		this.trainMode = trainMode;
 		this.savePath = savePath;
+		this.trainIndex = trainIndex;
+		this.strategy = strategy;
+		this.spawner = spawner;
 		survivorsPerGeneration = size / 2;
 		individuals = new IndexedHashMap<>();
-		this.spawner = spawner;
 		
 		if (!loadAll(size)) {
 			individuals.clear();
@@ -92,20 +106,20 @@ public class Population {
 	 * Samples an individual from this population depending on the trainMode.
 	 */
 	public float[] sample() {
-		return trainMode ? selectCurrentGenes() : selectFittestGenes();
+		return trainMode ? selectTrainingGenes() : selectFittestGenes();
 	}
 	
 	/**
 	 * Selects the current individual for training.
 	 */
-	private float[] selectCurrentGenes() {
+	private float[] selectTrainingGenes() {
 		int size = individuals.size();
 		
 		if (counter < 0 || counter >= size) {
 			counter = 0;
 		}
 		
-		return individuals.getKey(counter);
+		return strategy.selectTrainingGenes(individuals, counter)[trainIndex];
 	}
 	
 	/**
@@ -146,16 +160,8 @@ public class Population {
 		individuals.put(index, individual, fitness);
 	}
 	
-	/**
-	 * Updates the given individual's fitness. It will increment or
-	 * replace, depending on whether the game has been won or not.
-	 */
-	public float updateFitness(boolean won, float[] individual, float newFitness) {
-		float bias = (streak > 0 ? individuals.get(individual) : 0);
-		float totalFitness = bias + newFitness;
-		put(counter, individual, totalFitness);
-		
-		return totalFitness;
+	public float getFitness(float[] individual) {
+		return individuals.get(individual);
 	}
 	
 	/**
@@ -167,14 +173,16 @@ public class Population {
 	 * 
 	 * @return Whether the counter has been changed to the next individual
 	 */
-	public boolean evolve(boolean won, boolean inGoal, int moves) {
+	public boolean evolve(MatchResult result, EvaluationResult evaluation) {
 		boolean nextIndividual = false;
 		
 		if (trainMode) {
 			boolean nextGeneration = false;
+			int counterDelta = evaluation.getCounterDelta();
+			put(result.getGenes(), evaluation.getFitness());
 			
-			if (!won && streak >= 1) {
-				counter++;
+			if (counterDelta > 0) {
+				counter += counterDelta;
 				nextIndividual = true;
 				
 				nextGeneration = (counter >= individuals.size()) && (streak >= 1);
@@ -184,8 +192,9 @@ public class Population {
 				streak++;
 			}
 			
-			if (won) {
-				if (inGoal) {
+			if (result.isWon()) {
+				if (result.inGoal()) {
+					int moves = result.getTurn();
 					minGoalMoves = Math.min(moves, minGoalMoves);
 					maxGoalMoves = Math.max(moves, maxGoalMoves);
 					goalWins++;
@@ -272,8 +281,10 @@ public class Population {
 				
 				try (SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
 					int oldBytes = (int) fileSize;
-					int chunkBytes = Integer.BYTES * 7; // The number has to match the ints in a chunk written further below
-					int truncatedBytes = oldBytes - maxStatsBytes;
+					int chunkSize = 7; // The number has to match the ints in a chunk written further below
+					int chunkBytes = Integer.BYTES * chunkSize;
+					int newBytes = maxStatsBytes - (maxStatsBytes % chunkSize);
+					int truncatedBytes = oldBytes - newBytes;
 					truncatedBytes -= truncatedBytes % chunkBytes;
 					
 					ByteBuffer buffer = ByteBuffer.allocate(oldBytes);
@@ -282,7 +293,7 @@ public class Population {
 					ByteBuffer result = buffer.slice();
 					channel.position(0);
 					channel.write(result);
-					channel.truncate(maxStatsBytes);
+					channel.truncate(newBytes);
 				}
 			}
 			

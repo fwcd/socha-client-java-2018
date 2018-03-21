@@ -17,9 +17,12 @@ import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 /**
- * A collection of static utility methods.
+ * A collection of static utility methods and constants.
  */
 public final class HUIUtils {
+	public static final int MAX_FIELD = 64;
+	public static final int CARROT_THRESHOLD = 360;
+	
 	private HUIUtils() {}
 	
 	public static float[] generateWeights(int... layerSizes) {

@@ -11,6 +11,7 @@ import com.fwcd.sc18.core.EvaluatingLogic;
 import com.fwcd.sc18.exception.CorruptedDataException;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
+import com.fwcd.sc18.utils.MatchResult;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.Action;
@@ -32,32 +33,41 @@ import sc.shared.InvalidMoveException;
  */
 public class GeneticNeuralLogic extends EvaluatingLogic {
 	private static final int ENCODED_BOARD_SIZE = 26;
-	private static final int MAX_FIELD = 64;
-	private static final int CARROT_THRESHOLD = 360;
-	private static final int FITNESS_BIAS = 5;
-	private static final int WIN_FITNESS_BIAS = 10;
 	private static final Logger GENETIC_LOG = LoggerFactory.getLogger("geneticlog");
 
+	private final GeneticStrategy strategy;
 	private final int populationSize = 20;
 	private final boolean useDropout = false;
 	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
+	
 	private final Population population;
 	private final Perceptron neuralNet;
 	private final boolean trainMode;
+	private final int trainIndex;
 	
 	public GeneticNeuralLogic(VirtualClient client) {
+		this(client, new SoloStreakStrategy(), 0);
+	}
+	
+	public GeneticNeuralLogic(VirtualClient client, GeneticStrategy strategy, int trainIndex) {
 		super(client);
+		this.strategy = strategy;
+		this.trainIndex = trainIndex;
+		
 		GENETIC_LOG.info("Launching in training/testing mode...");
 		trainMode = true;
-		population = newPopulation(trainMode);
+		population = newPopulation();
 		neuralNet = newPerceptron();
 	}
 	
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
+		
 		GENETIC_LOG.info("Launching in production mode...");
+		strategy = new GeneticStrategy.None();
 		trainMode = false;
-		population = newPopulation(trainMode);
+		trainIndex = -1;
+		population = newPopulation();
 		neuralNet = newPerceptron();
 	}
 
@@ -66,7 +76,9 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	 */
 	public GeneticNeuralLogic(AbstractClient client, GeneticNeuralLogic other) {
 		super(client);
+		strategy = other.strategy;
 		trainMode = other.trainMode;
+		trainIndex = other.trainIndex;
 		population = other.population;
 		neuralNet = other.neuralNet;
 	}
@@ -79,39 +91,15 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
-		Player me = getMe(gameState);
-		
-		int carrots = me.getCarrots();
-		int field = me.getFieldIndex();
-		int turn = gameState.getTurn();
-		
-		boolean inGoal = me.inGoal();
-		float fitness;
-		
-		if (inGoal) {
-			fitness = WIN_FITNESS_BIAS
-					- HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT + 1);
-		} else {
-			float normCarrots = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
-			float normSalads = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
-			float normField = HUIUtils.normalize(me.getFieldIndex(), 0, MAX_FIELD);
-			
-			fitness = FITNESS_BIAS - normSalads + normField - normCarrots;
-		}
-		
-		int counter = population.getCounter();
-		int streak = population.getStreak();
-		
-		float totalFitness = population.updateFitness(won, neuralNet.getWeights(), fitness);
-		GENETIC_LOG.debug("[{}:{}] - Carrots: {}, Field: {}, Turns: {}, Fitness: {} ({})", new Object[] {
-				counter, streak, carrots, field, turn, totalFitness, (won ? (inGoal ? "won + in goal" : "won") : "lost")
-		});
-		
-		boolean choseNextIndividual = population.evolve(won, inGoal, turn);
+		float[] genes = neuralNet.getWeights();
+		MatchResult res = new MatchResult(gameState, getMyColor(), won, result, errorMessage, genes);
+		EvaluationResult eval = strategy.evaluate(res, population.getFitness(genes), population);
+		boolean choseNextIndividual = population.evolve(res, eval);
 		
 		if (choseNextIndividual) {
 			neuralNet.setDropoutEnabled(false); // Disable dropout and reset dropout indices
 		}
+		
 	}
 	
 	@Override
@@ -160,12 +148,12 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		// The total count of statements below needs to match the ENCODED_BOARD_SIZE
 		
 		encoded[i++] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
-		encoded[i++] = HUIUtils.normalize(me.getCarrots(), 0, CARROT_THRESHOLD);
+		encoded[i++] = HUIUtils.normalize(me.getCarrots(), 0, HUIUtils.CARROT_THRESHOLD);
 		encoded[i++] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
-		encoded[i++] = HUIUtils.normalize(myFieldIndex, 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(opponent.getCarrots(), 0, CARROT_THRESHOLD);
+		encoded[i++] = HUIUtils.normalize(myFieldIndex, 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(opponent.getCarrots(), 0, HUIUtils.CARROT_THRESHOLD);
 		encoded[i++] = HUIUtils.normalize(opponent.getSalads(), 0, Constants.SALADS_TO_EAT);
-		encoded[i++] = HUIUtils.normalize(oppFieldIndex, 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(oppFieldIndex, 0, HUIUtils.MAX_FIELD);
 		encoded[i++] = myCards.contains(CardType.EAT_SALAD) ? 1 : 0;
 		encoded[i++] = myCards.contains(CardType.FALL_BACK) ? 1 : 0;
 		encoded[i++] = myCards.contains(CardType.HURRY_AHEAD) ? 1 : 0;
@@ -178,13 +166,13 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		encoded[i++] = myFieldType == FieldType.SALAD ? 1 : 0;
 		encoded[i++] = myFieldType == FieldType.START ? 1 : 0;
 		encoded[i++] = myFieldType == FieldType.GOAL ? 1 : 0;
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.CARROT, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.HARE, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToPrevField(FieldType.HEDGEHOG, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_1, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_2, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.SALAD, myFieldIndex, gameState), 0, MAX_FIELD);
-		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.GOAL, myFieldIndex, gameState), 0, MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.CARROT, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.HARE, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToPrevField(FieldType.HEDGEHOG, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_1, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_2, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.SALAD, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
+		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.GOAL, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
 		
 		
 		return encoded;
@@ -199,7 +187,14 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		return new Perceptron(layerSizes);
 	}
 
-	private Population newPopulation(boolean trainMode) {
-		return new Population(populationSize, () -> HUIUtils.generateWeights(layerSizes), Paths.get("."), trainMode);
+	private Population newPopulation() {
+		return new Population(
+				populationSize,
+				() -> HUIUtils.generateWeights(layerSizes),
+				Paths.get("."),
+				strategy,
+				trainMode,
+				trainIndex
+		);
 	}
 }
