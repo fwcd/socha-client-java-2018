@@ -9,20 +9,24 @@ import java.nio.file.Paths;
 import com.fwcd.sc18.geneticneural.GeneticNeuralLogic;
 import com.fwcd.sc18.trainer.core.GameSimulator;
 
-import sc.player2018.RandomLogic;
+import sc.player2018.SimpleLogic;
 
 public class TrainerMain {
 	public static void main(String[] args) {
-		GameSimulator sim = new GameSimulator(GeneticNeuralLogic::new, RandomLogic::new, Long.MAX_VALUE);
+		GameSimulator simulator = new GameSimulator(
+				GeneticNeuralLogic::new,
+				SimpleLogic::new,
+				Long.MAX_VALUE
+		);
 		Path stopFile = Paths.get(".", "StopTraining");
-		Thread simThread = new Thread(sim::run);
+		Thread simThread = new Thread(simulator::run);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
 				System.out.println("Waiting for shutdown...");
 				long start = System.currentTimeMillis();
 				
-				sim.stop();
+				simulator.stop();
 				Files.deleteIfExists(stopFile);
 				simThread.join();
 				
@@ -35,7 +39,7 @@ public class TrainerMain {
 			}
 		}));
 		
-		sim.setStopCondition(() -> Files.exists(stopFile));
+		simulator.setStopCondition(() -> Files.exists(stopFile));
 		simThread.start();
 	}
 }

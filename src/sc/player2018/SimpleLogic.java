@@ -31,59 +31,41 @@ import sc.shared.PlayerColor;
  * waehlt, aber gueltige Zuege macht. Ausserdem werden zum Spielverlauf
  * Konsolenausgaben gemacht.
  */
-public class RandomLogic implements IGameHandler {
+public class SimpleLogic implements IGameHandler {
 	private VirtualClient virtualClient;
 	private AbstractClient client;
 	private GameState gameState;
 	private Player currentPlayer;
 
-	private static final Logger LOG = LoggerFactory.getLogger(RandomLogic.class);
-	/*
-	 * Klassenweit verfuegbarer Zufallsgenerator der beim Laden der klasse einmalig
-	 * erzeugt wird und darin immer zur Verfuegung steht.
-	 */
+	private static final Logger LOG = LoggerFactory.getLogger(SimpleLogic.class);
 	private static final Random RANDOM = new SecureRandom();
 
-	public RandomLogic(VirtualClient client) {
+	public SimpleLogic(VirtualClient client) {
 		virtualClient = client;
 	}
 	
-	/**
-	 * Erzeugt ein neues Strategieobjekt, das zufaellige Zuege taetigt.
-	 *
-	 * @param client
-	 *            Der Zugrundeliegende Client der mit dem Spielserver kommunizieren
-	 *            kann.
-	 */
-	public RandomLogic(AbstractClient client) {
+	public SimpleLogic(AbstractClient client) {
 		this.client = client;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void gameEnded(GameResult data, PlayerColor color, String errorMessage) {
-		LOG.info("Das Spiel ist beendet.");
+		LOG.info("The game has ended.");
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void onRequestAction() {
-		long startTime = System.nanoTime();
-		LOG.info("Es wurde ein Zug angefordert.");
+		long startTime = System.currentTimeMillis();
+		LOG.debug("A move has been requested.");
 		Move move = chooseMove();
 		move.orderActions();
-		LOG.info("Sende zug {}", move);
-		long nowTime = System.nanoTime();
+		LOG.debug("Sending move: {}", move);
 		sendAction(move);
-		LOG.warn("Time needed for turn: {}", (nowTime - startTime) / 1000000);
+		LOG.warn("Time needed for turn: {} ms", System.currentTimeMillis() - startTime);
 	}
 
 	private Move chooseMove() {
-		List<Move> possibleMove = gameState.getPossibleMoves(); // Mindestens ein element
+		List<Move> possibleMove = gameState.getPossibleMoves(); // Contains at least one entry
 		List<Move> saladMoves = new ArrayList<>();
 		List<Move> winningMoves = new ArrayList<>();
 		List<Move> selectedMoves = new ArrayList<>();
@@ -94,46 +76,43 @@ public class RandomLogic implements IGameHandler {
 				if (action instanceof Advance) {
 					Advance advance = (Advance) action;
 					if (advance.getDistance() + index == Constants.NUM_FIELDS - 1) {
-						// Zug ins Ziel
+						// Enter goal
 						winningMoves.add(move);
 
 					} else if (gameState.getBoard().getTypeAt(advance.getDistance() + index) == FieldType.SALAD) {
-						// Zug auf Salatfeld
+						// Move to salad field
 						saladMoves.add(move);
 					} else {
-						// Ziehe Vorwaerts, wenn moeglich
+						// Advance if possible
 						selectedMoves.add(move);
 					}
 				} else if (action instanceof Card) {
 					Card card = (Card) action;
 					if (card.getType() == CardType.EAT_SALAD) {
-						// Zug auf Hasenfeld und danch Salatkarte
+						// Advance to hare field and eat salad
 						saladMoves.add(move);
-					} // Muss nicht zusätzlich ausgewählt werden, wurde schon
-						// durch Advance ausgewaehlt
+					}
 				} else if (action instanceof ExchangeCarrots) {
 					ExchangeCarrots exchangeCarrots = (ExchangeCarrots) action;
 					if (exchangeCarrots.getValue() == 10 && currentPlayer.getCarrots() < 30 && index < 40
 							&& !(currentPlayer.getLastNonSkipAction() instanceof ExchangeCarrots)) {
-						// Nehme nur Karotten auf, wenn weniger als 30 und nur
-						// am Anfang und nicht zwei mal hintereinander
+						// Only pick up carrots if there are less than 30,
+						// just at the beginning and not twice in a row
 						selectedMoves.add(move);
 					} else if (exchangeCarrots.getValue() == -10 && currentPlayer.getCarrots() > 30 && index >= 40) {
-						// abgeben von Karotten ist nur am Ende sinnvoll
+						// Only drop carrots if at the end
 						selectedMoves.add(move);
 					}
 				} else if (action instanceof FallBack) {
-					if (index > 56 /* letztes Salatfeld */ && currentPlayer.getSalads() > 0) {
-						// Falle nur am Ende (index > 56) zurueck, ausser du
-						// musst noch einen Salat loswerden
+					if (index > 56 /* Last salad field */ && currentPlayer.getSalads() > 0) {
+						// Just fall back at the end if we still have salads
 						selectedMoves.add(move);
 					} else if (index <= 56 && index - gameState.getPreviousFieldByType(FieldType.HEDGEHOG, index) < 5) {
-						// Falle zuruek, falls sich Rueckzug lohnt (nicht zu
-						// viele Karotten aufnehmen)
+						// Don't pick up too many carrots while falling back
 						selectedMoves.add(move);
 					}
 				} else {
-					// Fuege Salatessen oder Skip hinzu
+					// Add "eat salad" or "skip"
 					selectedMoves.add(move);
 				}
 			}
@@ -154,29 +133,20 @@ public class RandomLogic implements IGameHandler {
 		return move;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void onUpdate(Player player, Player otherPlayer) {
 		currentPlayer = player;
-		LOG.info("Spielerwechsel: " + player.getPlayerColor());
+		LOG.info("Player's turn: {}", player.getPlayerColor());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void onUpdate(GameState gameState) {
 		this.gameState = gameState;
 		currentPlayer = gameState.getCurrentPlayer();
-		LOG.info("Das Spiel geht voran: Zug: {}", gameState.getTurn());
-		LOG.info("Spieler: {}", currentPlayer.getPlayerColor());
+		LOG.info("Move: {}", gameState.getTurn());
+		LOG.info("Current player: {}", currentPlayer.getPlayerColor());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendAction(Move move) {
 		if (client != null) {

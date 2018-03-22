@@ -11,6 +11,13 @@ import sc.plugin2018.GameState;
 import sc.plugin2018.Player;
 import sc.plugin2018.util.Constants;
 
+/**
+ * A "simple" strategy that picks single individuals and computes
+ * cumulative fitness values based off win streaks against the opponent.
+ * 
+ * <p>It can not be used to train against another individuals
+ * in the same population though.</p>
+ */
 public class SoloStreakStrategy implements GeneticStrategy {
 	private static final int FITNESS_BIAS = 5;
 	private static final int WIN_FITNESS_BIAS = 10;

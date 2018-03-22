@@ -184,8 +184,8 @@ public class Population {
 			if (counterDelta > 0) {
 				counter += counterDelta;
 				nextIndividual = true;
+				nextGeneration = evaluation.shouldSkipToNextGeneration() || counter >= size();
 				
-				nextGeneration = (counter >= individuals.size()) && (streak >= 1);
 				longestStreak = Math.max(longestStreak, streak);
 				streak = 0;
 			} else {
@@ -207,6 +207,7 @@ public class Population {
 			
 			if (nextGeneration) {
 				// Reached a full generation
+				strategy.onPreNextGeneration(this);
 				sortByFitnessDescending();
 				maxFitness = individuals.getValue(0);
 				
@@ -225,6 +226,7 @@ public class Population {
 				minGoalMoves = Integer.MAX_VALUE;
 				maxGoalMoves = Integer.MIN_VALUE;
 				maxFitness = Float.NEGATIVE_INFINITY;
+				strategy.onPostNextGeneration(this);
 			}
 		}
 		

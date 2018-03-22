@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BooleanSupplier;
-import java.util.function.Function;
 
 import com.fwcd.sc18.trainer.ui.GameView;
 
@@ -38,15 +37,20 @@ public class GameSimulator {
 	private boolean started = false;
 	private boolean stopped = false;
 	
-	public GameSimulator(Function<VirtualClient, IGameHandler> a, Function<VirtualClient, IGameHandler> b, long matches) {
+	@FunctionalInterface
+	public static interface LogicConstructor {
+		IGameHandler createLogic(VirtualClient client);
+	}
+	
+	public GameSimulator(LogicConstructor a, LogicConstructor b, long matches) {
 		this.matches = matches;
 		view = Optional.empty();
 		gameEndListeners = Collections.emptyList();
 		
 		clientA = new VirtualClient(PlayerColor.RED);
-		logicA = a.apply(clientA);
+		logicA = a.createLogic(clientA);
 		clientB = new VirtualClient(PlayerColor.BLUE);
-		logicB = b.apply(clientB);
+		logicB = b.createLogic(clientB);
 	}
 	
 	public GameSimulator(
