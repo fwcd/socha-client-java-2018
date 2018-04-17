@@ -1,0 +1,21 @@
+plugins {
+	id 'java'
+}
+
+dependencies {
+	// Include all JAR-libraries from lib folder
+	compile fileTree(dir: 'lib', include: ['*.jar'])
+}
+
+jar {
+	destinationDir = file('target') // Put JAR into target folder
+	manifest {
+		attributes 'Main-Class': 'sc.player2018.PhantomClientMain'
+	}
+	
+	// Package libraries into JAR
+	from {
+		configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	exclude('META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA')
+}

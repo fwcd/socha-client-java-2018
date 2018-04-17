@@ -17,7 +17,6 @@ The respective package-info.java files contain further information for each subp
 ## Setting up Eclipse for development
 
 * Clone this repository to your pc using git (you may want to use --depth to limit the clone depth):
-
       git clone https://bitbucket.org/TheDroide/phantomclient.git
 
 * Link the root repository folder to your workspace by opening
@@ -27,7 +26,8 @@ The respective package-info.java files contain further information for each subp
 
 * [Download the Server here](http://www.software-challenge.de/downloads/).
   
-* Build the client using the "build.xml" ANT-file (though it should already show up as a pre-configured project builder in Eclipse)
+* Build the client using Gradle:
+      gradlew build
   
 * You should find the compiled JAR under the path target/phantomclient.jar
   
