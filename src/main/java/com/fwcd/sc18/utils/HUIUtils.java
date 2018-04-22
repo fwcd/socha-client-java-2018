@@ -7,6 +7,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import sc.plugin2018.Action;
 import sc.plugin2018.Advance;
+import sc.plugin2018.CardType;
+import sc.plugin2018.ExchangeCarrots;
 import sc.plugin2018.FieldType;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -22,6 +24,7 @@ import sc.shared.PlayerColor;
 public final class HUIUtils {
 	public static final int MAX_FIELD = 64;
 	public static final int CARROT_THRESHOLD = 360;
+	public static final int LAST_SALAD_FIELD = 57;
 	
 	private HUIUtils() {}
 	
@@ -33,6 +36,21 @@ public final class HUIUtils {
 		
 		float[] newWeights = new float[weightCount];
 		return initWeights(newWeights);
+	}
+
+	public static boolean hasCyclicCarrotExchange(Player beforeMove, Player afterMove) {
+		Action first = beforeMove.getLastNonSkipAction();
+		Action second = afterMove.getLastNonSkipAction();
+		
+		if (first instanceof ExchangeCarrots && second instanceof ExchangeCarrots) {
+			int value1 = ((ExchangeCarrots) first).getValue();
+			int value2 = ((ExchangeCarrots) second).getValue();
+
+			// Checks whether a drop/take cycle has occurred
+			return (value1 > 0 && value2 < 0) || (value1 < 0 && value2 > 0);
+		} else {
+			return false;
+		}
 	}
 
 	public static float[] initWeights(float[] newWeights) {
@@ -101,6 +119,18 @@ public final class HUIUtils {
 	
 	public static int distToPrevField(FieldType fieldType, int currentIndex, GameState state) {
 		return state.getPreviousFieldByType(fieldType, currentIndex) - currentIndex;
+	}
+	
+	public static int distToNextSalad(Player me, GameState state) {
+		int myIndex = me.getFieldIndex();
+		int distToSaladField = distToNextField(FieldType.SALAD, myIndex, state);
+		int distToHareField = distToNextField(FieldType.HARE, myIndex, state);
+		
+		if (distToHareField < distToSaladField && me.ownsCardOfType(CardType.EAT_SALAD)) {
+			return distToHareField;
+		} else {
+			return distToSaladField;
+		}
 	}
 	
 	public static boolean isGameOver(GameState state) {
