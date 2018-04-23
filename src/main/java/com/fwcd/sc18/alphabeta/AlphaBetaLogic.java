@@ -5,6 +5,9 @@ import com.fwcd.sc18.core.EvaluatingLogic;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
@@ -14,9 +17,13 @@ import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 public class AlphaBetaLogic extends EvaluatingLogic {
+	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private int depth = 4;
 	private MoveEvaluator evaluator = new MoveEvaluator();
 	private MovePruner pruner = new MovePruner();
+
+	private boolean benchmark = true;
+	private int gameStateEvaluations = 0;
 	
 	public AlphaBetaLogic(VirtualClient client) {
 		super(client);
@@ -33,7 +40,16 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 
 	@Override
 	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
-		return alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+		long startTime = System.currentTimeMillis();
+		float rating = alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+		long delta = System.currentTimeMillis() - startTime;
+
+		if (benchmark) {
+			LOG.info("Alpha-Beta Search evaluated {} game states per second", (gameStateEvaluations * 1000) / delta);
+			gameStateEvaluations = 0;
+		}
+
+		return rating;
 	}
 	
 	private float alphaBeta(
@@ -58,6 +74,10 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 		
 		boolean wasPruned = false;
 		if (depth <= 0 || HUIUtils.isGameOver(gameAfterMove) || (wasPruned = pruner.shouldPrune(move, myColor, gameBeforeMove, gameAfterMove))) {
+			if (benchmark) {
+				gameStateEvaluations++;
+			}
+
 			return evaluator.rate(move, myColor, gameBeforeMove, gameAfterMove, wasPruned);
 		} else {
 			float bestRating = maximizing ? alpha : beta;
