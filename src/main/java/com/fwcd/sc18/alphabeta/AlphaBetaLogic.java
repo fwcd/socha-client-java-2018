@@ -2,6 +2,10 @@ package com.fwcd.sc18.alphabeta;
 
 import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
+import com.fwcd.sc18.evaluator.HeuristicEvaluator;
+import com.fwcd.sc18.evaluator.HeuristicPruner;
+import com.fwcd.sc18.evaluator.MoveEvaluator;
+import com.fwcd.sc18.evaluator.MovePruner;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 import com.fwcd.sc18.utils.HUIUtils;
 
@@ -19,8 +23,8 @@ import sc.shared.PlayerColor;
 public class AlphaBetaLogic extends EvaluatingLogic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
 	private int depth = 4;
-	private MoveEvaluator evaluator = new MoveEvaluator();
-	private MovePruner pruner = new MovePruner();
+	private MoveEvaluator evaluator = new HeuristicEvaluator();
+	private MovePruner pruner = new HeuristicPruner();
 
 	private boolean benchmark = true;
 	private int gameStateEvaluations = 0;

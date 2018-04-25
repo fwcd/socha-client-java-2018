@@ -1,4 +1,4 @@
-package com.fwcd.sc18.alphabeta;
+package com.fwcd.sc18.evaluator;
 
 import com.fwcd.sc18.utils.HUIUtils;
 
@@ -8,7 +8,7 @@ import sc.plugin2018.Player;
 import sc.plugin2018.util.GameRuleLogic;
 import sc.shared.PlayerColor;
 
-public class MoveEvaluator {
+public class HeuristicEvaluator implements MoveEvaluator {
 	public static final float GOOD_RATING = 10000000;
 	public static final float BAD_RATING = -10000000;
 

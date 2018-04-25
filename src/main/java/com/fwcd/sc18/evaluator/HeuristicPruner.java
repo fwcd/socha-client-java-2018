@@ -1,4 +1,4 @@
-package com.fwcd.sc18.alphabeta;
+package com.fwcd.sc18.evaluator;
 
 import com.fwcd.sc18.utils.HUIUtils;
 
@@ -10,7 +10,7 @@ import sc.plugin2018.Move;
 import sc.plugin2018.Player;
 import sc.shared.PlayerColor;
 
-public class MovePruner {
+public class HeuristicPruner implements MovePruner {
 	public boolean shouldPrune(Move move, PlayerColor myColor, GameState gameBeforeMove, GameState gameAfterMove) {
 		Player meBeforeMove = gameBeforeMove.getPlayer(myColor);
 		Player meAfterMove = gameAfterMove.getPlayer(myColor);
