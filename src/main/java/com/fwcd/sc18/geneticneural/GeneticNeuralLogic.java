@@ -10,6 +10,7 @@ import com.fwcd.sc18.core.CopyableLogic;
 import com.fwcd.sc18.core.EvaluatingLogic;
 import com.fwcd.sc18.exception.CorruptedDataException;
 import com.fwcd.sc18.trainer.core.VirtualClient;
+import com.fwcd.sc18.utils.GameAlgorithms;
 import com.fwcd.sc18.utils.HUIUtils;
 import com.fwcd.sc18.utils.MatchResult;
 
@@ -26,6 +27,7 @@ import sc.plugin2018.util.GameRuleLogic;
 import sc.shared.GameResult;
 import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
+import sc.shared.PlayerColor;
 
 /**
  * A game logic that uses a neural network to evaluate
@@ -39,6 +41,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private final int populationSize = 20;
 	private final boolean useDropout = false;
 	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
+	private int alphaBetaDepth = 3;
 	
 	private final Population population;
 	private final Perceptron neuralNet;
@@ -102,17 +105,15 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		
 	}
 	
-	@Override
-	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
+	private float evaluateLeaf(Move move, PlayerColor myColor, GameState gameBeforeMove, GameState gameAfterMove, boolean wasPruned) {
 		for (Action action : move.actions) {
 			if (action instanceof ExchangeCarrots) {
-				Action lastAction = me.getLastNonSkipAction();
+				Action lastAction = gameBeforeMove.getPlayer(myColor).getLastNonSkipAction();
 				if (lastAction instanceof ExchangeCarrots) {
 					ExchangeCarrots current = (ExchangeCarrots) action;
 					ExchangeCarrots last = (ExchangeCarrots) lastAction;
 					
-					if ((last.getValue() > 0 && current.getValue() < 0)
-							|| (last.getValue() < 0 && current.getValue() > 0)) {
+					if ((last.getValue() > 0 && current.getValue() < 0) || (last.getValue() < 0 && current.getValue() > 0)) {
 						return Float.NEGATIVE_INFINITY;
 					}
 				}
@@ -120,8 +121,6 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		}
 		
 		try {
-			GameState gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
-			
 			if (GameRuleLogic.canEnterGoal(gameBeforeMove) && !getMe(gameAfterMove).inGoal()) {
 				return Float.NEGATIVE_INFINITY;
 			}
@@ -129,8 +128,20 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 			return neuralNet.compute(encode(gameAfterMove))[0];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new CorruptedDataException(population.getCounter());
-		} catch (InvalidMoveException | InvalidGameStateException e) {
-			return Float.NEGATIVE_INFINITY;
+		}
+	}
+
+	@Override
+	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
+		PlayerColor myColor = me.getPlayerColor();
+		if (alphaBetaDepth < 1) {
+			try {
+				return evaluateLeaf(move, myColor, gameBeforeMove, HUIUtils.spawnChild(gameBeforeMove, move), false);
+			} catch (InvalidGameStateException | InvalidMoveException e) {
+				return Float.NEGATIVE_INFINITY;
+			}
+		} else {
+			return GameAlgorithms.alphaBeta(true, move, gameBeforeMove, alphaBetaDepth, myColor, null, this::evaluateLeaf);
 		}
 	}
 	

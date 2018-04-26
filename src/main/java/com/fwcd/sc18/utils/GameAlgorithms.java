@@ -18,6 +18,18 @@ public final class GameAlgorithms {
 			GameState gameBeforeMove,
 			int depth,
 			PlayerColor myColor,
+			MovePruner pruner,
+			MoveEvaluator evaluator
+	) {
+		return alphaBeta(maximizing, move, gameBeforeMove, depth, myColor, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, pruner, evaluator);
+	}
+
+	public static float alphaBeta(
+			boolean maximizing,
+			Move move,
+			GameState gameBeforeMove,
+			int depth,
+			PlayerColor myColor,
 			float alpha,
 			float beta,
 			MovePruner pruner,

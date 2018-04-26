@@ -42,7 +42,7 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 	@Override
 	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
 		long startTime = System.currentTimeMillis();
-		float rating = GameAlgorithms.alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, pruner, evaluator);
+		float rating = GameAlgorithms.alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), pruner, evaluator);
 		long delta = System.currentTimeMillis() - startTime;
 
 		if (benchmark && delta > 0) {

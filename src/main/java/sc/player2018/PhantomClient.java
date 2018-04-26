@@ -3,8 +3,8 @@ package sc.player2018;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import com.fwcd.sc18.alphabeta.AlphaBetaLogic;
 import com.fwcd.sc18.core.CopyableLogic;
+import com.fwcd.sc18.geneticneural.GeneticNeuralLogic;
 
 import sc.framework.plugins.SimplePlayer;
 import sc.plugin2018.AbstractClient;
@@ -25,8 +25,8 @@ public class PhantomClient extends AbstractClient {
 		this.reservation = reservation;
 		
 		if (strategy == null || strategy.isEmpty()) {
-			// logic = new GeneticNeuralLogic(this);
-			logic = new AlphaBetaLogic(this);
+			logic = new GeneticNeuralLogic(this);
+			// logic = new AlphaBetaLogic(this);
 		} else {
 			try {
 				logic = (CopyableLogic) Class.forName(strategy).newInstance();
