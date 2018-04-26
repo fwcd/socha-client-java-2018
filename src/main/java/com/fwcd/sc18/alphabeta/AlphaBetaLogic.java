@@ -7,7 +7,7 @@ import com.fwcd.sc18.evaluator.HeuristicPruner;
 import com.fwcd.sc18.evaluator.MoveEvaluator;
 import com.fwcd.sc18.evaluator.MovePruner;
 import com.fwcd.sc18.trainer.core.VirtualClient;
-import com.fwcd.sc18.utils.HUIUtils;
+import com.fwcd.sc18.utils.GameAlgorithms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,6 @@ import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
-import sc.shared.InvalidGameStateException;
-import sc.shared.InvalidMoveException;
-import sc.shared.PlayerColor;
 
 public class AlphaBetaLogic extends EvaluatingLogic {
 	private static final Logger LOG = LoggerFactory.getLogger("ownlog");
@@ -26,7 +23,7 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 	private MoveEvaluator evaluator = new HeuristicEvaluator();
 	private MovePruner pruner = new HeuristicPruner();
 
-	private boolean benchmark = true;
+	private boolean benchmark = false;
 	private int gameStateEvaluations = 0;
 	
 	public AlphaBetaLogic(VirtualClient client) {
@@ -45,71 +42,14 @@ public class AlphaBetaLogic extends EvaluatingLogic {
 	@Override
 	protected float evaluateMove(Move move, GameState gameBeforeMove, Player me) {
 		long startTime = System.currentTimeMillis();
-		float rating = alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
+		float rating = GameAlgorithms.alphaBeta(false, move, gameBeforeMove, depth, me.getPlayerColor(), Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, pruner, evaluator);
 		long delta = System.currentTimeMillis() - startTime;
 
-		if (benchmark) {
+		if (benchmark && delta > 0) {
 			LOG.info("Alpha-Beta Search evaluated {} game states per second", (gameStateEvaluations * 1000) / delta);
 			gameStateEvaluations = 0;
 		}
 
 		return rating;
-	}
-	
-	private float alphaBeta(
-			boolean maximizing,
-			Move move,
-			GameState gameBeforeMove,
-			int depth,
-			PlayerColor myColor,
-			float alpha,
-			float beta
-	) {
-		GameState gameAfterMove;
-		try {
-			gameAfterMove = HUIUtils.spawnChild(gameBeforeMove, move);
-		} catch (InvalidMoveException | InvalidGameStateException e) {
-			if (maximizing) {
-				return Float.NEGATIVE_INFINITY;
-			} else {
-				return Float.POSITIVE_INFINITY;
-			}
-		}
-		
-		boolean wasPruned = false;
-		if (depth <= 0 || HUIUtils.isGameOver(gameAfterMove) || (wasPruned = pruner.shouldPrune(move, myColor, gameBeforeMove, gameAfterMove))) {
-			if (benchmark) {
-				gameStateEvaluations++;
-			}
-
-			return evaluator.rate(move, myColor, gameBeforeMove, gameAfterMove, wasPruned);
-		} else {
-			float bestRating = maximizing ? alpha : beta;
-			
-			for (Move childMove : gameAfterMove.getPossibleMoves()) {
-				// TODO: Timer?
-				float rating;
-				
-				if (maximizing) {
-					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, myColor, bestRating, beta);
-					if (rating > bestRating) {
-						bestRating = rating;
-						if (bestRating >= beta) {
-							break; // Beta-cutoff
-						}
-					}
-				} else {
-					rating = alphaBeta(!maximizing, childMove, gameAfterMove, depth - 1, myColor, alpha, bestRating);
-					if (rating < bestRating) {
-						bestRating = rating;
-						if (bestRating <= alpha) {
-							break; // Alpha-cutoff
-						}
-					}
-				}
-			}
-			
-			return bestRating;
-		}
 	}
 }

@@ -6,18 +6,20 @@ import com.antelmann.game.GameMove;
 import com.antelmann.game.GamePlay;
 import com.fwcd.sc18.agbinds.AGGameState;
 import com.fwcd.sc18.agbinds.AGMove;
+import com.fwcd.sc18.evaluator.MoveEvaluator;
 import com.fwcd.sc18.trainer.core.VirtualClient;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.GameState;
 import sc.plugin2018.Move;
 import sc.plugin2018.Player;
+import sc.shared.PlayerColor;
 
 /**
  * A logic based upon evaluating moves by assigning
  * a numeric rating to a move/state-combination.
  */
-public abstract class EvaluatingLogic extends TemplateLogic {
+public abstract class EvaluatingLogic extends TemplateLogic implements MoveEvaluator {
 	private boolean parallelize = true;
 	
 	public EvaluatingLogic(VirtualClient client) {
@@ -59,5 +61,10 @@ public abstract class EvaluatingLogic extends TemplateLogic {
 	public double heuristic(GamePlay game, GameMove move, int[] role) {
 		GameState state = ((AGGameState) game).getState();
 		return evaluateMove(((AGMove) move).get(), state, state.getCurrentPlayer());
+	}
+
+	@Override
+	public float rate(Move move, PlayerColor myColor, GameState gameBeforeMove, GameState gameAfterMove, boolean wasPruned) {
+		return evaluateMove(move, gameBeforeMove, gameBeforeMove.getPlayer(myColor));
 	}
 }
