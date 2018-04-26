@@ -1,0 +1,60 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+	
+		{
+			"type": "java",
+			"name": "Debug (Launch)-GUITrainerMain<phantomclient>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"console": "internalConsole",
+			"stopOnEntry": false,
+			"mainClass": "com.fwcd.sc18.trainer.GUITrainerMain",
+			"projectName": "phantomclient",
+			"args": ""
+		},
+		{
+			"type": "java",
+			"name": "Debug (Launch)-TrainerMain<phantomclient>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"console": "internalConsole",
+			"stopOnEntry": false,
+			"mainClass": "com.fwcd.sc18.trainer.TrainerMain",
+			"projectName": "phantomclient",
+			"args": ""
+		},
+		{
+			"type": "java",
+			"name": "Debug (Launch)-PhantomClientMain<phantomclient>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"console": "internalConsole",
+			"stopOnEntry": false,
+			"mainClass": "sc.player2018.PhantomClientMain",
+			"projectName": "phantomclient",
+			"args": ""
+		},
+		{
+			"type": "java",
+			"name": "Debug (Launch)-Playground<phantomclient>",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"console": "internalConsole",
+			"stopOnEntry": false,
+			"mainClass": "com.fwcd.sc18.test.Playground",
+			"projectName": "phantomclient",
+			"args": ""
+		},
+		{
+			"type": "java",
+			"name": "Debug (Attach)",
+			"request": "attach",
+			"hostName": "localhost",
+			"port": 0
+		}
+	]
+}
