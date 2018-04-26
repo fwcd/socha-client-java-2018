@@ -1,7 +1,5 @@
 package com.fwcd.sc18.evaluator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import sc.plugin2018.Action;

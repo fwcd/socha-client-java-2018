@@ -41,7 +41,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private final int populationSize = 20;
 	private final boolean useDropout = false;
 	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
-	private int alphaBetaDepth = 3;
+	private int alphaBetaDepth = 0;
 	
 	private final Population population;
 	private final Perceptron neuralNet;

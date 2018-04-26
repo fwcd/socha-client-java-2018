@@ -1,6 +1,5 @@
 package com.fwcd.sc18.evaluator;
 
-import com.antelmann.game.GameUtilities;
 import com.fwcd.sc18.utils.HUIUtils;
 
 import sc.plugin2018.GameState;
