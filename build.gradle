@@ -9,15 +9,15 @@ dependencies {
 
 jar {
 	destinationDir = file('target') // Put JAR into target folder
-	
+
 	// Package libraries into JAR
 	from {
 		configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 	exclude('META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA')
-	baseName 'phantomclient'
+	baseName 'runnableclient'
 	manifest {
-		attributes 'Main-Class': 'sc.player2018.PhantomClientMain'
+		attributes 'Main-Class': 'sc.player2018.SC18ClientMain'
 	}
 	from sourceSets.main.output
 }

@@ -3,3 +3,6 @@ bin/
 build/
 target/*.jar
 target/*.zip
+.classpath
+.project
+.idea/

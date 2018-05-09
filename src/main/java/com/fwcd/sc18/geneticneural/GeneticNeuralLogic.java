@@ -42,30 +42,30 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 	private final boolean useDropout = false;
 	private final int[] layerSizes = {ENCODED_BOARD_SIZE, 30, 15, 5, 1};
 	private int alphaBetaDepth = 0;
-	
+
 	private final Population population;
 	private final Perceptron neuralNet;
 	private final boolean trainMode;
 	private final int trainIndex;
-	
+
 	public GeneticNeuralLogic(VirtualClient client) {
 		this(client, new SoloStreakStrategy(), 0);
 	}
-	
+
 	public GeneticNeuralLogic(VirtualClient client, GeneticStrategy strategy, int trainIndex) {
 		super(client);
 		this.strategy = strategy;
 		this.trainIndex = trainIndex;
-		
+
 		GENETIC_LOG.info("Launching in training/testing mode...");
 		trainMode = true;
 		population = newPopulation();
 		neuralNet = newPerceptron();
 	}
-	
+
 	public GeneticNeuralLogic(AbstractClient client) {
 		super(client);
-		
+
 		GENETIC_LOG.info("Launching in production mode...");
 		strategy = new GeneticStrategy.None();
 		trainMode = false;
@@ -91,20 +91,20 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		neuralNet.setWeights(population.sample());
 		neuralNet.setDropoutEnabled(trainMode && useDropout);
 	}
-	
+
 	@Override
 	protected void onGameEnd(GameState gameState, boolean won, GameResult result, String errorMessage) {
 		float[] genes = neuralNet.getWeights();
 		MatchResult res = new MatchResult(gameState, getMyColor(), won, result, errorMessage, genes);
 		EvaluationResult eval = strategy.evaluate(res, population.getFitness(genes), population);
 		boolean choseNextIndividual = population.evolve(res, eval);
-		
+
 		if (choseNextIndividual) {
 			neuralNet.setDropoutEnabled(false); // Disable dropout and reset dropout indices
 		}
-		
+
 	}
-	
+
 	private float evaluateLeaf(Move move, PlayerColor myColor, GameState gameBeforeMove, GameState gameAfterMove, boolean wasPruned) {
 		for (Action action : move.actions) {
 			if (action instanceof ExchangeCarrots) {
@@ -112,19 +112,19 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 				if (lastAction instanceof ExchangeCarrots) {
 					ExchangeCarrots current = (ExchangeCarrots) action;
 					ExchangeCarrots last = (ExchangeCarrots) lastAction;
-					
+
 					if ((last.getValue() > 0 && current.getValue() < 0) || (last.getValue() < 0 && current.getValue() > 0)) {
 						return Float.NEGATIVE_INFINITY;
 					}
 				}
 			}
 		}
-		
+
 		try {
 			if (GameRuleLogic.canEnterGoal(gameBeforeMove) && !getMe(gameAfterMove).inGoal()) {
 				return Float.NEGATIVE_INFINITY;
 			}
-			
+
 			return neuralNet.compute(encode(gameAfterMove))[0];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new CorruptedDataException(population.getCounter());
@@ -144,7 +144,7 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 			return GameAlgorithms.alphaBeta(true, move, gameBeforeMove, alphaBetaDepth, myColor, null, this::evaluateLeaf);
 		}
 	}
-	
+
 	private float[] encode(GameState gameState) {
 		Player me = getMe(gameState);
 		Player opponent = getOpponent(gameState);
@@ -152,12 +152,12 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		int myFieldIndex = me.getFieldIndex();
 		int oppFieldIndex = opponent.getFieldIndex();
 		FieldType myFieldType = gameState.getTypeAt(myFieldIndex);
-		
+
 		float[] encoded = new float[ENCODED_BOARD_SIZE];
 		int i = 0;
-		
+
 		// The total count of statements below needs to match the ENCODED_BOARD_SIZE
-		
+
 		encoded[i++] = HUIUtils.normalize(gameState.getRound(), 0, Constants.ROUND_LIMIT);
 		encoded[i++] = HUIUtils.normalize(me.getCarrots(), 0, HUIUtils.CARROT_THRESHOLD);
 		encoded[i++] = HUIUtils.normalize(me.getSalads(), 0, Constants.SALADS_TO_EAT);
@@ -184,8 +184,8 @@ public class GeneticNeuralLogic extends EvaluatingLogic {
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.POSITION_2, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.SALAD, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
 		encoded[i++] = HUIUtils.normalize(HUIUtils.distToNextField(FieldType.GOAL, myFieldIndex, gameState), 0, HUIUtils.MAX_FIELD);
-		
-		
+
+
 		return encoded;
 	}
 
