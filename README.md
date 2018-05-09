@@ -16,22 +16,14 @@ Package structure:
 
 The respective package-info.java files contain further information for each subpackage.
 
-## Setting up Eclipse for development
-
-* Clone this repository to your pc using git (you may want to use --depth to limit the clone depth):
-      git clone https://bitbucket.org/TheDroide/phantomclient.git
-
-* Link the root repository folder to your workspace by opening
-  it through "File" > "Open Projects from File System..."
-
-## Running the client
+## Building and running the client
 
 * [Download the Server here](http://www.software-challenge.de/downloads/).
 
 * Build the client using Gradle:
       gradlew build
 
-* You should find the compiled JAR under the path target/phantomclient.jar
+* You should find the compiled JAR under the path target/runnableclient.jar
 
 * Launch the Server-GUI and load the compiled client as a computer-player.
   (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/),
