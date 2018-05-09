@@ -20,11 +20,10 @@ The respective package-info.java files contain further information for each subp
 
 * [Download the Server here](http://www.software-challenge.de/downloads/).
 
-* Build the client using Gradle:
-      gradlew build
+* Build the client using Gradle: `./gradlew build` or `gradlew build` (depending on your shell)
 
 * You should find the compiled JAR under the path target/runnableclient.jar
 
 * Launch the Server-GUI and load the compiled client as a computer-player.
-  (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/),
+  (You can choose the opponent yourself... there is a [simple client](http://www.software-challenge.de/downloads/)
   which stupidly commits random legal moves while playing and thus is useful for testing.)
