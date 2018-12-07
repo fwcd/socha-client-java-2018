@@ -9,10 +9,10 @@ My contribution to the [Software Challenge 2018](http://www.software-challenge.d
 Package structure:
 
 * **src/main/java** - Client source code
-    * **com.fwcd.sc18** - Contains game ai logic
+    * **fwcd.sc18** - Contains game ai logic
     * **sc.player2018** - Necessary client code to interact with the game and a very simple demo logic
 * **src/test/java** - Testing source code
-    * **com.fwcd.sc18.test**
+    * **fwcd.sc18.test**
 
 The respective package-info.java files contain further information for each subpackage.
 

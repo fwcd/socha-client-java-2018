@@ -3,8 +3,8 @@ package sc.player2018;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import com.fwcd.sc18.core.CopyableLogic;
-import com.fwcd.sc18.geneticneural.GeneticNeuralLogic;
+import fwcd.sc18.core.CopyableLogic;
+import fwcd.sc18.geneticneural.GeneticNeuralLogic;
 
 import sc.framework.plugins.SimplePlayer;
 import sc.plugin2018.AbstractClient;

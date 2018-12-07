@@ -8,7 +8,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fwcd.sc18.trainer.core.VirtualClient;
+import fwcd.sc18.trainer.core.VirtualClient;
 
 import sc.plugin2018.AbstractClient;
 import sc.plugin2018.Action;

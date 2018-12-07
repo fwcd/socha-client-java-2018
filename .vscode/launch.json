@@ -12,7 +12,7 @@
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",
 			"stopOnEntry": false,
-			"mainClass": "com.fwcd.sc18.trainer.GUITrainerMain",
+			"mainClass": "fwcd.sc18.trainer.GUITrainerMain",
 			"projectName": "phantomclient",
 			"args": ""
 		},
@@ -23,7 +23,7 @@
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",
 			"stopOnEntry": false,
-			"mainClass": "com.fwcd.sc18.trainer.TrainerMain",
+			"mainClass": "fwcd.sc18.trainer.TrainerMain",
 			"projectName": "phantomclient",
 			"args": ""
 		},
@@ -45,7 +45,7 @@
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",
 			"stopOnEntry": false,
-			"mainClass": "com.fwcd.sc18.test.Playground",
+			"mainClass": "fwcd.sc18.test.Playground",
 			"projectName": "phantomclient",
 			"args": ""
 		},
